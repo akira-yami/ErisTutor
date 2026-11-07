@@ -1567,11 +1567,15 @@ class AIRuntimeModelRouter:
                     response_format=response_format,
                     reasoning_effort=reasoning_effort,
                     # Sentinel 0 trên lane verifier: tắt deadline HTTP của
-                    # DS2API khi caller không chủ động đặt giới hạn. Nếu để
-                    # None, OpenAICompatibleClient sẽ tự dùng self.timeout=30s.
-                    # Những lane khác vẫn theo timeout mặc định như trước.
-                    timeout=(0.0 if name == 'eris_character_claim_verifier_v1'
-                             and timeout_seconds is None else timeout_seconds),
+                    # DS2API khi caller không chủ động đặt giới hạn.
+                    # Root / executive dùng failfast timeout (mặc định 90s) để
+                    # payload lớn không bị ngắt sớm ở 30s.
+                    timeout=(
+                        0.0 if name == 'eris_character_claim_verifier_v1' and timeout_seconds is None
+                        else (float(os.environ.get("ERIS_EXECUTIVE_DS2API_FAILFAST_TIMEOUT_S", "90.0"))
+                              if "root" in name and timeout_seconds is None
+                              else timeout_seconds)
+                    ),
                 )
 
             resource_class, backend = self._client_inference_profile(client)

@@ -971,8 +971,8 @@ class PublicOutputRuntimeMixin:
             )
 
         # TTS: đọc to câu vừa nói với emotion context (valence/arousal/stance).
-        speech_provider = self._get_runtime_provider("speech")
-        _tts = getattr(speech_provider, "engine", None) if speech_provider is not None else None
+        speech_provider = self._get_runtime_provider("speech") if callable(getattr(self, "_get_runtime_provider", None)) else None
+        _tts = getattr(speech_provider, "engine", None) if speech_provider is not None else getattr(self, "tts_engine", None)
         has_scheduled_tts = False
         # Panel không phụ thuộc TTS. Khi sync_text đang chờ remote audio, dữ liệu
         # cảm xúc/nhật ký vẫn phải hiện ngay chứ không đứng nhìn spinner như một

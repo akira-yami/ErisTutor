@@ -4,26 +4,38 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $outputDir = Join-Path $repoRoot 'exports'
-$stamp = Get-Date -Format 'yyyyMMdd_HHmmss_fff'
-$zipPath = Join-Path $outputDir "eris-ai-$stamp.zip"
+$stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+$zipPath = Join-Path $outputDir "ErisTutor_ai_export.zip"
+$timestampedZipPath = Join-Path $outputDir "ErisTutor_ai_export_$stamp.zip"
 $partialPath = "$zipPath.partial"
 
-# Only these project areas are considered; personal state at the root is excluded.
-$includeDirs = @('src', 'docs/knowledge', 'tools', 'gemini_manager', 'installer', 'env-examples')
+# Only core source code and documentation are included.
+# Exclude tools, embeddings, binary assets, and personal state.
+$includeDirs = @('src', 'docs', 'contracts', 'gemini_manager', 'tests')
 $skipDirs = @(
-    'node_modules', '__pycache__', 'build', 'dist', 'out', 'bin', 'obj',
+    'tools', 'tool', 'node_modules', '__pycache__', 'build', 'dist', 'out', 'bin', 'obj',
     'logs', 'log', 'cache', 'state', 'runtime_state', 'data', 'docker-data',
-    'memory_core', 'embedding_model', 'paraphrase-multilingual-MiniLM-L12-v2',
-    'portable_python', 'venv', 'secret_versions', 'browser_profile', 'browser_profiles',
-    'profiles', 'tts_vocal_cache', 'raw_stream_samples',
-    'WebAI-to-API', 'WebAI-to-API-2', 'reference-repos'
+    'memory', 'memory_core', 'embedding_model', 'paraphrase-multilingual-MiniLM-L12-v2',
+    'portable_python', 'venv', '.venv', 'secret_versions', 'browser_profile', 'browser_profiles',
+    'profiles', 'tts_vocal_cache', 'raw_stream_samples', 'asset', 'assets',
+    'data_Eris_windows_x86_64', '.godot', '.pytest_cache', '.ruff_cache', '.eris_home', '.eris_state',
+    'WebAI-to-API', 'WebAI-to-API-2', 'reference-repos', 'exports'
 )
+
+$skipExtensions = @(
+    '.exe', '.pck', '.db', '.sqlite', '.sqlite3', '.db-shm', '.db-wal', '.png', '.jpg', '.jpeg',
+    '.webp', '.gif', '.ico', '.bmp', '.ttf', '.otf', '.woff', '.woff2', '.wav', '.mp3', '.ogg',
+    '.flac', '.ctex', '.dll', '.so', '.dylib', '.bin', '.key', '.pem', '.cert', '.zip', '.tar',
+    '.gz', '.7z', '.rar', '.pdf', '.docx', '.import', '.pyc', '.pyo', '.pyd', '.moc3',
+    '.model3.json', '.exp3.json', '.pose3.json', '.physics3.json', '.cdi3.json', '.motion3.json'
+)
+
 $extensions = @(
     '.py', '.pyi', '.cs', '.gd', '.tscn', '.tres', '.gdshader', '.uid',
     '.js', '.cjs', '.mjs', '.ts', '.tsx', '.jsx', '.html', '.css', '.scss',
     '.go', '.mod', '.sum', '.c', '.h', '.cpp', '.hpp', '.rs', '.sh',
     '.bat', '.cmd', '.ps1', '.iss', '.spec', '.sln', '.csproj', '.props', '.targets',
-    '.md', '.rst', '.toml', '.ini', '.cfg', '.godot', '.json', '.yaml', '.yml', '.sql'
+    '.md', '.rst', '.toml', '.ini', '.cfg', '.godot', '.json', '.yaml', '.yml', '.sql', '.patch'
 )
 $rootExtensions = @('.py', '.bat', '.cmd', '.ps1', '.spec', '.sln', '.csproj', '.toml', '.ini', '.cfg', '.godot', '.md')
 $specialNames = @('.gitignore', '.gitattributes', '.editorconfig', '.dockerignore', 'Dockerfile', 'LICENSE', 'LICENSE.txt', 'CMakeLists.txt')
@@ -31,27 +43,36 @@ $configFiles = @('config/example.json', 'config/secrets.example.json', 'config/l
 
 function Test-ExportFile([System.IO.FileInfo] $File) {
     $name = $File.Name
+    $ext = $File.Extension.ToLower()
+
     if ($File.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { return $false }
-    # Source modules such as eris_secrets.py stay; credential DATA files do not.
+    if ($ext -in $skipExtensions) { return $false }
+
     if ($name -match '(?i)(\.bak($|[._-])|\.backup($|[._-])|\.local\.)') { return $false }
     if ($name.StartsWith('.env', [System.StringComparison]::OrdinalIgnoreCase)) {
         return $name.EndsWith('.example', [System.StringComparison]::OrdinalIgnoreCase)
     }
     if ($name.StartsWith('.') -and $name -notin $specialNames) { return $false }
-    if ($File.Extension -in @('.json', '.yaml', '.yml', '.ini', '.cfg')) {
+    if ($ext -in @('.json', '.yaml', '.yml', '.ini', '.cfg')) {
         if ($name -match '(?i)(secret|credential|cookie|token|account|keyring|storage.state|auth.state)' -and
             $name -notmatch '(?i)\.example\.') { return $false }
     }
-    return ($File.Extension -in $extensions -or $name -in $specialNames -or $name -like 'requirements*.txt')
+    return ($ext -in $extensions -or $name -in $specialNames -or $name -like 'requirements*.txt')
 }
 
 function Get-ExportFiles([string] $Directory) {
     foreach ($item in Get-ChildItem -LiteralPath $Directory -Force) {
         if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
         if ($item.PSIsContainer) {
-            if ($item.Name.StartsWith('.') -or $item.Name -in $skipDirs) { continue }
-            # This is a generated gateway copy; the real source lives in tools/whale2api.
-            if ($item.FullName -eq (Join-Path $repoRoot 'src/tools/whale2api')) { continue }
+            $lowerName = $item.Name.ToLower()
+            if ($item.Name.StartsWith('.') -or 
+                $item.Name -in $skipDirs -or 
+                $lowerName -in $skipDirs -or 
+                $lowerName -like '*tool*' -or 
+                $lowerName -like '*embed*' -or 
+                $lowerName -like '*paraphrase*') { 
+                continue 
+            }
             Get-ExportFiles $item.FullName
         } elseif (Test-ExportFile $item) {
             $item
@@ -85,9 +106,13 @@ try {
             }
         }
     ) | Sort-Object -Property FullName -Unique
+
     if (-not $files) { throw 'No source files found.' }
 
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+    if (Test-Path -LiteralPath $partialPath) { Remove-Item -LiteralPath $partialPath -Force }
+    if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
+
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $stream = [System.IO.File]::Open($partialPath, [System.IO.FileMode]::CreateNew)
@@ -97,31 +122,36 @@ try {
     foreach ($file in $files) {
         $relative = $file.FullName.Substring($repoRoot.Length + 1).Replace('\', '/')
         [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
-            $archive, $file.FullName, "eris/$relative", [System.IO.Compression.CompressionLevel]::Optimal
+            $archive, $file.FullName, $relative, [System.IO.Compression.CompressionLevel]::Optimal
         ) | Out-Null
         $paths.Add($relative)
     }
-    $entry = $archive.CreateEntry('eris/AI_EXPORT_README.txt')
+
+    $entry = $archive.CreateEntry('AI_EXPORT_README.txt')
     $writer = [System.IO.StreamWriter]::new($entry.Open(), [System.Text.UTF8Encoding]::new($false))
     try {
-        $writer.WriteLine('Eris source snapshot for external AI code review.')
-        $writer.WriteLine('Read AGENTS.md and docs/knowledge first; compare historical notes with current code.')
-        $writer.WriteLine('Contains current working files, including uncommitted changes.')
-        $writer.WriteLine('Excludes local state, known credential files, binaries, media, caches and model weights.')
-        $writer.WriteLine('This is a code review snapshot, not a complete runnable distribution.')
-        $writer.WriteLine('Filename filters do not detect secrets hardcoded inside source. Review before sharing.')
+        $writer.WriteLine('ErisTutor source snapshot for Web AI code analysis.')
+        $writer.WriteLine('Excluded: tools/ folder, embedding models/caches, binaries, caches, and secrets.')
         $writer.WriteLine('')
-        $writer.WriteLine("Included files: $($paths.Count)")
-        foreach ($path in $paths) { $writer.WriteLine($path) }
+        $writer.WriteLine("Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+        $writer.WriteLine("Included files count: $($paths.Count)")
+        $writer.WriteLine('')
+        $writer.WriteLine('Files list:')
+        foreach ($path in $paths) { $writer.WriteLine(" - $path") }
     } finally { $writer.Dispose() }
+
     $archive.Dispose()
     $archive = $null
     $stream.Dispose()
     $stream = $null
-    Move-Item -LiteralPath $partialPath -Destination $zipPath
+
+    Move-Item -LiteralPath $partialPath -Destination $zipPath -Force
+    Copy-Item -LiteralPath $zipPath -Destination $timestampedZipPath -Force
+
     $size = [Math]::Round((Get-Item -LiteralPath $zipPath).Length / 1MB, 2)
-    Write-Host "Done: $($paths.Count) files, $size MB"
-    Write-Host "ZIP: $zipPath"
+    Write-Host "Success! Exported $($paths.Count) files ($size MB)"
+    Write-Host "ZIP file: $zipPath"
+    Write-Host "Timestamped: $timestampedZipPath"
     exit 0
 } catch {
     if ($null -ne $archive) { $archive.Dispose() }

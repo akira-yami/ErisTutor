@@ -14,7 +14,9 @@ from runtime.autonomous_loop_runtime import AutonomousLoopRuntimeMixin
 from runtime.chat_cycle import ChatCycleMixin
 from runtime.coordinator_shutdown import CoordinatorShutdownMixin
 from runtime.incoming_protocol_runtime import IncomingProtocolRuntimeMixin
+from runtime.observer_private_runtime import ObserverPrivateRuntimeMixin
 from runtime.presence_controller import PresenceControllerMixin
+from runtime.provider_action_runtime import ProviderActionRuntimeMixin
 from runtime.public_output_runtime import PublicOutputRuntimeMixin
 from runtime.settings_control_runtime import SettingsControlRuntimeMixin
 from runtime.user_control_runtime import UserControlRuntimeMixin
@@ -30,6 +32,8 @@ from runtime.world_state import ensure_world_state_service
 class RuntimeCoordinator(
     CoordinatorShutdownMixin,
     IncomingProtocolRuntimeMixin,
+    ProviderActionRuntimeMixin,
+    ObserverPrivateRuntimeMixin,
     UserControlRuntimeMixin,
     SettingsControlRuntimeMixin,
     PresenceControllerMixin,
@@ -238,21 +242,6 @@ class RuntimeCoordinator(
 
         self.logger.info("[RuntimeCoordinator] Initialized cleanly.")
 
-    def bind_tts_engine(self, engine: Any) -> None:
-        self.tts_engine = engine
-
-    def _send_decision_to_body(self, decision: Any, *, channel: str | None = None, **kwargs: Any) -> bool:
-        """Send synthesized decision payload over transport to Godot Live2D body."""
-        payload = decision.to_payload() if hasattr(decision, "to_payload") else dict(decision)
-        if hasattr(self, "transport") and hasattr(self.transport, "send_json"):
-            try:
-                self.transport.send_json(payload)
-                return True
-            except Exception as exc:
-                self.logger.warning("[RuntimeCoordinator] Failed to send decision to body: %s", exc)
-                return False
-        return True
-
     def _send_runtime_json(self, payload: Mapping[str, Any], *, channel: str | None = None) -> bool:
         """Send raw runtime telemetry or canvas payload over transport."""
         if hasattr(self, "transport") and hasattr(self.transport, "send_json"):
@@ -305,16 +294,10 @@ class RuntimeCoordinator(
     def _capture_speech_interrupt_for_user(self, user_text: str, *, timestamp: float | None = None) -> Any:
         return None
 
-    def _supersede_tts_for_new_user_turn(self, reason: str = "") -> None:
-        pass
-
     def _handle_force_speak_request(self) -> None:
         orchestrator = getattr(self, "ai_autonomous_orchestrator", None)
         if orchestrator is not None:
             orchestrator.run_force_speak("Eris xin chào!")
-
-    def _handle_stage_inbound_event(self, msg: Mapping[str, Any]) -> None:
-        pass
 
     def _get_internal_state(self) -> Any:
         if getattr(self, "_internal_state", None) is None and getattr(self, "internal_state_engine", None) is not None:
