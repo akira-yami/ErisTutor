@@ -15,6 +15,7 @@ from runtime.chat_cycle import ChatCycleMixin
 from runtime.coordinator_shutdown import CoordinatorShutdownMixin
 from runtime.incoming_protocol_runtime import IncomingProtocolRuntimeMixin
 from runtime.presence_controller import PresenceControllerMixin
+from runtime.public_output_runtime import PublicOutputRuntimeMixin
 from runtime.settings_control_runtime import SettingsControlRuntimeMixin
 from runtime.user_control_runtime import UserControlRuntimeMixin
 from runtime.runtime_settings_store import get_runtime_settings_store
@@ -32,6 +33,7 @@ class RuntimeCoordinator(
     UserControlRuntimeMixin,
     SettingsControlRuntimeMixin,
     PresenceControllerMixin,
+    PublicOutputRuntimeMixin,
     ChatCycleMixin,
     AutonomousLoopRuntimeMixin,
 ):
