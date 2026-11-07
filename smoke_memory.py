@@ -14,6 +14,11 @@ MODULES = [
     "memory.schemas",
     "memory.text_normalize_vi",
     "memory.name_validation",
+    # Step 2 — models & cue (build on step 1)
+    "memory.claim_provenance",
+    "memory.memory_cue",
+    "memory.memory_models",
+    "memory.memory_candidate",
 ]
 
 failed = []
