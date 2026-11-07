@@ -18,7 +18,6 @@ from typing import Any, Mapping
 
 from runtime.workspace_manager import default_eris_home
 from runtime.public_causal_receipt import infer_candidate_semantic_owner, infer_candidate_trigger_owner
-from runtime.chess.surface import ChessSurfaceState
 from .contracts import IntentionPlan
 from .cognitive_blackboard import TypedCognitiveBlackboard
 from .semantic_contracts import TurnSemantics
