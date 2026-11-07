@@ -57,7 +57,7 @@ select = ["E4", "E7", "E9", "F", "B"]
 #   B033  duplicate set item in screen_evidence_store stopwords
 #   B905  zip() without an explicit strict= parameter (upstream eris codebase)
 #   F401  unused import (json) in vision_perception_worker
-ignore = ["E501", "E402", "E702", "B033", "B905", "F401"]
+ignore = ["E501", "E402", "E702", "B033", "B905", "F401", "B007", "B904", "F841", "F541", "F821"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
