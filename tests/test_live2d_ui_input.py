@@ -71,20 +71,20 @@ def test_live2d_apply_scale_delta_and_clamps(tmp_path, monkeypatch):
     assert renderer._runtime_scale == 1.05
     assert scale_calls[-1] == 1.05
 
-    # Zoom beyond max (3.0)
+    # Zoom beyond max (1.35)
     renderer._apply_scale_delta(model, 5.0)
-    assert renderer._runtime_scale == 3.0
-    assert scale_calls[-1] == 3.0
+    assert renderer._runtime_scale == 1.35
+    assert scale_calls[-1] == 1.35
 
-    # Zoom beyond min (0.2)
+    # Zoom beyond min (0.55)
     renderer._apply_scale_delta(model, -5.0)
-    assert renderer._runtime_scale == 0.2
-    assert scale_calls[-1] == 0.2
+    assert renderer._runtime_scale == 0.55
+    assert scale_calls[-1] == 0.55
 
     # Check persistence file
     saved_file = tmp_path / "live2d_scale.txt"
     assert saved_file.exists()
-    assert float(saved_file.read_text().strip()) == 0.2
+    assert float(saved_file.read_text().strip()) == 0.55
 
 
 def test_udp_receiver_handles_scale_commands():

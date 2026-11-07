@@ -826,17 +826,20 @@ class Live2DRenderer:
 
     def _compute_head_anchor_offset_y(self, scale: float) -> float:
         """Bù trừ tọa độ Y theo tỉ lệ scale để đỉnh đầu không bị cắt ngang cửa sổ khi phóng to."""
+        base_offset_y = getattr(getattr(self, "config", None), "offset_y", -0.02)
         head_compensation = -0.65 * (float(scale) - DEFAULT_LIVE2D_SCALE)
-        return self.config.offset_y + head_compensation
+        return float(base_offset_y) + head_compensation
 
     def _apply_model_scale_and_offset(self, model: Any, scale: float) -> None:
         if model is None:
             return
         target_scale = max(MIN_LIVE2D_SCALE, min(MAX_LIVE2D_SCALE, round(float(scale), 3)))
         target_offset_y = self._compute_head_anchor_offset_y(target_scale)
+        base_offset_x = float(getattr(getattr(self, "config", None), "offset_x", 0.0))
         try:
             model.SetScale(target_scale)
-            model.SetOffset(self.config.offset_x, target_offset_y)
+            if hasattr(model, "SetOffset"):
+                model.SetOffset(base_offset_x, target_offset_y)
         except Exception as exc:
             print(f"[Live2D][WARN] Không cập nhật được scale/offset model: {exc}", flush=True)
 

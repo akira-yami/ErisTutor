@@ -152,12 +152,13 @@ class GraphWorkspace:
         if not self.store.compare_and_set_meta_revision(META_KEY, base_revision, state):
             raise ValueError("stale_graph_revision")
 
-    def create(self, title: str, *, base_revision: int, origin="user", follow=True) -> dict:
+    def create(self, title: str, *, base_revision: int | None = None, origin="user", follow=True) -> dict:
         title = _title(title)
         if origin not in {"user", "eris_proposed"}:
             raise ValueError("invalid_graph_origin")
         with self._lock:
             state = self._load()
+            revision = state["revision"] if base_revision is None else base_revision
             if len(state["groups"]) >= MAX_GROUPS:
                 raise ValueError("graph_group_limit")
             group_id = _new_group_id(title)
@@ -167,7 +168,7 @@ class GraphWorkspace:
             state["groups"].append(group)
             if follow:
                 state["selected_group_id"] = group_id
-            self._write(state, base_revision)
+            self._write(state, revision)
             return copy.deepcopy(group)
 
     def delete(self, *, group_id: str = "", title: str = "", base_revision: int | None = None) -> bool:
@@ -228,10 +229,11 @@ class GraphWorkspace:
         group["nodes"].extend(additions)
         return additions
 
-    def select(self, group_id: str, *, base_revision: int, node_id: str = "") -> list[dict]:
+    def select(self, group_id: str, *, base_revision: int | None = None, node_id: str = "") -> list[dict]:
         group_id = _id(group_id)
         with self._lock:
             state = self._load()
+            revision = state["revision"] if base_revision is None else base_revision
             additions = []
             if group_id != self.legacy_group_id:
                 group = next((item for item in state["groups"] if item["group_id"] == group_id), None)
@@ -247,10 +249,10 @@ class GraphWorkspace:
             elif node_id:
                 raise ValueError("unknown_graph_node")
             state["selected_group_id"] = group_id
-            self._write(state, base_revision)
+            self._write(state, revision)
             return additions
 
-    def expand(self, group_id: str, parent_id: str, nodes: list[dict], *, base_revision: int,
+    def expand(self, group_id: str, parent_id: str, nodes: list[dict], *, base_revision: int | None = None,
                origin: str = "user", follow=True) -> list[dict]:
         group_id, parent_id = _id(group_id), _id(parent_id)
         if origin not in {"user", "eris_proposed"}:
@@ -258,6 +260,7 @@ class GraphWorkspace:
         clean = _validated_nodes(nodes, limit=8)
         with self._lock:
             state = self._load()
+            revision = state["revision"] if base_revision is None else base_revision
             group = next((item for item in state["groups"] if item["group_id"] == group_id), None)
             if group is None:
                 raise ValueError("unknown_graph_group")
@@ -280,7 +283,7 @@ class GraphWorkspace:
             if follow:
                 group["selected_node_id"] = additions[0]["id"]
                 state["selected_group_id"] = group_id
-            self._write(state, base_revision)
+            self._write(state, revision)
             return copy.deepcopy(additions)
 
     def apply_gemini(self, group_id: str, node_id: str, payload: dict) -> bool:
