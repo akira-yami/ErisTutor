@@ -13,11 +13,9 @@ import socket
 import sys
 import tempfile
 import time
-from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from runtime.incoming_protocol_runtime import IncomingProtocolRuntimeMixin
 from runtime.learning_canvas import LearningCanvasService
 from runtime.learning_canvas.inbox import CanvasControlInbox
 from runtime.learning_canvas.snapshot import build_snapshot
@@ -51,7 +49,6 @@ def main():
                                              for node in canvas.pack.nodes for exercise in node["exercises"]]}
             target = Path(__file__).parent / "web-canvas" / "learning_canvas_fixture.json"
             target.write_text(json.dumps(fixture, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            store.close()
             print(target)
             return
         request = {"type": "learning_canvas_request", "request_id": "demo-navigation", "action": "navigate",
@@ -61,9 +58,7 @@ def main():
                 client.bind(("127.0.0.1", 0))
                 client.settimeout(2)
                 transport = UdpTransport("127.0.0.1", client.getsockname()[1], "127.0.0.1", 0)
-                host = SimpleNamespace(learning_canvas_service=canvas,
-                                       _send_runtime_json=lambda payload, **_: transport.send_json(payload))
-                inbox = CanvasControlInbox(transport, lambda msg: IncomingProtocolRuntimeMixin._handle_learning_canvas_request(host, msg))
+                inbox = CanvasControlInbox(transport, lambda msg: transport.send_json(canvas.handle(msg)))
                 inbox.start()
                 try:
                     start = time.perf_counter()
@@ -79,11 +74,14 @@ def main():
             "demo-attempt", node_id, "correct", "quiz_correct", strength=1.0,
             path_id=canvas.pack.path.path_id, item_family_id="demo-independent", recorded_at=time.time(),
         ))
-        store.close()
+        resources.close()
         reopened = LearningStore(path)
         try:
             restored = LearningCanvasService(LearningService(reopened), store=reopened)
-            after = restored.handle({"request_id": "demo-restart", "action": "open"})["learning_canvas"]
+            try:
+                after = restored.handle({"request_id": "demo-restart", "action": "open"})["learning_canvas"]
+            finally:
+                restored.close()
             assert after["focus"]["node_id"] == node_id and after["focus"]["pinned"]
             old = next(n for n in before["nodes"] if n["id"] == node_id)["state"]
             new = next(n for n in after["nodes"] if n["id"] == node_id)["state"]
