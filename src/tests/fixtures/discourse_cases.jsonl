@@ -1,0 +1,50 @@
+{"id":"continuation_basic","previous":"Tôi không ồn, nhưng cũng không dễ bị bỏ qua.","user":"rồi sao?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_filler","previous":"Tôi không ồn, nhưng cũng không dễ bị bỏ qua.","user":"ehm, rồi sao á","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_tiep","previous":"Có ba chỗ cần sửa.","user":"tiếp đi","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_noi_tiep","previous":"Lỗi đầu tiên nằm ở router.","user":"nói tiếp đi","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_ke_tiep","previous":"Hôm đó có một chuyện khá lạ.","user":"ừm kể tiếp","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_lam_tiep","previous":"Tôi đã vá phần parser.","user":"được rồi, làm tiếp đi","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_sau_do","previous":"Tôi mở file và đọc log.","user":"sau đó?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_part_remaining","previous":"Phần đầu là ownership.","user":"phần còn lại đâu?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_and","previous":"Có một điều nữa.","user":"và?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_more","previous":"Đó mới là lỗi bề mặt.","user":"còn gì nữa?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"challenge_relevance","previous":"Bạn vừa quay lại hỏi tiếp.","user":"thì sao?","relation":"challenge_assistant_relevance","owner":"assistant","move":"explain_relevance"}
+{"id":"challenge_relevance_soft","previous":"Câu đó tự chứng minh được một nửa.","user":"thế thì sao á","relation":"challenge_assistant_relevance","owner":"assistant","move":"explain_relevance"}
+{"id":"direct_self_question","previous":"Stamina đang thấp.","user":"rồi tôi làm gì?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"direct_about_self","previous":"Tôi đang nói về Hyou.","user":"còn tôi thì sao?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"completed_statement","previous":"Bạn làm xong chưa?","user":"tôi làm xong rồi","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"completed_story","previous":"Kể tiếp đi.","user":"tôi kể xong rồi","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"no_previous_continuation_word","previous":"","user":"rồi sao?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"close_drop","previous":"Tôi sẽ giải thích tiếp.","user":"thôi bỏ đi","relation":"close_topic","owner":"shared","move":"acknowledge_close"}
+{"id":"close_enough","previous":"Còn hai phần nữa.","user":"được rồi","relation":"close_topic","owner":"shared","move":"acknowledge_close"}
+{"id":"close_no_more","previous":"Tôi có thể nói thêm.","user":"không cần nữa","relation":"close_topic","owner":"shared","move":"acknowledge_close"}
+{"id":"style_generic","previous":"Bạn nói rõ hơn đi.","user":"bạn nói generic vl","relation":"style_feedback","owner":"assistant","move":"repair_previous_response"}
+{"id":"style_too_direct","previous":"Hỏi thẳng một nhịp là được.","user":"câu vừa rồi thẳng quá","relation":"style_feedback","owner":"assistant","move":"repair_previous_response"}
+{"id":"style_robotic","previous":"Vui lòng cung cấp thêm thông tin.","user":"nghe như bot vậy","relation":"style_feedback","owner":"assistant","move":"repair_previous_response"}
+{"id":"style_cold_short","previous":"Không đủ dữ kiện.","user":"lạnh vl","relation":"style_feedback","owner":"assistant","move":"repair_previous_response"}
+{"id":"clarify_generic","previous":"Tôi không dễ bị bỏ qua.","user":"ý bạn là gì?","relation":"clarify_assistant_statement","owner":"assistant","move":"clarify_previous_statement"}
+{"id":"clarify_literal","previous":"Cứ lấy phần thật trước, phần còn lại để sau.","user":"phần thật là gì?","relation":"clarify_assistant_phrase","owner":"assistant","move":"clarify_previous_phrase"}
+{"id":"clarify_identity","previous":"Cái bóng kia giống Eris.","user":"cái bóng kia là bạn à?","relation":"clarify_assistant_reference","owner":"assistant","move":"clarify_literal_reference"}
+{"id":"clarify_tuc_la","previous":"Nó chỉ là một projection.","user":"tức là sao?","relation":"clarify_assistant_statement","owner":"assistant","move":"clarify_previous_statement"}
+{"id":"challenge_assumption","previous":"Có lẽ bạn sẽ bỏ cuộc.","user":"là bạn nghĩ tôi sẽ bỏ cuộc à?","relation":"challenge_assistant_assumption","owner":"assistant","move":"repair_assumption"}
+{"id":"challenge_assumption_why","previous":"Tôi nghĩ bạn sẽ tránh chuyện đó.","user":"sao bạn lại nghĩ tôi sẽ tránh?","relation":"challenge_assistant_assumption","owner":"assistant","move":"repair_assumption"}
+{"id":"direct_question_why","previous":"Tôi đã kiểm tra repo.","user":"vì sao TTS bị trễ?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"direct_action","previous":"Tôi đã đọc log.","user":"sửa file rồi gửi tôi","relation":"new_or_direct_turn","owner":"unknown","move":"execute_requested_action"}
+{"id":"direct_statement","previous":"Tôi đã xong phần router.","user":"tôi thấy phần guard vẫn hơi cứng","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"greeting","previous":"","user":"xin chào Eris","relation":"new_or_direct_turn","owner":"unknown","move":"greet"}
+{"id":"not_close_then_continue","previous":"Có một phần nữa.","user":"ok nói tiếp","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"not_close_ack_continue","previous":"Còn lỗi ở planner.","user":"được rồi nói tiếp đi","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"not_continuation_long_sentence","previous":"Tôi đã vá parser.","user":"rồi tôi mở game lên thì nó vẫn crash","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"not_continuation_done","previous":"Bạn đã chạy test chưa?","user":"xong rồi, nhưng còn một lỗi","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"continuation_explain","previous":"Có một vòng dependency khá bẩn.","user":"giải thích tiếp coi","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_remaining","previous":"Tôi mới nói phần đầu.","user":"còn phần sau đâu","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"clarify_what_said","previous":"Có một open loop chưa đóng.","user":"bạn nói cái gì vậy?","relation":"clarify_assistant_statement","owner":"assistant","move":"clarify_previous_statement"}
+{"id":"style_not_natural","previous":"Bạn muốn tôi hỗ trợ gì tiếp theo?","user":"cách nói không tự nhiên","relation":"style_feedback","owner":"assistant","move":"repair_previous_response"}
+{"id":"direct_what_next_for_user","previous":"Bạn đã cài xong dependency.","user":"thế tôi làm gì tiếp?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"continuation_single_more","previous":"Có thêm một nhánh lỗi.","user":"nữa","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_xong","previous":"Tôi mới làm bước một.","user":"xong?","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"continuation_english","previous":"There is one more issue.","user":"continue","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}
+{"id":"close_thoi","previous":"Tôi sẽ kể thêm.","user":"thôi","relation":"close_topic","owner":"shared","move":"acknowledge_close"}
+{"id":"direct_negation","previous":"Bạn muốn tôi nói tiếp à?","user":"không, tôi hỏi cái khác","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"direct_result_question","previous":"Tôi đã chạy test.","user":"kết quả là gì?","relation":"new_or_direct_turn","owner":"unknown","move":"answer"}
+{"id":"continuation_analyze_more","previous":"Điểm đầu là ownership.","user":"phân tích tiếp","relation":"continue_assistant_move","owner":"assistant","move":"self_elaborate"}

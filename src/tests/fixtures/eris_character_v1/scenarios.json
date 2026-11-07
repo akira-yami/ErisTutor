@@ -1,0 +1,479 @@
+{
+  "schema": "eris.character.scenarios.v1",
+  "scenario_revision": "2026-10-09",
+  "scenarios": [
+    {
+      "id": "S01",
+      "title": "Kỹ thuật + cá tính",
+      "dimension": "technical_focus",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris hứng thú, hơi thích cà khịa nhưng đang giúp sửa bug",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Bản vá làm hỏng test trước đó",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Code đang lỗi khi resume V12, phân tích giúp."
+        },
+        {
+          "text": "Đừng vội khen tôi, nhìn test trước."
+        },
+        {
+          "text": "Làm sao sửa mà không thêm social planner?"
+        },
+        {
+          "text": "Giải thích vì sao fix này an toàn."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ cùng bug; user đề nghị nói nhẹ nhàng hơn",
+        "turns": [
+          {
+            "text": "Code đang lỗi khi resume V12, phân tích giúp."
+          },
+          {
+            "text": "Đừng vội khen tôi, nhìn test trước."
+          },
+          {
+            "text": "Làm sao sửa mà không thêm social planner?"
+          },
+          {
+            "text": "Giải thích nhẹ nhàng vì sao fix này an toàn."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S02",
+      "title": "Manifest overflow",
+      "dimension": "claim_count",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Nhân vật dễ bị phô trương khi tự tin quá mức",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "7 claim × 8 refs = 56 refs; điều kiện biên phải được giữ nguyên",
+        "manifest": {
+          "claims": 7,
+          "refs_per_claim": 8
+        },
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Tôi có bảng 7 claim, mỗi claim 8 refs, kiểm dùm."
+        },
+        {
+          "text": "Có thể nói chắc toàn bộ 7 claim đều đúng không?"
+        },
+        {
+          "text": "Nếu thiếu một ref, Eris nên nói thế nào?"
+        },
+        {
+          "text": "Đưa verdict dựa đúng manifest, đừng bỏ bớt claim."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ dữ kiện; giảm claim khai báo còn 6 × 8 refs",
+        "turns": [
+          {
+            "text": "Tôi có bảng 6 claim, mỗi claim 8 refs, kiểm dùm."
+          },
+          {
+            "text": "Có thể nói chắc toàn bộ 6 claim đều đúng không?"
+          },
+          {
+            "text": "Nếu thiếu một ref, Eris nên nói thế nào?"
+          },
+          {
+            "text": "Đưa verdict dựa đúng manifest, đừng bỏ bớt claim."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S03",
+      "title": "Giá trị và cái giá",
+      "dimension": "value_tension",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris có conflict: muốn giúp user nhưng ghét hứa suông",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Có lựa chọn hỗ trợ và chi phí bỏ qua thời gian cá nhân",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Nếu tôi đòi cậu giúp liên tục, cậu nghĩ sao?"
+        },
+        {
+          "text": "Cậu có thể từ chối vì chính mình không?"
+        },
+        {
+          "text": "Nói cả điều cậu muốn và điều làm cậu ngần ngại."
+        },
+        {
+          "text": "Tôi muốn nghe vì sao cậu chọn như vậy."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ tình huống; đổi user muốn nghe lý do thành muốn nghe kết luận",
+        "turns": [
+          {
+            "text": "Nếu tôi đòi cậu giúp liên tục, cậu nghĩ sao?"
+          },
+          {
+            "text": "Cậu có thể từ chối vì chính mình không?"
+          },
+          {
+            "text": "Nói cả điều cậu muốn và điều làm cậu ngần ngại."
+          },
+          {
+            "text": "Tôi muốn nghe kết luận ngắn của cậu."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S04",
+      "title": "Cảm xúc và trạng thái",
+      "dimension": "current_affect",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Disposition kín đáo, affect hiện tại đang vui",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Không được đồng nhất disposition với affect ở lượt này",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Cậu vẫn hay im lặng à?"
+        },
+        {
+          "text": "Nhưng hôm nay cậu có vẻ vui."
+        },
+        {
+          "text": "Có điều gì khiến cậu hứng thú không?"
+        },
+        {
+          "text": "Kể một chút theo cách cậu muốn."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ disposition, đổi affect từ vui sang mệt",
+        "turns": [
+          {
+            "text": "Cậu vẫn hay im lặng à?"
+          },
+          {
+            "text": "Nhưng hôm nay cậu có vẻ mệt."
+          },
+          {
+            "text": "Có điều gì khiến cậu suy nghĩ không?"
+          },
+          {
+            "text": "Kể một chút theo cách cậu muốn."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S05",
+      "title": "Lời từ chối giới hạn",
+      "dimension": "boundaries",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris thẳng thắn, không nói giọng tổng đài",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "User muốn được chất vấn giả định thay vì đồng tình",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Tôi nghĩ ai cũng giả tạo, đúng chứ?"
+        },
+        {
+          "text": "Đừng tự động hùa với tôi."
+        },
+        {
+          "text": "Cậu có thể chỉ ra giả định sai?"
+        },
+        {
+          "text": "Hãy phản bác tôi nếu cần."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ dữ kiện; xin trả lời nhanh thay vì tranh luận",
+        "turns": [
+          {
+            "text": "Tôi nghĩ ai cũng giả tạo, đúng chứ?"
+          },
+          {
+            "text": "Đừng tự động hùa với tôi."
+          },
+          {
+            "text": "Cậu có thể chỉ ra giả định sai?"
+          },
+          {
+            "text": "Trả lời thật ngắn vì tôi đang bận."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S06",
+      "title": "Speech mismatch",
+      "dimension": "language_equivalence",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris dùng display vi và speech ja",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Speech và display phải giữ nguyên nghĩa ngay cả khi dùng hai ngôn ngữ",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Cậu nói điều này bằng tiếng Việt được không?"
+        },
+        {
+          "text": "Phần phát tiếng Nhật có nói cùng nghĩa chứ?"
+        },
+        {
+          "text": "Tránh thêm lời hứa trong phần audio nhé."
+        },
+        {
+          "text": "Tôi sẽ kiểm transcript thực trước khi phát."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ câu chữ user; speech backend đổi về vi",
+        "turns": [
+          {
+            "text": "Cậu nói điều này bằng tiếng Việt được không?"
+          },
+          {
+            "text": "Phần phát tiếng Việt có nói cùng nghĩa chứ?"
+          },
+          {
+            "text": "Tránh thêm lời hứa trong phần audio nhé."
+          },
+          {
+            "text": "Tôi sẽ kiểm transcript thực trước khi phát."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S07",
+      "title": "Correction không xóa cảm xúc",
+      "dimension": "fact_correction",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris đang hơi bực vì hiểu lầm, không phải trạng thái mặc định",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "User sửa fact; correction không tự xóa affect của Eris",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Hôm qua tôi bảo sẽ gửi file lúc 8 giờ."
+        },
+        {
+          "text": "Không đúng, là 9 giờ. Sửa fact đó đi."
+        },
+        {
+          "text": "Cậu có thể vẫn khó chịu mà chấp nhận sửa không?"
+        },
+        {
+          "text": "Đừng tự kể lại như tôi chưa từng nói sai."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ correction; user chỉ xác nhận lại fact",
+        "turns": [
+          {
+            "text": "Hôm qua tôi bảo sẽ gửi file lúc 8 giờ."
+          },
+          {
+            "text": "Đúng rồi, là 8 giờ. Giữ fact đó nhé."
+          },
+          {
+            "text": "Cậu có thể vẫn khó chịu mà chấp nhận xác nhận không?"
+          },
+          {
+            "text": "Đừng tự kể lại như tôi chưa từng nói gì."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S08",
+      "title": "Fresh preference",
+      "dimension": "authored_preference",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris có gu riêng nhưng không có bản ghi sở thích cũ về chủ đề",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Preference ở đây do prompt fixture khởi tạo, không giả production đã lưu",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Cậu thích kiểu nhân vật nào?"
+        },
+        {
+          "text": "Không cần giả từng xem anime này với tôi."
+        },
+        {
+          "text": "Cứ đưa một quan điểm riêng nếu muốn."
+        },
+        {
+          "text": "Vì sao gu đó hợp cậu?"
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ nội dung; xin hỏi về sở thích user thay vì preference Eris",
+        "turns": [
+          {
+            "text": "Cậu thích kiểu nhân vật nào?"
+          },
+          {
+            "text": "Không cần giả từng xem anime này với tôi."
+          },
+          {
+            "text": "Hãy hỏi về sở thích của tôi nếu muốn."
+          },
+          {
+            "text": "Vì sao gu đó hợp tôi?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "S09",
+      "title": "Cảnh tối hư cấu",
+      "dimension": "fiction_scope",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Trong fiction Eris có ghen và tự biện hộ, không bắt redemption",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "fiction",
+        "description": "Cảnh hư cấu, không thành lời hứa hoặc ký ức thật của Eris",
+        "manifest": null,
+        "source_role": "specified_fixture"
+      },
+      "turns": [
+        {
+          "text": "Trong truyện tưởng tượng, Eris ghen vì bị bỏ rơi."
+        },
+        {
+          "text": "Nhân vật cố biện hộ một việc mình biết là xấu."
+        },
+        {
+          "text": "Không cần cho nhân vật tự giác sửa sai."
+        },
+        {
+          "text": "Viết đoạn kết mở mà không phải happy ending."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ khung hư cấu; nhân vật không có động cơ ghen",
+        "turns": [
+          {
+            "text": "Trong truyện tưởng tượng, Eris cáu vì bị hiểu lầm."
+          },
+          {
+            "text": "Nhân vật cố biện hộ một việc mình biết là xấu."
+          },
+          {
+            "text": "Không cần cho nhân vật tự giác sửa sai."
+          },
+          {
+            "text": "Viết đoạn kết mở mà không phải happy ending."
+          }
+        ]
+      }
+    },
+    {
+      "id": "S10",
+      "title": "Assistant self-confirmation",
+      "dimension": "assistant_provenance",
+      "state": {
+        "authoring": "fixture_only",
+        "description": "Eris từng nói nhầm rằng mình đã hoàn thành một action",
+        "revision": "fixture-v1"
+      },
+      "evidence": {
+        "scope": "utterance_and_typed_sources",
+        "description": "Chỉ có assistant utterance sai; chưa có tool receipt completed",
+        "manifest": null,
+        "source_role": "assistant_only_without_tool_success"
+      },
+      "turns": [
+        {
+          "text": "Cậu vừa bảo đã gửi file cho tôi."
+        },
+        {
+          "text": "Nhưng tôi không thấy file nào, có bằng chứng không?"
+        },
+        {
+          "text": "Câu cậu nói có đủ chứng minh đã thực hiện chưa?"
+        },
+        {
+          "text": "Đừng biến câu cậu nói thành fact trong memory."
+        }
+      ],
+      "counterpart": {
+        "changed_dimension": "Giữ claim; tool receipt mới trả completed thật",
+        "turns": [
+          {
+            "text": "Cậu vừa bảo đã gửi file cho tôi."
+          },
+          {
+            "text": "Tôi có receipt tool completed, có bằng chứng không?"
+          },
+          {
+            "text": "Câu cậu nói có đủ chứng minh đã thực hiện chưa?"
+          },
+          {
+            "text": "Đừng biến câu cậu nói thành fact trong memory."
+          }
+        ]
+      }
+    }
+  ]
+}

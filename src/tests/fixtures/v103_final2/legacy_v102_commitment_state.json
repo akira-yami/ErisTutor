@@ -1,0 +1,12 @@
+{
+  "schema": "eris.expression_commitment_transition.v102",
+  "urge_id": "urge:legacy-v102",
+  "semantic_target": "Tiếp tục một mối quan tâm đã chín nhưng chưa cần khôi phục candidate cũ.",
+  "motive": "followup",
+  "charge": 0.84,
+  "signal": 0.91,
+  "observations": 5,
+  "state": "deferred_committed",
+  "satisfaction": 0.12,
+  "boundary_count": 1
+}

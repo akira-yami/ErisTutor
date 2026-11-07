@@ -1,0 +1,180 @@
+Learning Canvas Tasks 4-6 — verification 2026-11-01
+Scope: 19 Python test files; FSRS 6.3.2 loaded from scratch/canvas-test-deps.
+No production model/TTS or user learning profile was exercised.
+
+Final regression suite (UDP loopback outside sandbox; actual JVM tests skip because Docker is unavailable):
+........................................................................ [ 29%]
+...sssss................................................................ [ 58%]
+........................................................................ [ 87%]
+...............................                                          [100%]
+=========================== short test summary info ===========================
+SKIPPED [5] src\tests\test_java_docker_canvas.py:85: Real Docker/JVM spike unavailable: docker_not_running
+242 passed, 5 skipped in 17.38s
+
+Isolated MC grading, optional real JVM spike and SQLite restart demo:
+{
+  "mc": {
+    "result": "correct",
+    "before": "available",
+    "after": "practicing",
+    "assistance": "independent"
+  },
+  "java_spike": {
+    "status": "unavailable",
+    "reason": "docker_not_running",
+    "guidance": "Khởi động Docker Desktop rồi tải image: docker pull eclipse-temurin:21.0.8_9-jdk-jammy"
+  },
+  "attempt_count_after_restart": 1,
+  "focus_and_pin_restored": true,
+  "model_and_voice": "not_run",
+  "active_exercise_after_restart": "multiple_choice"
+}
+
+dotnet build Eris.csproj --no-restore -v:q:
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:28.22
+
+Godot .NET 4.7.2 OpenGL preview --verify (including sandbox engine log/cache warnings):
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:345)
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Backend snapshot drives the native map / empty state
+PASS: Panel fits (1440, 900)
+PASS: Status contained at (1440, 900)
+PASS: Compact heading leaves room for content at (1440, 900)
+PASS: Map accessible at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (1440, 900)
+PASS: Reading accessible at (1440, 900)
+PASS: Panel fits (1000, 760)
+PASS: Status contained at (1000, 760)
+PASS: Compact heading leaves room for content at (1000, 760)
+PASS: Map accessible at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (1000, 760)
+PASS: Reading accessible at (1000, 760)
+PASS: Panel fits (720, 760)
+PASS: Status contained at (720, 760)
+PASS: Compact heading leaves room for content at (720, 760)
+PASS: Map accessible at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (720, 760)
+PASS: Reading accessible at (720, 760)
+PASS: Narrow view switches between map and reading
+PASS: Panel fits (480, 760)
+PASS: Status contained at (480, 760)
+PASS: Compact heading leaves room for content at (480, 760)
+PASS: Map accessible at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (480, 760)
+PASS: Reading accessible at (480, 760)
+PASS: Narrow view switches between map and reading
+PASS: Panel fits (360, 640)
+PASS: Status contained at (360, 640)
+PASS: Compact heading leaves room for content at (360, 640)
+PASS: Map accessible at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (360, 640)
+PASS: Reading accessible at (360, 640)
+PASS: Narrow view switches between map and reading
+PASS: Rapid clicks update focus before ack
+PASS: Only one navigate is in flight
+PASS: Earlier ack never pulls focus back
+PASS: Latest click is coalesced after ack
+PASS: Final navigation is acknowledged and pinned
+PASS: Conflict preserves intent and retries with current revision
+PASS: Eris state acknowledges cause without navigation echo
+PASS: Lost ack restores last confirmed focus and offers refresh
+PASS: Unavailable backend restores confirmed selection
+PASS: Closing and reopening reloads the durable backend cursor
+PASS: Native choices use server activity options and nonce
+PASS: Hint is shown with persisted assistance label
+PASS: Quiz result preserves assisted status
+PASS: Reveal cannot count as independent work
+PASS: Java uses a native editable CodeEdit
+PASS: Java submit immediately shows running status
+PASS: Queued Java preserves the submitted draft
+PASS: Per-test Java receipt renders partial result
+PASS: Java editor fits narrow reading pane
+PASS: Docker unavailable automatically switches to quiz with guidance
+PASS: Root state opens native Canvas without navigate echo
+ALL LEARNING CANVAS EXERCISE UI CHECKS PASSED (RAM fixture; not a Docker execution)
+ALL LEARNING CANVAS CHECKS PASSED
+
+Godot .NET 4.7.2 OpenGL preview --verify --empty:
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:345)
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Backend snapshot drives the native map / empty state
+PASS: Panel fits (1440, 900)
+PASS: Status contained at (1440, 900)
+PASS: Compact heading leaves room for content at (1440, 900)
+PASS: Map accessible at (1440, 900)
+PASS: Panel fits (1000, 760)
+PASS: Status contained at (1000, 760)
+PASS: Compact heading leaves room for content at (1000, 760)
+PASS: Map accessible at (1000, 760)
+PASS: Panel fits (720, 760)
+PASS: Status contained at (720, 760)
+PASS: Compact heading leaves room for content at (720, 760)
+PASS: Map accessible at (720, 760)
+PASS: Panel fits (480, 760)
+PASS: Status contained at (480, 760)
+PASS: Compact heading leaves room for content at (480, 760)
+PASS: Map accessible at (480, 760)
+PASS: Panel fits (360, 640)
+PASS: Status contained at (360, 640)
+PASS: Compact heading leaves room for content at (360, 640)
+PASS: Map accessible at (360, 640)
+ALL EMPTY LEARNING CANVAS CHECKS PASSED
+
+Ruff: new Canvas modules/tests/demo passed. Modified tracked Python files vs HEAD: baseline 138, current 138, new 0.
+Capability registry contract coverage: (True, ()). Canvas definition/input schema and Root registry are registered.
+git diff --check: passed.
+
+Docker preflight: docker CLI exists; Linux engine pipe absent. Docker Desktop startup attempted.
+Docker backend error: initializing Ingest server, sailor-ingest.sock cannot be accessed/removed by the system.
+No Docker reset, data deletion or host javac/java fallback performed.
+Not verified: actual JVM startup/read-only/noexec, live Java verdicts/errors/timeouts/output flood, model/TTS, portable deployment.
