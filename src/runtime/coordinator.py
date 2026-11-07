@@ -185,6 +185,40 @@ class RuntimeCoordinator(
             if self.logger is not None:
                 self.logger.debug("[RuntimeCoordinator] Tutor runtime init degraded: %s", exc)
 
+        # Living User Memory & Gemini Portrait Presenter
+        self.memory_portrait_presenter = None
+        self.memory_gc_service = None
+        self.learner_portrait_service = None
+        try:
+            living_user = getattr(self.memory_core, "living_user", None)
+            if living_user is not None:
+                from memory.living_user import GeminiWebUserProfileAdapter, SavedGeminiMemoryPortrait
+
+                gemini_curator = getattr(self.llm_service, "curator_client", None)
+                if not isinstance(gemini_curator, GeminiWebUserProfileAdapter):
+                    gemini_curator = GeminiWebUserProfileAdapter.create_if_available()
+                living_user.bind_model_adapter(gemini_curator)
+                self.memory_portrait_presenter = SavedGeminiMemoryPortrait(
+                    living_user.base_dir, client=gemini_curator
+                )
+
+            from runtime.memory_gc_service import build_memory_gc_service
+
+            self.memory_gc_service = build_memory_gc_service(
+                memory_core=self.memory_core,
+                llm_service=self.llm_service,
+                idle_probe=getattr(self, "_background_memory_digest_idle_probe", None),
+            )
+            if self.memory_gc_service is not None and self.memory_portrait_presenter is not None:
+                self.memory_gc_service.portrait_presenter = self.memory_portrait_presenter
+
+            from runtime.learner_portrait import LearnerPortraitService
+
+            self.learner_portrait_service = LearnerPortraitService()
+        except Exception as exc:
+            if self.logger is not None:
+                self.logger.debug("[RuntimeCoordinator] Memory portrait / GC init degraded: %s", exc)
+
         self.logger.info("[RuntimeCoordinator] Initialized cleanly.")
 
     def bind_tts_engine(self, engine: Any) -> None:
