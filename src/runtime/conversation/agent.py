@@ -763,6 +763,34 @@ class RuntimeModelRootAgent:
             pass
 
 
+def _clean_empty_and_zeroes(val: Any) -> Any:
+    """Loại bỏ các key/giá trị rỗng, vô nghĩa hoặc các khối toàn số 0.0 để giữ prompt tinh gọn."""
+    if val in (None, "", {}, [], ()):
+        return None
+    if isinstance(val, Mapping):
+        cleaned = {}
+        for k, v in val.items():
+            if str(k).startswith("__"):
+                continue
+            # Bỏ existential_anchor nếu chưa có beat nào và toàn bộ các trọng số đều là 0.0
+            if k == "existential_anchor" and isinstance(v, Mapping):
+                if not any(isinstance(x, (int, float)) and x > 0 for x in v.values()):
+                    continue
+            # Bỏ environment_awareness nếu không có app/process nào đang mở và activity là unknown
+            if k == "environment_awareness" and isinstance(v, Mapping):
+                if not v.get("focused_app") and not v.get("focused_process") and v.get("activity") in (None, "unknown"):
+                    continue
+            sub = _clean_empty_and_zeroes(v)
+            if sub is not None:
+                cleaned[k] = sub
+        return cleaned if cleaned else None
+    if isinstance(val, (list, tuple)):
+        cleaned = [_clean_empty_and_zeroes(x) for x in val]
+        cleaned = [x for x in cleaned if x is not None]
+        return cleaned if cleaned else None
+    return val
+
+
 def _bounded_context(context: Mapping[str, Any]) -> dict[str, Any]:
     # Hai key ``__*`` là dependency runtime nội bộ và tuyệt đối không serialize
     # vào model payload. Model chỉ thấy evidence/context public-safe đã chọn.
@@ -784,8 +812,6 @@ def _bounded_context(context: Mapping[str, Any]) -> dict[str, Any]:
         "confusion_signal",
         "social_situation_evidence",
         "discourse_context",
-        "personality_summary",
-        "personality_context",
         "relationship_summary",
         "relationship_context",
         "previous_public_excerpt",
@@ -801,7 +827,9 @@ def _bounded_context(context: Mapping[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for key in allowed:
         if key in context:
-            out[key] = _bounded_value(context[key], depth=0)
+            val = _clean_empty_and_zeroes(_bounded_value(context[key], depth=0))
+            if val is not None:
+                out[key] = val
     # Passive evidence read on each Root decision; no extra tick/worker/LLM.
     try:
         from ..workspace.presentation_feedback import recent_render_feedback

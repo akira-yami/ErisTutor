@@ -352,10 +352,25 @@ class WorldStateSnapshot:
         lines = [
             "WORLD_STATE_V1:",
             f"- revision={self.revision}; lane={lane}",
-            f"- environment fact: app={env.get('focused_app') or '<unknown>'}; process={env.get('focused_process') or '<unknown>'}; object={env.get('focused_object') or '<unknown>'}",
-            f"- environment interpretation: activity={env.get('activity') or 'unknown'}; task={env.get('task_hint') or 'unknown'}; phase={env.get('phase') or 'unknown'}; confidence={float(env.get('confidence', 0.0) or 0.0):.2f}",
-            f"- conversation: topic={conv.get('topic') or '<none>'}; intent={json.dumps(conv.get('user_intent', {}), ensure_ascii=False, separators=(',', ':'))}",
         ]
+        focused_app = env.get("focused_app")
+        focused_process = env.get("focused_process")
+        focused_object = env.get("focused_object")
+        activity = env.get("activity")
+        task_hint = env.get("task_hint")
+        phase = env.get("phase")
+        confidence = float(env.get("confidence", 0.0) or 0.0)
+
+        has_env_facts = bool(focused_app or focused_process or (activity and activity != "unknown"))
+        if has_env_facts:
+            lines.append(f"- environment fact: app={focused_app or '<unknown>'}; process={focused_process or '<unknown>'}; object={focused_object or '<unknown>'}")
+            lines.append(f"- environment interpretation: activity={activity or 'unknown'}; task={task_hint or 'unknown'}; phase={phase or 'unknown'}; confidence={confidence:.2f}")
+
+        topic = conv.get("topic")
+        intent = conv.get("user_intent")
+        if topic or intent:
+            lines.append(f"- conversation: topic={topic or '<none>'}; intent={json.dumps(intent or {}, ensure_ascii=False, separators=(',', ':'))}")
+
         cognition = projection.get("cognition", {}) if isinstance(projection, Mapping) else {}
         concerns = cognition.get("active_concerns", ()) if isinstance(cognition, Mapping) else ()
         materials = cognition.get("mental_material", ()) if isinstance(cognition, Mapping) else ()
@@ -367,16 +382,17 @@ class WorldStateSnapshot:
             # được copy nguyên văn thành lời public hay coi nó là fact bên ngoài.
             lines.append("- mental_material=" + json.dumps(list(materials)[:12], ensure_ascii=False, separators=(",", ":"), default=str)[:12000])
             lines.append("- mental_material_rule=private semantic material only; never expose as hidden reasoning and never promote to external fact.")
+
         sensors = system.get("sensor_health", {}) if isinstance(system, Mapping) else {}
-        if sensors:
-            lines.append("- sensor_health=" + ", ".join(f"{key}:{value}" for key, value in sorted(sensors.items())))
-        lines.extend((
-            "- FACT != INTERPRETATION. Do not turn task/activity inference into direct sensor fact.",
-            "- Respect freshness/confidence/provenance. Stale or missing evidence must lower certainty.",
-            "- Capability wording must match sensor_health: do not say 'I cannot see your computer/screen' when Deep Environment/UIA/OCR evidence is present. State the exact layer you have instead.",
-            "- VLM unavailable/degraded does NOT erase structured Deep Environment or UIA/OCR awareness.",
-            "- WorldState does not invoke or imply VLM/pixel vision.",
-        ))
+        active_sensors = {k: v for k, v in sensors.items() if v not in ("disabled", "unavailable", "unknown")}
+        if active_sensors:
+            lines.append("- sensor_health=" + ", ".join(f"{key}:{value}" for key, value in sorted(active_sensors.items())))
+
+        if has_env_facts or materials or concerns:
+            lines.extend((
+                "- FACT != INTERPRETATION. Do not turn task/activity inference into direct sensor fact.",
+                "- Respect freshness/confidence/provenance. Stale or missing evidence must lower certainty.",
+            ))
         return "\n".join(lines)
 
 
