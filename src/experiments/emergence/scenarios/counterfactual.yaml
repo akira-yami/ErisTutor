@@ -1,0 +1,7 @@
+scenario_id: counterfactual_history_pairs
+initial_snapshot: baseline_v1
+instances: 20
+probe_repetitions: 5
+metrics:
+  history_classifier_auroc: 0.75
+  within_condition_icc: 0.65
