@@ -70,21 +70,24 @@ class UIAEventClient:
         return bool(self._thread and self._thread.is_alive())
 
     def start(self) -> "UIAEventClient":
-        if not self.enabled or self.alive:
-            return self
-        self._stop.clear()
-        self._thread = threading.Thread(target=self._event_loop, name="eris-uia-mta", daemon=True)
-        self._thread.start()
-        if not self._atexit_registered:
-            atexit.register(self.stop)
-            self._atexit_registered = True
+        with self._lock:
+            if not self.enabled or self.alive:
+                return self
+            self._stop.clear()
+            self._commands = queue.Queue()
+            self._thread = threading.Thread(target=self._event_loop, name="eris-uia-mta", daemon=True)
+            self._thread.start()
+            if not self._atexit_registered:
+                atexit.register(self.stop)
+                self._atexit_registered = True
         return self
 
     def stop(self) -> None:
-        self._stop.set()
-        self._commands.put(("stop", 0))
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=1.5)
+        with self._lock:
+            self._stop.set()
+            thread = self._thread
+        if thread and thread is not threading.current_thread():
+            thread.join(timeout=1.5)
 
     def invalidate(self, hwnd: int, *, runtime_id: str = "") -> None:
         """Đánh dấu dữ liệu bẩn; callback event không thực hiện cross-process scan."""
@@ -327,6 +330,8 @@ class UIAEventClient:
                 except Exception:
                     pass
             self._handler_refs.clear()
+            self._subscribed_hwnds.clear()
+            self._root_refs.clear()
             try:
                 ole32.CoUninitialize()
             except Exception:
