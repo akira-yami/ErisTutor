@@ -153,6 +153,19 @@ class CoordinatorShutdownMixin:
             pass
         if supervisor is not None:
             supervisor.shutdown_all()
+        subject_components = getattr(self, "subject_core_components", None)
+        if subject_components is not None:
+            try:
+                subject_components.close()
+            except Exception as exc:
+                self.logger.debug("[subject-core] close error: %s", exc)
+        learning_service = getattr(self, "learning_service", None)
+        learning_store = getattr(learning_service, "_store", None)
+        if learning_store is not None and callable(getattr(learning_store, "close", None)):
+            try:
+                learning_store.close()
+            except Exception as exc:
+                self.logger.debug("[learning-store] close error: %s", exc)
         health_registry = getattr(self, "subsystem_health_registry", None)
         if health_registry is not None:
             health_registry.mark_stopped("runtime.coordinator")

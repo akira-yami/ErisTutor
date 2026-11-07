@@ -41,6 +41,7 @@ exclude = ["tests*", "assets*"]
 [tool.setuptools.package-data]
 evals = ["*.json"]
 "experiments.emergence" = ["scenarios/*.yaml"]
+"memory.subject" = ["schema.sql", "migrations/*.sql"]
 "runtime.learning_canvas" = ["packs/*.json"]
 "native.uiaccess_broker" = ["*.manifest", "*.ps1"]
 
