@@ -42,5 +42,9 @@ jobs:
         run: |
           if (Test-Path smoke_memory.py) { python smoke_memory.py }
 
+      - name: Import smoke test (llm)
+        run: |
+          if (Test-Path smoke_llm.py) { python smoke_llm.py }
+
       - name: Unit tests
         run: pytest -q
