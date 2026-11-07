@@ -95,6 +95,13 @@ class RuntimeCoordinator(
         self.world_state_service = ensure_world_state_service(self)
         self.open_loop_store = ensure_open_loop_store(self)
 
+        # AI Orchestrated Runtime (Architecture C)
+        try:
+            from runtime.ai_orchestrated.bootstrap import install_ai_orchestrated_runtime
+            install_ai_orchestrated_runtime(self, self.llm_service)
+        except Exception as exc:
+            self.logger.warning("[RuntimeCoordinator] Failed to install AI orchestrated runtime: %s", exc)
+
         self.logger.info("[RuntimeCoordinator] Initialized cleanly.")
 
     def bind_tts_engine(self, engine: Any) -> None:
