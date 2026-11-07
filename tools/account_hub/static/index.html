@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eris Account & Resource Hub</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="hub-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="hub-sidebar">
+            <div class="brand">
+                <div class="brand-avatar">
+                    <span class="avatar-glow"></span>
+                    <span class="brand-glyph">✦</span>
+                </div>
+                <div class="brand-info">
+                    <h2>ERIS HUB</h2>
+                    <span class="brand-subtitle">Account & Resource Manager</span>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <button class="nav-tab active" data-tab="overview" id="nav-overview">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Tổng quan Hệ thống</span>
+                </button>
+                <button class="nav-tab" data-tab="deepseek" id="nav-deepseek">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A7.003 7.003 0 0 1 5.07 11H5a1 1 0 0 1 0-2h.07A7.003 7.003 0 0 1 11 5.07V5a1 1 0 0 1 2 0v.07A7.003 7.003 0 0 1 18.93 11H19a1 1 0 0 1 0 2h-.07A7.003 7.003 0 0 1 13 16.93z">
+                        </path>
+                    </svg>
+                    <span>Não bộ DeepSeek</span>
+                </button>
+                <button class="nav-tab" data-tab="elevenlabs" id="nav-elevenlabs">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <span>Giọng nói ElevenLabs</span>
+                </button>
+                <button class="nav-tab" data-tab="gemini" id="nav-gemini">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Mắt & Model 3.8</span>
+                </button>
+                <button class="nav-tab" data-tab="secrets" id="nav-secrets">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span>Gemma & Cloud API Keys</span>
+                </button>
+                <button class="nav-tab" data-tab="ports" id="nav-ports">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 11a9 9 0 0 1 9 9"></path>
+                        <path d="M4 4a16 16 0 0 1 16 16"></path>
+                        <circle cx="5" cy="19" r="1"></circle>
+                    </svg>
+                    <span>Cổng dịch vụ (Ports)</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="runtime-badge-container">
+                    <div class="pulse-indicator" id="runtime-pulse"></div>
+                    <span id="runtime-status-label">Đang kiểm tra...</span>
+                </div>
+                <div class="action-buttons-stack">
+                    <button class="btn btn-emerald" id="btn-start-eris" onclick="startEris()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Khởi động Eris
+                    </button>
+                    <button class="btn btn-danger-soft" id="btn-stop-eris" onclick="stopEris()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <rect x="6" y="6" width="12" height="12"></rect>
+                        </svg>
+                        Dừng Eris
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="hub-content">
+            <!-- Topbar Header -->
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1 id="page-title">Tổng quan Hệ thống</h1>
+                    <p id="page-desc">Theo dõi tình trạng tài khoản và tài nguyên AI theo thời gian thực.</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-glass" onclick="loadAllData()" id="btn-refresh">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                            height="16">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M1 20v-6h6"></path>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        Làm mới
+                    </button>
+                </div>
+            </header>
+
+            <!-- 1. OVERVIEW VIEW -->
+            <section class="tab-pane active" id="pane-overview">
+                <!-- Hero Readiness Card -->
+                <div class="hero-readiness-card">
+                    <div class="readiness-radial-wrap">
+                        <svg class="radial-svg" viewBox="0 0 120 120">
+                            <circle class="radial-bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="radial-progress" id="readiness-circle" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="radial-content">
+                            <span class="radial-percent" id="readiness-percent">0%</span>
+                            <span class="radial-label">Sẵn sàng</span>
+                        </div>
+                    </div>
+                    <div class="readiness-info">
+                        <div class="readiness-title-row">
+                            <h2 id="readiness-status-text">Đang kiểm tra hệ thống...</h2>
+                            <span class="badge" id="readiness-badge">Kiểm tra</span>
+                        </div>
+                        <p id="readiness-detail-text">Hệ thống đang đối chiếu trạng thái pool DeepSeek, ElevenLabs
+                            credits và session Gemini.</p>
+                        <div class="readiness-quick-metrics">
+                            <div class="quick-metric">
+                                <span class="qm-label">Não (DeepSeek)</span>
+                                <span class="qm-value" id="qm-deepseek">--</span>
+                            </div>
+                            <div class="quick-metric">
+                                <span class="qm-label">Giọng (ElevenLabs)</span>
+                                <span class="qm-value" id="qm-eleven">--</span>
+                            </div>
+                            <div class="quick-metric">
+                                <span class="qm-label">Mắt (Gemini)</span>
+                                <span class="qm-value" id="qm-gemini">--</span>
+                            </div>
+                            <div class="quick-metric">
+                                <span class="qm-label">Dự phòng (Groq)</span>
+                                <span class="qm-value" id="qm-groq">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Pillars Grid -->
+                <div class="pillars-grid">
+                    <!-- DeepSeek Card -->
+                    <div class="pillar-card" onclick="switchTab('deepseek')">
+                        <div class="pillar-head">
+                            <div class="pillar-icon pillar-deepseek">🧠</div>
+                            <div class="pillar-meta">
+                                <h3>DeepSeek Pool</h3>
+                                <span class="pillar-sub">Não bộ & 8 Roles</span>
+                            </div>
+                            <span class="status-chip" id="chip-ds">Loading</span>
+                        </div>
+                        <div class="pillar-body">
+                            <div class="stat-highlight">
+                                <span class="stat-num" id="ds-active-count">0</span>
+                                <span class="stat-unit">/ <span id="ds-total-count">0</span> tài khoản khả dụng</span>
+                            </div>
+                            <p class="stat-desc" id="ds-desc-status">Đang quét gateway 6011-6016...</p>
+                        </div>
+                        <div class="pillar-foot">
+                            <span>Quản lý danh sách acc &rarr;</span>
+                        </div>
+                    </div>
+
+                    <!-- ElevenLabs Card -->
+                    <div class="pillar-card" onclick="switchTab('elevenlabs')">
+                        <div class="pillar-head">
+                            <div class="pillar-icon pillar-eleven">🎙️</div>
+                            <div class="pillar-meta">
+                                <h3>ElevenLabs TTS</h3>
+                                <span class="pillar-sub">Giọng nói tiếng Nhật / Việt</span>
+                            </div>
+                            <span class="status-chip" id="chip-el">Loading</span>
+                        </div>
+                        <div class="pillar-body">
+                            <div class="stat-highlight">
+                                <span class="stat-num" id="el-quota-rem">0</span>
+                                <span class="stat-unit">ký tự còn lại</span>
+                            </div>
+                            <div class="progress-bar-wrap">
+                                <div class="progress-bar-fill" id="el-quota-bar" style="width: 0%"></div>
+                            </div>
+                            <p class="stat-desc" id="el-desc-status">0 tài khoản trong pool</p>
+                        </div>
+                        <div class="pillar-foot">
+                            <span>Quản lý tokens & quota &rarr;</span>
+                        </div>
+                    </div>
+
+                    <!-- Gemini Card -->
+                    <div class="pillar-card" onclick="switchTab('gemini')">
+                        <div class="pillar-head">
+                            <div class="pillar-icon pillar-gemini">👁️</div>
+                            <div class="pillar-meta">
+                                <h3>Gemini & Model 3.8</h3>
+                                <span class="pillar-sub">Mắt quan sát & Web Session</span>
+                            </div>
+                            <span class="status-chip" id="chip-gemini">Loading</span>
+                        </div>
+                        <div class="pillar-body">
+                            <div class="stat-highlight">
+                                <span class="stat-num" id="gemini-freshness">--</span>
+                                <span class="stat-unit">tuổi thọ cookie</span>
+                            </div>
+                            <p class="stat-desc" id="gemini-desc-status">Đồng bộ qua Chrome Extension hoặc dán tay</p>
+                        </div>
+                        <div class="pillar-foot">
+                            <span>Đồng bộ cookie &rarr;</span>
+                        </div>
+                    </div>
+
+                    <!-- Groq Card -->
+                    <!-- Groq & Gemma Card -->
+                    <div class="pillar-card" onclick="switchTab('secrets')">
+                        <div class="pillar-head">
+                            <div class="pillar-icon pillar-groq">⚡</div>
+                            <div class="pillar-meta">
+                                <h3>Gemma & Cloud Keys</h3>
+                                <span class="pillar-sub">Google AI Studio & Groq</span>
+                            </div>
+                            <span class="status-chip" id="chip-groq">Loading</span>
+                        </div>
+                        <div class="pillar-body">
+                            <div class="stat-highlight">
+                                <span class="stat-num" id="groq-key-status">--</span>
+                                <span class="stat-unit">key dự phòng</span>
+                            </div>
+                            <p class="stat-desc" id="groq-desc-status">Dùng khi luồng web quá tải</p>
+                        </div>
+                        <div class="pillar-foot">
+                            <span>Xem & test API keys &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. DEEPSEEK VIEW -->
+            <section class="tab-pane" id="pane-deepseek">
+                <div class="section-banner">
+                    <div>
+                        <h2>Tài khoản Não bộ DeepSeek (Whale2API Pool)</h2>
+                        <p>Khai thác trọn vẹn sức mạnh Whale2API: Ping probe trực tiếp, đếm ngược thời gian gỡ mute, mở khóa tự động và nạp token không cần mật khẩu.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-primary" onclick="testAllDeepSeekAccounts()" id="btn-test-all-ds">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            Kiểm tra toàn bộ Pool
+                        </button>
+                        <button class="btn btn-emerald" onclick="unmuteExpiredDeepSeek()" id="btn-unmute-expired" style="display: none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            Mở khóa acc hết hạn (<span id="expired-mute-badge">0</span>)
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportDeepSeekCSV()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Xuất CSV
+                        </button>
+                        <button class="btn btn-secondary" onclick="unmuteDeepSeek(true)">
+                            Mở khóa tất cả
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Test Progress Banner (Hiện khi chạy probe test) -->
+                <div class="card glass-card mb-4" id="ds-test-progress-card" style="display: none; border-color: rgba(99, 102, 241, 0.4);">
+                    <div class="d-flex justify-between align-center mb-2">
+                        <div>
+                            <strong style="color: #fff;">Đang kiểm tra chất lượng Pool (Whale2API Probe)...</strong>
+                            <span class="text-muted text-sm ml-2" id="ds-test-job-status">Đang chạy</span>
+                        </div>
+                        <span class="stat-unit" id="ds-test-job-counter">0 / 0</span>
+                    </div>
+                    <div class="progress-bar-wrap" style="height: 6px;">
+                        <div class="progress-bar-fill" id="ds-test-job-fill" style="width: 0%; background: var(--brand-gradient);"></div>
+                    </div>
+                </div>
+
+                <!-- Add Tokens Box -->
+                <div class="card glass-card">
+                    <h3 class="card-title">Thêm Token / Tài khoản mới (Bỏ qua Mật Khẩu)</h3>
+                    <p class="card-hint">
+                        💡 <strong>Lấy Token cực nhanh:</strong> Mở <code>chat.deepseek.com</code> &rarr; F12 &rarr; <strong>Application</strong> &rarr; <strong>LocalStorage</strong> &rarr; copy key <code>userToken</code>. Hoặc dán theo dạng <code>Tên_Acc,Token</code> hoặc token trần (mỗi dòng một token).
+                    </p>
+                    <textarea id="ds-input-accounts" rows="3" class="hub-textarea" placeholder="Dán DeepSeek Tokens vào đây...&#10;eyJhbGciOi...&#10;acc2,token2..."></textarea>
+                    <div class="card-action-bar">
+                        <button class="btn btn-primary" onclick="addDeepSeekAccounts()">
+                            <span>+ Thêm vào Pool & Gắn Gateway</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accounts Table -->
+                <div class="card glass-card mt-4">
+                    <div class="table-header-row">
+                        <div>
+                            <h3 class="card-title">Danh sách tài khoản trong Pool</h3>
+                            <span class="card-hint">Được đồng bộ trực tiếp từ <code>whale2api.db</code></span>
+                        </div>
+                        <span class="table-counter" id="ds-table-count">0 tài khoản</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="hub-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tài khoản / Nhãn</th>
+                                    <th>Token / Pass</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thời hạn Mute</th>
+                                    <th>Device ID</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ds-accounts-tbody">
+                                <tr><td colspan="7" class="text-center py-4">Đang nạp dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ELEVENLABS VIEW -->
+            <section class="tab-pane" id="pane-elevenlabs">
+                <div class="section-banner">
+                    <div>
+                        <h2>Tài khoản ElevenLabs (Firebase Refresh Token Pool)</h2>
+                        <p>Xoay vòng ký tự phát âm thanh. Nhập Firebase Refresh Token của các tài khoản miễn phí.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-secondary" onclick="syncElevenLabsQuotas()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                            </svg>
+                            Đồng bộ hạn mức (Sync Quota)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Token Box -->
+                <div class="card glass-card">
+                    <h3 class="card-title">Thêm / Cập nhật Giọng nói & Refresh Tokens</h3>
+                    <p class="card-hint">
+                        💡 <strong>Thông minh:</strong> Hỗ trợ dán <strong>toàn bộ chuỗi JSON Firebase auth</strong> (từ LocalStorage web ElevenLabs), hệ thống sẽ tự bóc tách <code>stsTokenManager.refreshToken</code>, <code>apiKey</code> và <code>displayName</code>! Hoặc dán token trần (<code>AMf-...</code>) hoặc <code>Tên_Giọng,Token</code>.
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="mb-3">
+                        <div class="form-group">
+                            <label>Tên giọng / Nhãn hiển thị (Tùy chọn):</label>
+                            <input type="text" id="el-voice-name-input" class="hub-input"
+                                placeholder="VD: Hairi Takahara, Giọng Eris... (để trống tự lấy theo email/JSON)">
+                        </div>
+                        <div class="form-group">
+                            <label>Firebase Web API Key (Tự động nhận nếu dán JSON):</label>
+                            <input type="text" id="el-firebase-key-input" class="hub-input"
+                                placeholder="Tự động phát hiện trong JSON hoặc giữ nguyên">
+                        </div>
+                    </div>
+                    <textarea id="el-input-tokens" rows="4" class="hub-textarea"
+                        placeholder="Dán chuỗi JSON Firebase auth hoặc danh sách Refresh Tokens vào đây...&#10;{&#10;  &quot;email&quot;: &quot;...&quot;,&#10;  &quot;stsTokenManager&quot;: { &quot;refreshToken&quot;: &quot;AMf-...&quot; }&#10;}&#10;hoặc AMf-vBy...&#10;hoặc Tên Giọng,AMf-vBy..."></textarea>
+                    <div class="card-action-bar">
+                        <button class="btn btn-primary" onclick="addElevenLabsTokens()">
+                            <span>+ Thêm / Cập nhật Giọng & Tự Động Đồng Bộ Quota</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tokens Table -->
+                <div class="card glass-card mt-4">
+                    <div class="table-header-row">
+                        <h3 class="card-title">Danh sách Tokens trong Pool</h3>
+                        <span class="table-counter" id="el-table-count">0 tokens</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="hub-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nhãn</th>
+                                    <th>Refresh Token</th>
+                                    <th>Hạn mức ký tự</th>
+                                    <th>Ngày reset</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="el-accounts-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">Đang nạp dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. GEMINI VIEW -->
+            <section class="tab-pane" id="pane-gemini">
+                <div class="section-banner">
+                    <div>
+                        <h2>Gemini Web Session & Vision Docker</h2>
+                        <p>Khai thác model Gemini 3.8 / Vision thông qua Cookie phiên đăng nhập web Google.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-secondary" onclick="launchTutor()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            Mở Google Tutor Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="gemini-status-card glass-card mb-4">
+                    <div class="g-status-left">
+                        <div class="g-icon-circle" id="g-status-icon">👁️</div>
+                        <div>
+                            <h3 id="g-cred-status">Đang kiểm tra cookie...</h3>
+                            <p id="g-cred-detail">Trạng thái phiên đăng nhập Google trên Vision Docker</p>
+                            <div class="g-tokens-row">
+                                <span class="g-token-badge">PSID: <code id="g-psid-display">--</code></span>
+                                <span class="g-token-badge">PSIDTS: <code id="g-psidts-display">--</code></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="g-status-right">
+                        <div class="g-meta-pill">
+                            <span>Lần đồng bộ cuối:</span>
+                            <strong id="g-last-synced">--</strong>
+                        </div>
+                        <div class="g-meta-pill">
+                            <span>Vision Docker (Port 8000):</span>
+                            <strong id="g-docker-status">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cookie Direct Paste -->
+                <div class="card glass-card">
+                    <h3 class="card-title">Dán trực tiếp Cookie Google</h3>
+                    <p class="card-hint">Mở <code>gemini.google.com</code> trên Chrome &rarr; F12 &rarr; Application
+                        &rarr; Cookies, hoặc dán toàn bộ chuỗi Header Cookie vào đây:</p>
+                    <textarea id="gemini-raw-cookie" rows="3" class="hub-textarea"
+                        placeholder="__Secure-1PSID=...; __Secure-1PSIDTS=..."></textarea>
+                    <div class="card-action-bar">
+                        <button class="btn btn-primary" onclick="pasteGeminiCookie()">
+                            <span>Đồng bộ Cookie ngay</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chrome Extension guide -->
+                <div class="card glass-card mt-4 info-guide-card">
+                    <div class="guide-header">
+                        <span class="guide-badge">Tùy chọn 1-Click</span>
+                        <h3>Đồng bộ qua Chrome Extension</h3>
+                    </div>
+                    <p>Trong thư mục <code>tools/gemini_cookie_extension</code> có sẵn extension cho Chrome. Bạn chỉ cần
+                        cài Developer mode vào trình duyệt, mở tab Gemini và bấm nút <strong>"Đồng bộ Cookie vào
+                            Docker"</strong>.</p>
+                </div>
+            </section>
+
+            <!-- 5. GEMMA & CLOUD KEYS POOL VIEW -->
+            <section class="tab-pane" id="pane-secrets">
+                <div class="section-banner">
+                    <div>
+                        <h2>⚡ Gemma & Cloud Keys Pool (SQLite .db & JSONL)</h2>
+                        <p>Hệ thống quản lý xoay vòng API Keys trong SQLite (<code>config/cloud_keys_pool.db</code>), tự động hạ nhiệt (cooling) khi dính HTTP 429 và đồng bộ ra <code>config/cloud_keys.jsonl</code> & <code>config/secrets.json</code> cho worker.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-secondary" onclick="exportAndDownloadJsonl()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Xem file JSONL
+                        </button>
+                        <button class="btn btn-secondary" onclick="syncCloudKeys()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M23 4v6h-6"></path>
+                                <path d="M1 20v-6h6"></path>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            Đồng bộ DB & JSONL
+                        </button>
+                        <button class="btn btn-primary" onclick="openAddCloudKeyModal()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            + Thêm Key / Nạp Hàng Loạt
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Google AI Studio / Gemma Section -->
+                <div class="card glass-card mt-3">
+                    <div class="card-header-flex">
+                        <div>
+                            <h3 style="font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <span>💎</span> Google AI Studio Pool (Gemma 2, Gemma-7B/27B & Gemini Flash)
+                            </h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                Xoay vòng tự động theo thuật toán LRU (Least Recently Used) khi cần gọi tác vụ Gemma/Gemini.
+                            </p>
+                        </div>
+                        <span class="badge" id="gemini-pool-counter">0 keys</span>
+                    </div>
+                    <div id="gemini-keys-list" class="cloud-keys-table-container mt-3">
+                        <div class="empty-state">Đang tải danh sách key từ database...</div>
+                    </div>
+                </div>
+
+                <!-- Groq Cloud Section -->
+                <div class="card glass-card mt-4">
+                    <div class="card-header-flex">
+                        <div>
+                            <h3 style="font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                                <span>⚡</span> Groq Cloud Pool (Gemma 2 9B & Llama 3.3 Siêu Tốc)
+                            </h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                Tốc độ suy luận siêu nhanh (500+ tokens/s), tự động chuyển key khi dính rate limit 429.
+                            </p>
+                        </div>
+                        <span class="badge" id="groq-pool-counter">0 keys</span>
+                    </div>
+                    <div id="groq-keys-list" class="cloud-keys-table-container mt-3">
+                        <div class="empty-state">Đang tải danh sách key từ database...</div>
+                    </div>
+                </div>
+
+                <!-- Secondary Secrets (Firebase & DeepSeek Official) -->
+                <div class="card glass-card mt-4" style="opacity: 0.9;">
+                    <div class="field-header">
+                        <div>
+                            <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted);">
+                                ⚙️ Cấu hình Phụ trợ Secrets.json (Firebase Auth & DeepSeek Official)
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="two-col-grid mt-2">
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-muted);">FIREBASE_API_KEY (ElevenLabs Web Auth):</label>
+                            <input type="text" id="input-firebase-key" class="hub-input" style="font-size: 0.85rem;" placeholder="Nhập Firebase Web API Key">
+                            <span class="field-note" style="margin-top: 3px;">Hiện tại: <code id="sec-firebase-current">--</code></span>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-muted);">DEEPSEEK_API_KEY (Platform Fallback):</label>
+                            <input type="password" id="input-deepseek-key" class="hub-input" style="font-size: 0.85rem;" placeholder="Nhập sk-... dự phòng">
+                            <span class="field-note" style="margin-top: 3px;">Hiện tại: <code id="sec-deepseek-current">--</code></span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <button class="btn btn-secondary" onclick="saveSecondarySecrets()">Lưu cấu hình phụ trợ</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. PORTS VIEW -->
+            <section class="tab-pane" id="pane-ports">
+                <div class="section-banner">
+                    <div>
+                        <h2>Cổng Dịch Vụ Cục Bộ (Ports Monitor)</h2>
+                        <p>Theo dõi xem các gateway DeepSeek, Docker container và bridge có đang lắng nghe hay không.
+                        </p>
+                    </div>
+                    <div class="banner-actions">
+                        <button class="btn btn-secondary" onclick="loadPorts()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
+                                height="16">
+                                <path d="M23 4v6h-6"></path>
+                                <path d="M1 20v-6h6"></path>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            Quét lại cổng
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ports-grid" id="ports-grid-container">
+                    <div class="text-center py-4">Đang quét cổng...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Thêm Key Cloud / Gemma -->
+    <div id="modal-cloud-key" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Thêm Key vào Pool SQLite</h3>
+                <button class="modal-close-btn" onclick="closeAddCloudKeyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Nhà cung cấp (Provider):</label>
+                    <select id="modal-key-provider" class="hub-input" style="width: 100%;">
+                        <option value="gemini">Google AI Studio (Gemma 2 & Gemini Flash)</option>
+                        <option value="groq">Groq Cloud (Gemma 2 9B & Llama 3.3)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Nhãn gợi nhớ (Tùy chọn):</label>
+                    <input type="text" id="modal-key-label" class="hub-input" placeholder="Ví dụ: Gemma Backup 1, Groq Fast">
+                </div>
+                <div class="mb-3">
+                    <label style="font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 4px;">
+                        Nhập 1 Key HOẶC dán danh sách hàng loạt (mỗi dòng 1 key):
+                    </label>
+                    <textarea id="modal-key-input" rows="4" class="hub-textarea" style="width: 100%; font-family: var(--font-mono); font-size: 0.82rem;" placeholder="AIzaSy... hoặc gsk_... (có thể dán nhiều dòng để nạp hàng loạt)"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddCloudKeyModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="submitAddCloudKey()">
+                    <span>Lưu vào SQLite Pool</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

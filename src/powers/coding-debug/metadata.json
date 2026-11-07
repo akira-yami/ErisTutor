@@ -1,0 +1,32 @@
+{
+  "name": "coding-debug",
+  "description": "Debug lỗi code/runtime bằng evidence: đọc lỗi, search/read code, chạy test hoặc command phát triển và replan từ kết quả thật.",
+  "keywords": [
+    "debug",
+    "bug",
+    "error",
+    "test fail",
+    "traceback",
+    "runtime",
+    "lỗi",
+    "không chạy",
+    "die",
+    "fix root cause"
+  ],
+  "tools": [
+    "read_current_error",
+    "inspect_runtime_log",
+    "project_search_text",
+    "project_semantic_search",
+    "project_find_symbol",
+    "project_read_file",
+    "project_run_tests",
+    "project_run_command",
+    "project_git_diff"
+  ],
+  "mode": "long",
+  "latency": "seconds to minutes",
+  "workspace_required": true,
+  "risk_level": "medium",
+  "reversible": true
+}

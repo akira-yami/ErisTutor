@@ -2,31 +2,45 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - "feat/**"
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
 
+# Must run on Windows: the runtime uses msvcrt, tasklist and CREATE_NO_WINDOW,
+# which do not exist on Linux runners.
 jobs:
-  python:
-    name: Python checks
-    runs-on: ubuntu-latest
+  foundation:
+    runs-on: windows-latest
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+      PYTHONPATH: src
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+          cache: pip
 
-      - name: Install dependencies
+      - name: Install dev dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install ruff
+          pip install -r requirements-dev.txt
 
       - name: Lint (ruff)
-        run: ruff check . || true
+        run: ruff check src
 
-      - name: Compile check
-        run: python -m compileall -q .
+      - name: Import smoke test (foundation)
+        run: python smoke_foundation.py
+
+      - name: Import smoke test (memory)
+        run: |
+          if (Test-Path smoke_memory.py) { python smoke_memory.py }
+
+      - name: Unit tests
+        run: pytest -q

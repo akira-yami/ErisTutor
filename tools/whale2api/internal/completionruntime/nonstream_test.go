@@ -1,0 +1,298 @@
+package completionruntime
+
+import (
+	"context"
+	"errors"
+	"io"
+	"net/http"
+	"strings"
+	"testing"
+
+	"whale2api/internal/auth"
+	"whale2api/internal/config"
+	dsclient "whale2api/internal/deepseek/client"
+	"whale2api/internal/pooldb"
+	"whale2api/internal/promptcompat"
+)
+
+type fakeDeepSeekCaller struct {
+	responses             []*http.Response
+	payloads              []map[string]any
+	uploads               []dsclient.UploadFileRequest
+	uploadAccounts        []string
+	switchAccountOnCreate string
+	createSessions        int
+}
+
+type discardRestartCaller struct {
+	createAccounts []string
+}
+
+func (d *discardRestartCaller) CreateSession(ctx context.Context, a *auth.RequestAuth, _ int) (string, error) {
+	d.createAccounts = append(d.createAccounts, a.AccountID)
+	if len(d.createAccounts) == 1 {
+		a.TryAutoDiscardHTTPBody(ctx, []byte(`{"data":{"biz_code":5,"biz_msg":"user is muted"}}`))
+		return "", errors.New("account muted")
+	}
+	return "session-" + a.AccountID, nil
+}
+
+func (d *discardRestartCaller) GetPow(context.Context, *auth.RequestAuth, int) (string, error) {
+	return "pow", nil
+}
+
+func (d *discardRestartCaller) UploadFile(context.Context, *auth.RequestAuth, dsclient.UploadFileRequest, int) (*dsclient.UploadFileResult, error) {
+	return &dsclient.UploadFileResult{ID: "file-id"}, nil
+}
+
+func (d *discardRestartCaller) CallCompletion(_ context.Context, _ *auth.RequestAuth, _ map[string]any, _ string, _ int) (*http.Response, error) {
+	return sseHTTPResponse(http.StatusOK, `data: {"p":"response/content","v":"ok"}`), nil
+}
+
+func TestStartCompletionRestartsWholeAttemptAfterAutoDiscard(t *testing.T) {
+	t.Setenv("WHALE2API_ACCOUNT_MAX_INFLIGHT", "1")
+	store := config.LoadStore()
+	db := pooldb.NewMem()
+	db.RegisterKey("managed-key", []config.Account{
+		{Email: "muted@example.com", Token: "token-1"},
+		{Email: "healthy@example.com", Token: "token-2"},
+	}, true)
+	resolver := auth.NewResolver(store, func(context.Context, config.Account) (string, error) {
+		return "fresh-token", nil
+	})
+	resolver.PoolDB = db
+	req, _ := http.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+	req.Header.Set("x-api-key", "managed-key")
+	a, err := resolver.Determine(req)
+	if err != nil {
+		t.Fatalf("determine failed: %v", err)
+	}
+	defer resolver.Release(a)
+
+	ds := &discardRestartCaller{}
+	standard := promptcompat.StandardRequest{
+		Surface:         "test",
+		RequestedModel:  "deepseek-flash",
+		ResolvedModel:   "deepseek-flash",
+		ResponseModel:   "deepseek-flash",
+		PromptTokenText: "hello",
+		FinalPrompt:     "hello",
+	}
+	var rebuiltAccounts []string
+	result, outErr := StartCompletion(context.Background(), ds, a, standard, Options{
+		RebuildRequest: func(_ context.Context, requestAuth *auth.RequestAuth) (promptcompat.StandardRequest, error) {
+			rebuiltAccounts = append(rebuiltAccounts, requestAuth.AccountID)
+			return standard, nil
+		},
+	})
+	if outErr != nil {
+		t.Fatalf("start completion failed: %#v", outErr)
+	}
+	defer func() { _ = result.Response.Body.Close() }()
+	if len(ds.createAccounts) != 2 || ds.createAccounts[0] != "muted@example.com" || ds.createAccounts[1] != "healthy@example.com" {
+		t.Fatalf("expected full restart on replacement account, got %#v", ds.createAccounts)
+	}
+	if result.SessionID != "session-healthy@example.com" || a.AccountID != "healthy@example.com" {
+		t.Fatalf("attempt did not finish on healthy account: session=%q account=%q", result.SessionID, a.AccountID)
+	}
+	if len(rebuiltAccounts) != 1 || rebuiltAccounts[0] != "healthy@example.com" {
+		t.Fatalf("request resources were not rebuilt for replacement account: %#v", rebuiltAccounts)
+	}
+}
+
+func (f *fakeDeepSeekCaller) CreateSession(_ context.Context, a *auth.RequestAuth, _ int) (string, error) {
+	f.createSessions++
+	if f.switchAccountOnCreate != "" {
+		a.AccountID = f.switchAccountOnCreate
+	}
+	return "session-1", nil
+}
+
+func (f *fakeDeepSeekCaller) GetPow(context.Context, *auth.RequestAuth, int) (string, error) {
+	return "pow", nil
+}
+
+func (f *fakeDeepSeekCaller) UploadFile(_ context.Context, a *auth.RequestAuth, req dsclient.UploadFileRequest, _ int) (*dsclient.UploadFileResult, error) {
+	f.uploads = append(f.uploads, req)
+	f.uploadAccounts = append(f.uploadAccounts, a.AccountID)
+	return &dsclient.UploadFileResult{ID: "file-runtime-" + a.AccountID}, nil
+}
+
+func (f *fakeDeepSeekCaller) CallCompletion(_ context.Context, _ *auth.RequestAuth, payload map[string]any, _ string, _ int) (*http.Response, error) {
+	f.payloads = append(f.payloads, payload)
+	if len(f.responses) == 0 {
+		return sseHTTPResponse(http.StatusOK, `data: {"p":"response/content","v":"fallback"}`), nil
+	}
+	resp := f.responses[0]
+	f.responses = f.responses[1:]
+	return resp, nil
+}
+
+func TestExecuteNonStreamWithRetryBuildsCanonicalTurn(t *testing.T) {
+	ds := &fakeDeepSeekCaller{responses: []*http.Response{sseHTTPResponse(
+		http.StatusOK,
+		`data: {"response_message_id":42,"p":"response/content","v":"<tool_calls><invoke name=\"Write\"><parameter name=\"content\">{\"x\":1}</parameter></invoke></tool_calls>"}`,
+	)}}
+	stdReq := promptcompat.StandardRequest{
+		Surface:         "test",
+		ResponseModel:   "deepseek-flash",
+		PromptTokenText: "prompt",
+		FinalPrompt:     "final prompt",
+		ToolNames:       []string{"Write"},
+		ToolsRaw: []any{map[string]any{
+			"name": "Write",
+			"input_schema": map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"content": map[string]any{"type": "string"},
+				},
+			},
+		}},
+	}
+
+	result, outErr := ExecuteNonStreamWithRetry(context.Background(), ds, &auth.RequestAuth{}, stdReq, Options{})
+	if outErr != nil {
+		t.Fatalf("unexpected output error: %#v", outErr)
+	}
+	if result.SessionID != "session-1" {
+		t.Fatalf("session mismatch: %q", result.SessionID)
+	}
+	if got := result.Turn.ResponseMessageID; got != 42 {
+		t.Fatalf("response message id mismatch: %d", got)
+	}
+	if len(result.Turn.ToolCalls) != 1 {
+		t.Fatalf("expected one tool call, got %d", len(result.Turn.ToolCalls))
+	}
+	if _, ok := result.Turn.ToolCalls[0].Input["content"].(string); !ok {
+		t.Fatalf("expected schema-normalized string argument, got %#v", result.Turn.ToolCalls[0].Input["content"])
+	}
+	if result.Turn.Usage.InputTokens == 0 || result.Turn.Usage.TotalTokens == 0 {
+		t.Fatalf("expected usage to be populated, got %#v", result.Turn.Usage)
+	}
+}
+
+func TestExecuteNonStreamWithRetryUsesSameAccountSyntheticEmptyRetry(t *testing.T) {
+	ds := &fakeDeepSeekCaller{responses: []*http.Response{
+		sseHTTPResponse(http.StatusOK, `data: {"response_message_id":77,"p":"response/status","v":"FINISHED"}`),
+		sseHTTPResponse(http.StatusOK, `data: {"p":"response/content","v":"visible"}`),
+	}}
+	stdReq := promptcompat.StandardRequest{
+		Surface:         "test",
+		ResponseModel:   "deepseek-flash",
+		PromptTokenText: "prompt",
+		FinalPrompt:     "final prompt",
+	}
+
+	result, outErr := ExecuteNonStreamWithRetry(context.Background(), ds, &auth.RequestAuth{}, stdReq, Options{RetryEnabled: true})
+	if outErr != nil {
+		t.Fatalf("expected synthetic retry success, got outErr=%#v", outErr)
+	}
+	if len(ds.payloads) != 2 {
+		t.Fatalf("expected same-account synthetic retry, got %d completion calls", len(ds.payloads))
+	}
+	if result.Turn.Text != "visible" {
+		t.Fatalf("expected retry visible text, got %q", result.Turn.Text)
+	}
+}
+
+func TestExecuteNonStreamWithRetryConvertsReferenceMarkers(t *testing.T) {
+	ds := &fakeDeepSeekCaller{responses: []*http.Response{sseHTTPResponse(
+		http.StatusOK,
+		`data: {"p":"response/content","v":"答案[reference:0]。","citation":{"cite_index":0,"url":"https://example.com/ref"}}`,
+	)}}
+	stdReq := promptcompat.StandardRequest{
+		Surface:         "test",
+		ResponseModel:   "deepseek-flash-search",
+		PromptTokenText: "prompt",
+		FinalPrompt:     "final prompt",
+		Search:          true,
+	}
+
+	result, outErr := ExecuteNonStreamWithRetry(context.Background(), ds, &auth.RequestAuth{}, stdReq, Options{})
+	if outErr != nil {
+		t.Fatalf("unexpected output error: %#v", outErr)
+	}
+	want := "答案[0](https://example.com/ref)。"
+	if result.Turn.Text != want {
+		t.Fatalf("text mismatch: got %q want %q", result.Turn.Text, want)
+	}
+}
+
+func TestStartCompletionDoesNotUploadHistoryContextFile(t *testing.T) {
+	ds := &fakeDeepSeekCaller{responses: []*http.Response{sseHTTPResponse(http.StatusOK, `data: {"p":"response/content","v":"ok"}`)}}
+	stdReq := promptcompat.StandardRequest{
+		Surface:         "test_adapter",
+		RequestedModel:  "deepseek-flash",
+		ResolvedModel:   "deepseek-flash",
+		ResponseModel:   "deepseek-flash",
+		PromptTokenText: "first user turn",
+		FinalPrompt:     "first user turn",
+		Messages: []any{
+			map[string]any{"role": "user", "content": "first user turn"},
+		},
+	}
+
+	start, outErr := StartCompletion(context.Background(), ds, &auth.RequestAuth{DeepSeekToken: "token"}, stdReq, Options{})
+	if outErr != nil {
+		t.Fatalf("unexpected output error: %#v", outErr)
+	}
+	if len(ds.uploads) != 0 {
+		t.Fatalf("expected no context file upload, got %d", len(ds.uploads))
+	}
+	if len(ds.payloads) != 1 {
+		t.Fatalf("expected one completion payload, got %d", len(ds.payloads))
+	}
+	prompt, _ := ds.payloads[0]["prompt"].(string)
+	if prompt != "first user turn" {
+		t.Fatalf("expected prompt unchanged, got %q", prompt)
+	}
+	if start.Request.PromptTokenText != "first user turn" {
+		t.Fatalf("expected PromptTokenText unchanged, got %q", start.Request.PromptTokenText)
+	}
+}
+
+func TestStartCompletionPreservesPlainTextAndExplicitFileAfterAccountSwitch(t *testing.T) {
+	ds := &fakeDeepSeekCaller{
+		switchAccountOnCreate: "acct-b",
+		responses: []*http.Response{
+			sseHTTPResponse(http.StatusOK, `data: {"p":"response/content","v":"ok"}`),
+		},
+	}
+	stdReq := promptcompat.StandardRequest{
+		Surface:         "openai_chat",
+		RequestedModel:  "deepseek-flash",
+		ResolvedModel:   "deepseek-flash",
+		ResponseModel:   "deepseek-flash",
+		PromptTokenText: "history\nlatest",
+		FinalPrompt:     "history\nlatest",
+		RefFileIDs:      []string{"file-user"},
+	}
+
+	start, outErr := StartCompletion(context.Background(), ds, &auth.RequestAuth{AccountID: "acct-a", DeepSeekToken: "token"}, stdReq, Options{})
+	if outErr != nil {
+		t.Fatalf("unexpected output error: %#v", outErr)
+	}
+	defer func() { _ = start.Response.Body.Close() }()
+	if len(ds.uploads) != 0 {
+		t.Fatalf("expected no automatic upload after account switch, got %d", len(ds.uploads))
+	}
+	refs := start.Payload["ref_file_ids"].([]any)
+	if len(refs) != 1 || refs[0] != "file-user" {
+		t.Fatalf("expected explicit file reference preserved, got %#v", refs)
+	}
+	if start.Payload["prompt"] != "history\nlatest" || start.Request.PromptTokenText != "history\nlatest" {
+		t.Fatalf("expected full context text preserved, got payload=%#v request=%#v", start.Payload, start.Request)
+	}
+}
+
+func sseHTTPResponse(status int, lines ...string) *http.Response {
+	body := strings.Join(lines, "\n")
+	if !strings.HasSuffix(body, "\n") {
+		body += "\n"
+	}
+	return &http.Response{
+		StatusCode: status,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(strings.NewReader(body)),
+	}
+}

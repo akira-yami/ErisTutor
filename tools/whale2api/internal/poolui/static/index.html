@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Whale2API Quản lý Pool</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <div id="loginPage" class="login-page">
+    <div class="login-shell">
+      <div class="login-brand">
+        <h1>Whale2API</h1>
+        <p class="muted">Bảng điều khiển Pool · Mỗi API Key một Pool</p>
+        <p class="login-hint muted">Đăng nhập bằng <code>POOL_UI_ADMIN_TOKEN</code> cấu hình phía server</p>
+      </div>
+      <form id="loginForm" class="login-card">
+        <h2>Đăng nhập</h2>
+        <label class="field">
+          <span>Token quản trị</span>
+          <input type="password" id="loginToken" autocomplete="off" required />
+        </label>
+        <button type="submit" class="btn primary block">Vào</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="site-header">
+      <div class="site-brand">
+        <h1>Whale2API</h1>
+        <span class="site-sub">Quản lý Pool</span>
+      </div>
+      <button type="button" class="btn ghost sm" id="btnLogout">Đăng xuất</button>
+    </header>
+
+    <main class="workspace">
+      <aside class="pool-sidebar">
+        <div class="sidebar-head">
+          <h2>Gateway Key</h2>
+          <button type="button" class="btn sm primary" id="btnNewKey">Tạo mới</button>
+        </div>
+        <ul id="keyList" class="key-list"></ul>
+      </aside>
+
+      <section class="pool-main" id="poolPanel">
+        <div class="empty-state" id="emptyState">
+          <h2>Chọn Pool</h2>
+          <p class="muted">Chọn một Gateway Key ở cột trái, hoặc tạo Pool mới để bắt đầu quản lý tài khoản.</p>
+        </div>
+
+        <div class="pool-view hidden" id="poolView">
+          <div class="pool-head">
+            <h2 id="currentPoolTitle">—</h2>
+            <p class="muted" id="currentKeyMeta"></p>
+          </div>
+
+          <div class="pool-tabs-row">
+            <div class="tabs" role="tablist">
+              <button type="button" class="tab active" data-tab="active" role="tab">Khả dụng</button>
+              <button type="button" class="tab" data-tab="discarded" role="tab">Đã vô hiệu</button>
+            </div>
+          </div>
+
+          <div class="main-progress-slot" id="mainProgressSlot">
+            <div id="testProgressWrap" class="main-progress">
+              <div class="main-progress-row">
+                <div class="test-progress-track">
+                  <div id="testProgressFill" class="test-progress-fill"></div>
+                </div>
+                <button type="button" class="btn icon-btn progress-stop-btn" id="btnStopTest" title="Dừng kiểm tra" aria-label="Dừng kiểm tra">
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4.5" y="4.5" width="7" height="7" rx="1"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tài khoản</th>
+                  <th>Mật khẩu</th>
+                  <th>Device Token</th>
+                  <th>Trạng thái</th>
+                  <th>Khác</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="accountBody"></tbody>
+            </table>
+          </div>
+
+          <div class="list-foot">
+            <p class="muted foot" id="accountStats"></p>
+            <div class="pagination" id="accountPagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="pool-inspector" id="poolInspector">
+        <div id="inspectorIdle" class="inspector-idle">
+          <h3>Pool</h3>
+          <p class="muted">Chọn Pool ở cột trái để quản lý Pool, dữ liệu, kiểm tra tài khoản và khóa.</p>
+        </div>
+
+        <div id="inspectorActive" class="inspector-active hidden">
+          <section class="inspector-section">
+            <h4 class="inspector-section-title">Pool</h4>
+            <nav class="inspector-nav">
+              <button type="button" class="inspector-item" id="btnRenamePool">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M11.5 2.5l2 2L5 13H3v-2l8.5-8.5z"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Đổi tên</span>
+                  <span class="inspector-item-desc">Sửa tên hiển thị của Pool</span>
+                </span>
+              </button>
+              <button type="button" class="inspector-item" id="btnDeletePool">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3.5 5h9M6.5 5V4a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1M5.5 5l.5 8.5h4l.5-8.5"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Xóa Pool</span>
+                  <span class="inspector-item-desc">Xóa Key và mọi tài khoản liên kết</span>
+                </span>
+              </button>
+            </nav>
+          </section>
+
+          <section class="inspector-section">
+            <h4 class="inspector-section-title">Dữ liệu</h4>
+            <nav class="inspector-nav">
+              <button type="button" class="inspector-item" id="btnImportCSV">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3v7M5.5 6.5 8 9l2.5-2.5M3 12.5h10"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Nhập CSV</span>
+                  <span class="inspector-item-desc">Thêm tài khoản hàng loạt</span>
+                </span>
+              </button>
+              <button type="button" class="inspector-item" id="btnExportCSV">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 10V3M5.5 5.5 8 3l2.5 2.5M3 12.5h10"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Xuất CSV</span>
+                  <span class="inspector-item-desc">Tải Pool hiện tại về</span>
+                </span>
+              </button>
+            </nav>
+          </section>
+
+          <section class="inspector-section">
+            <h4 class="inspector-section-title">Kiểm tra</h4>
+            <nav class="inspector-nav">
+              <button type="button" class="inspector-item" id="btnTestAll">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="6,4 6,12 12,8"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Kiểm tra nick sống</span>
+                  <span class="inspector-item-desc">Kiểm tra tài khoản chưa vô hiệu</span>
+                </span>
+              </button>
+              <button type="button" class="inspector-item" id="btnTestMuted">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8h2l2-3v6l2-3h6"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Kiểm tra nick cấm ngôn</span>
+                  <span class="inspector-item-desc" id="btnTestMutedDesc">Kiểm tra tài khoản bị cấm ngôn</span>
+                </span>
+              </button>
+              <button type="button" class="inspector-item hidden" id="btnDiscardFailed">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Vô hiệu nick lỗi</span>
+                  <span class="inspector-item-desc" id="btnDiscardFailedDesc">—</span>
+                </span>
+              </button>
+            </nav>
+          </section>
+
+          <section class="inspector-section">
+            <h4 class="inspector-section-title">Khóa</h4>
+            <nav class="inspector-nav">
+              <button type="button" class="inspector-item" id="btnViewKey">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="9" r="3.5"/><path d="M9.5 6.5A4.5 4.5 0 0 1 6 13M11 3l1.5 1.5"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">API Key</span>
+                  <span class="inspector-item-desc">Xem và sao chép</span>
+                </span>
+              </button>
+              <button type="button" class="inspector-item" id="btnRotateKey">
+                <span class="inspector-item-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3.5 8a4.5 4.5 0 0 1 7.7-3.2M12.5 3.5V6h-2.5"/><path d="M12.5 8a4.5 4.5 0 0 1-7.7 3.2M3.5 12.5V10H6"/></svg></span>
+                <span class="inspector-item-body">
+                  <span class="inspector-item-title">Đổi (Rotate) Key</span>
+                  <span class="inspector-item-desc">Thay Key client sử dụng</span>
+                </span>
+              </button>
+            </nav>
+          </section>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="newKeyDialog" class="dialog">
+    <form id="newKeyForm" class="dialog-card">
+      <h2>Tạo Gateway Key mới</h2>
+      <label class="field">
+        <span>API Key (sk- ngẫu nhiên)</span>
+        <div class="input-row">
+          <input id="newKeyValue" required readonly />
+          <button type="button" class="btn sm" id="btnRegenNewKey">Tạo lại</button>
+        </div>
+      </label>
+      <label class="field"><span>Tên</span><input id="newKeyName" /></label>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary">Tạo</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="renamePoolDialog" class="dialog">
+    <form id="renamePoolForm" class="dialog-card">
+      <h2>Đổi tên Pool</h2>
+      <label class="field"><span>Tên</span><input id="renamePoolName" required /></label>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="importCsvDialog" class="dialog">
+    <form id="importCsvForm" class="dialog-card">
+      <h2>Nhập CSV</h2>
+      <p class="muted dialog-hint">CSV UTF-8: <code>email,password[,device_id]</code> hoặc có dòng tiêu đề.</p>
+      <p class="muted dialog-hint">Cột thứ ba có thể để trống (để trống thì tự lấy device khi cần); nếu nhiều token ngăn bằng <code>|</code> thì chỉ lấy token đầu tiên.</p>
+      <label class="field">
+        <span>Chọn tệp</span>
+        <div class="file-picker">
+          <label class="file-picker-btn">
+            Chọn tệp…
+            <input type="file" id="csvFile" accept=".csv,text/csv" required />
+          </label>
+          <span class="file-picker-name muted" id="csvFileName">Chưa chọn tệp</span>
+        </div>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary">Nhập</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="viewKeyDialog" class="dialog">
+    <div class="dialog-card">
+      <h2>API Key</h2>
+      <code id="viewKeyValue" class="key-preview-block">—</code>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Đóng</button>
+        <button type="button" class="btn primary" id="btnDialogCopyKey">Sao chép</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="rotateDialog" class="dialog">
+    <form id="rotateForm" class="dialog-card">
+      <h2>Đổi (Rotate) API Key</h2>
+      <p class="muted dialog-hint">Giữ nguyên tài khoản trong Pool, chỉ thay Key mà client dùng.</p>
+      <label class="field">
+        <span>Key mới (sk- ngẫu nhiên)</span>
+        <div class="input-row">
+          <input id="rotateNew" required readonly />
+          <button type="button" class="btn sm" id="btnRegenRotateKey">Tạo lại</button>
+        </div>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary">Xác nhận đổi Key</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+[project]
+name = "eristutor"
+version = "0.1.0"
+description = "ErisTutor — clean incremental rebuild of the Eris runtime, layer by layer."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+screen = [
+  "mss",
+  "Pillow",
+  "numpy>=2.0.0",
+  "pytesseract",
+  "requests",
+  "uiautomation",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+telemetry = [
+  "mss",
+  "Pillow",
+  "psutil",
+]
+
+[tool.setuptools]
+py-modules = ["failure_meta"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+# Only the packages that currently exist in the repo. Expand as later layers land.
+include = [
+  "actions*", "core*", "cortex*", "domain*", "evals*", "experiments*", "llm*",
+  "memory*", "native*", "parser_grounding*", "runtime*", "screen*", "telemetry*",
+  "transport*",
+]
+exclude = ["tests*", "assets*"]
+
+[tool.setuptools.package-data]
+evals = ["*.json"]
+"experiments.emergence" = ["scenarios/*.yaml"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = ["assets", ".venv"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B"]
+# E501: long lines (inherited from eris).
+# The rules below are suppressed to match upstream eris, which ships this code
+# as-is and runs no ruff gate. They are lint-debt to clean up in a later pass,
+# not blockers for the foundation layer:
+#   E402  module-level import not at top (files open with a docstring/try-block)
+#   E702  multiple statements on one line (semicolon) in ocr_worker
+#   B033  duplicate set item in screen_evidence_store stopwords
+#   B905  zip() without an explicit strict= parameter (upstream eris codebase)
+#   F401  unused import (json) in vision_perception_worker
+ignore = ["E501", "E402", "E702", "B033", "B905", "F401"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

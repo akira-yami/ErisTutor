@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Cookie Sync to Docker",
+  "version": "1.0",
+  "description": "Dong bo Cookie Gemini Web vao Docker Vision API chi voi 1-click",
+  "permissions": [
+    "cookies"
+  ],
+  "host_permissions": [
+    "*://gemini.google.com/*",
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sync Gemini Cookie"
+  }
+}
