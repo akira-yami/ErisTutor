@@ -59,7 +59,7 @@ def validate_pack(raw: Any) -> KnowledgePack:
         raise ValueError("unsupported_pack_version")
     namespace = identifier(raw.get("skill_namespace"))
     title = _text(raw.get("title"))
-    domain = DomainSpec(group_id, title, namespace, version="1", capabilities=("choice", "java"))
+    domain = DomainSpec(group_id, title, namespace, version="1", capabilities=("choice", "java", "python"))
     path_id = identifier(raw.get("path_id"))
     if not path_id.startswith(namespace + ":"):
         raise ValueError("pack_namespace_mismatch")
@@ -93,12 +93,14 @@ def validate_pack(raw: Any) -> KnowledgePack:
             if block_id in ids:
                 raise ValueError("duplicate_pack_id")
             ids.add(block_id)
-            if block.get("kind") not in {"explanation", "java"}:
+            if block.get("kind") not in {"explanation", "java", "python"}:
                 raise ValueError("invalid_pack_block_kind")
             _text(block.get("title"))
             _text(block.get("text"), 3000)
         kinds = {block["kind"] for block in node["blocks"]}
-        if kinds != {"explanation", "java"}:
+        if kinds not in ({"explanation", "java"}, {"explanation", "python"}, {"explanation", "java", "python"}):
+            if "python" in kinds:
+                raise ValueError("pack_requires_explanation_and_python")
             raise ValueError("pack_requires_explanation_and_java")
         for exercise in _items(node.get("exercises"), 4):
             if not isinstance(exercise, dict):
@@ -122,8 +124,10 @@ def validate_pack(raw: Any) -> KnowledgePack:
                 if len(set(keys)) != len(keys) or exercise.get("answer") not in keys:
                     raise ValueError("invalid_choice_answer")
                 _text(exercise.get("explanation"), 1000)
-            elif exercise.get("type") == "java":
-                _text(exercise.get("class_name"), 80)
+            elif exercise.get("type") in {"java", "python"}:
+                is_py = exercise.get("type") == "python"
+                if not is_py:
+                    _text(exercise.get("class_name"), 80)
                 _text(exercise.get("solution"), 6000)
                 _text(exercise.get("starter_code"), 3000)
                 _text(exercise.get("harness"), 6000)
@@ -131,11 +135,11 @@ def validate_pack(raw: Any) -> KnowledgePack:
                 keys = []
                 for test in tests:
                     if not isinstance(test, dict):
-                        raise ValueError("invalid_java_test")
+                        raise ValueError("invalid_python_test" if is_py else "invalid_java_test")
                     keys.append(identifier(test.get("id")))
                     _text(test.get("description"), 500)
                 if len(set(keys)) != len(keys):
-                    raise ValueError("duplicate_java_test")
+                    raise ValueError("duplicate_python_test" if is_py else "duplicate_java_test")
             else:
                 raise ValueError("invalid_pack_exercise_type")
     path = LearningPath(path_id, title, _text(raw.get("goal"), 500), tuple(points),

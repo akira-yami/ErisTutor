@@ -48,14 +48,12 @@ def _paragraphs(lines: list[str]) -> list[dict]:
                 sentences = re.split(r'(?<=[.!?;])\s+', content)
                 group = ""
                 for sentence in sentences:
-                    if not sentence:
-                        continue
+                    if not sentence: continue
                     if group and len(group) + len(sentence) + 1 > 310:
                         result.append({"type": "paragraph", "text": group})
                         group = ""
                     group += (" " if group else "") + sentence
-                if group:
-                    result.append({"type": "paragraph", "text": group})
+                if group: result.append({"type": "paragraph", "text": group})
             buffer.clear()
 
     i = 0
@@ -181,8 +179,7 @@ def parse_markdown(text: str) -> list[dict]:
             output.append({'type':'formula', 'latex':latex})
             end = found.end()
         if matches:
-            if content[end:].strip():
-                output.append({'type':'paragraph', 'text':content[end:].strip()})
+            if content[end:].strip(): output.append({'type':'paragraph', 'text':content[end:].strip()})
         else:
             output.append(block)
     return output[:_MAX_BLOCKS]
@@ -234,8 +231,7 @@ def _render_math(blocks: list[dict], workspace: Path, delivery_id: str) -> None:
             fig.savefig(dest, dpi=125, transparent=True, bbox_inches='tight', pad_inches=.2)
             plt.close(fig)
             data=dest.read_bytes()
-            if len(data)>2_500_000:
-                dest.unlink(missing_ok=True); continue
+            if len(data)>2_500_000: dest.unlink(missing_ok=True); continue
             block['path']=f'documents/{delivery_id}/{name}'
             block['sha256']=hashlib.sha256(data).hexdigest()
             count+=1
@@ -255,10 +251,8 @@ def prepare_document(*, text: str, session_id: str, generation: int,
         disk_id = delivery_id
     blocks = parse_markdown(text)
     if workspace is not None and render_math:
-        try:
-            _render_math(blocks, Path(workspace), disk_id)
-        except (ImportError, OSError):
-            pass
+        try: _render_math(blocks, Path(workspace), disk_id)
+        except (ImportError, OSError): pass
     return {
         'parse_mode':'workspace_document','workspace_version':1,
         'document_id': text_digest(f'{session_id}:{generation}:{run_id}:{delivery_id}')[:32],

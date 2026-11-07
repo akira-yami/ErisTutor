@@ -1,5 +1,17 @@
+# -*- coding: utf-8 -*-
+from .action import ActionCapability
 from .canvas import CanvasCapability
-from .tutor import TutorCapability
+from .research import ResearchCapability, ResearchResult
+from .tutor import TutorAdvice, TutorCapability
+from .work import WorkCapability, WorkResult
 
-__all__ = ["CanvasCapability", "TutorCapability"]
-
+__all__ = [
+    "ActionCapability",
+    "CanvasCapability",
+    "ResearchCapability",
+    "ResearchResult",
+    "TutorAdvice",
+    "TutorCapability",
+    "WorkCapability",
+    "WorkResult",
+]

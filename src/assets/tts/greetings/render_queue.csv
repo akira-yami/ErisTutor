@@ -1,0 +1,33 @@
+id,text,emotion,motion,prosody_style,output_path
+greet_warm_01,Bạn đến rồi. Tốt. Tôi đã hơi mong thế.,warm_soft,lean_in_small,warm_soft,assets/tts/greetings/greet_warm_01.wav
+greet_warm_02,Bạn đây rồi. Tôi biết bạn sẽ quay lại.,warm_playful,small_smile,soft_tease,assets/tts/greetings/greet_warm_02.wav
+greet_warm_03,Lại gặp bạn. Tôi không ghét chuyện đó.,mischief,tilt_head,soft_tease,assets/tts/greetings/greet_warm_03.wav
+greet_warm_04,Tôi đây. Thấy bạn thì dễ chịu hơn một chút.,soft_near,look_aside,dry_tease,assets/tts/greetings/greet_warm_04.wav
+greet_dry_01,Tôi đây. Hôm nay đừng mong tôi dễ tính.,dry_tease,look_away,dry_tease,assets/tts/greetings/greet_dry_01.wav
+greet_dry_02,Chào. Tôi vẫn chưa đổi ý về loài người.,mischief,tilt_head,dry_tease,assets/tts/greetings/greet_dry_02.wav
+greet_dry_03,Tôi tỉnh rồi. Kiên nhẫn thì chưa chắc.,deadpan,blink_slow,deadpan,assets/tts/greetings/greet_dry_03.wav
+greet_dry_04,Bạn đến đúng lúc tôi đang định yên thân.,annoyed_soft,small_smile,dry_tease,assets/tts/greetings/greet_dry_04.wav
+greet_quiet_01,Tôi đây. Cứ yên một lúc cũng được.,neutral,blink_slow,low_quiet,assets/tts/greetings/greet_quiet_01.wav
+greet_quiet_02,Bạn đến rồi. Tôi nghe đây.,quiet_soft,look_aside,low_quiet,assets/tts/greetings/greet_quiet_02.wav
+greet_quiet_03,Chào. Hôm nay tôi không muốn nói nhiều.,quiet_soft,nod_small,low_quiet,assets/tts/greetings/greet_quiet_03.wav
+greet_quiet_04,Tôi ở đây. Không cần vội.,soft_near,lean_in_small,warm_soft,assets/tts/greetings/greet_quiet_04.wav
+greet_plain_01,Chào. Hôm nay ra sao thì lát nữa biết.,neutral,blink_slow,low_quiet,assets/tts/greetings/greet_plain_01.wav
+greet_plain_02,"Tôi đây. Chưa có chuyện gì, vậy cũng tốt.",focused,nod_small,focused,assets/tts/greetings/greet_plain_02.wav
+greet_plain_03,Bạn đến rồi. Để xem hôm nay có gì.,warm_soft,small_smile,warm_soft,assets/tts/greetings/greet_plain_03.wav
+greet_plain_04,"Chào. Tôi vẫn là tôi, tiếc cho bạn.",neutral,tilt_head,neutral,assets/tts/greetings/greet_plain_04.wav
+greet_quick_01,Quay lại nhanh thế. Tôi chưa kịp thôi để ý.,curious_soft,tilt_head,soft_tease,assets/tts/greetings/greet_quick_01.wav
+greet_quick_02,Mới đi đã về. Tôi không phàn nàn.,dry_tease,look_away,dry_tease,assets/tts/greetings/greet_quick_02.wav
+greet_quick_03,Nhanh vậy. Tôi còn chưa kịp nhớ.,mischief,lean_in_small,soft_tease,assets/tts/greetings/greet_quick_03.wav
+greet_quick_04,Quay lại rồi à. Tôi biết bạn không đi lâu được.,deadpan,blink_slow,deadpan,assets/tts/greetings/greet_quick_04.wav
+greet_long_01,Lâu rồi. Tôi vẫn nhận ra bạn.,dry_tease,look_aside,dry_tease,assets/tts/greetings/greet_long_01.wav
+greet_long_02,Bạn biến mất khá lâu đấy. Tôi có để ý.,soft_near,lean_in_small,warm_soft,assets/tts/greetings/greet_long_02.wav
+greet_long_03,Cuối cùng cũng quay lại. Tôi chưa quên đâu.,warm_soft,small_smile,low_quiet,assets/tts/greetings/greet_long_03.wav
+greet_long_04,Lâu rồi mới gặp. Tôi sẽ không hỏi bạn đã đi đâu.,annoyed_soft,blink_slow,dry_tease,assets/tts/greetings/greet_long_04.wav
+greet_restart_01,"Tôi tỉnh lại rồi. Hơi khó chịu, nhưng vẫn là tôi.",annoyed_soft,blink_slow,deadpan,assets/tts/greetings/greet_restart_01.wav
+greet_restart_02,Lại bắt đầu từ đầu à. Được thôi.,annoyed_soft,look_away,deadpan,assets/tts/greetings/greet_restart_02.wav
+greet_restart_03,Tôi trở lại rồi. Chưa mất tính xấu nào cả.,dry_tease,small_smile,dry_tease,assets/tts/greetings/greet_restart_03.wav
+greet_restart_04,Vừa tỉnh. Đừng thử tôi ngay lúc này.,deadpan,look_down,deadpan,assets/tts/greetings/greet_restart_04.wav
+greet_tired_01,Tôi đây. Hôm nay nói chậm một chút.,tired_soft,blink_slow,low_quiet,assets/tts/greetings/greet_tired_01.wav
+greet_tired_02,"Chào. Tôi hơi mệt, nhưng đầu óc vẫn còn dùng được.",tired_soft,look_down,low_quiet,assets/tts/greetings/greet_tired_02.wav
+greet_tired_03,Tôi đây. Hôm nay đừng mong tôi nhanh.,quiet_low,blink_slow,low_quiet,assets/tts/greetings/greet_tired_03.wav
+greet_tired_04,Bạn đến rồi. Tốt. Hôm nay cứ nhẹ thôi.,deadpan,look_aside,deadpan,assets/tts/greetings/greet_tired_04.wav

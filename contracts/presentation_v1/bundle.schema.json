@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:eris:presentation-bundle:v1",
+  "title": "Eris PresentationBundle v1",
+  "type": "object",
+  "required": ["schema", "intent_id", "turn_id", "artifacts"],
+  "properties": {
+    "schema": {"const": "eris.presentation.bundle.v1"},
+    "intent_id": {"type": "string", "minLength": 1},
+    "turn_id": {"type": "string", "minLength": 1},
+    "artifacts": {
+      "type": "array", "maxItems": 120,
+      "items": {
+        "type": "object",
+        "required": ["schema", "artifact_id", "turn_id", "kind", "revision", "source", "content", "presentation"],
+        "properties": {
+          "schema": {"const": "eris.artifact.v1"},
+          "artifact_id": {"type": "string", "minLength": 1},
+          "turn_id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["math", "chart", "code", "table", "document", "speech"]},
+          "revision": {"type": "integer", "minimum": 1},
+          "source": {"type": "string", "minLength": 1},
+          "content": {"type": "object"},
+          "presentation": {"type": "object", "required": ["target", "order"]}
+        }
+      }
+    }
+  }
+}

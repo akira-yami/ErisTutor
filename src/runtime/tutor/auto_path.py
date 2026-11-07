@@ -9,21 +9,9 @@ from __future__ import annotations
 import hashlib
 from typing import Any, Mapping, Sequence
 
-from runtime.cognition.normalization import normalize_vi
 from runtime.learning_core.contracts import KnowledgePoint, LearningPath
 from runtime.pedagogical_plan_builder import TeachingPlanBuilder
-
-
-def _explicit_pedagogical_activation(user_text: str) -> bool:
-    text = normalize_vi(str(user_text or ""))
-    markers = (
-        "chi toi", "chi minh", "day toi", "day minh", "teach me", "tutor me",
-        "help me learn", "help me study", "i want to learn", "i need to learn",
-        "muon hoc", "dang hoc", "muon hieu", "that su hieu", "hieu cho toi goc",
-        "giai thich ky", "giai thich chi tiet", "giai thich sau", "tu goc",
-        "explain deeply", "in detail", "from first principles", "walk me through",
-    )
-    return any(marker in text for marker in markers)
+from runtime.ai_orchestrated.orchestrator import _explicit_pedagogical_activation
 
 
 def _stable(prefix: str, goal: str) -> str:
@@ -133,10 +121,12 @@ def maybe_autostart_path(
         if active is not None:
             # Không tự tạo path mới chỉ vì nhiều lượt đang bàn cùng một chủ đề.
             # Muốn đổi môn khi đã có path, user phải kích hoạt ý định học rõ ràng.
+            from runtime.ai_orchestrated.orchestrator import _explicit_pedagogical_activation
             if not _explicit_pedagogical_activation(user_text):
                 return False
             # "Dạy tôi lại", "học tiếp" chỉ là tiếp tục path hiện tại, tuyệt
             # đối không lập curriculum mới từ một lượt thiếu tên chủ đề.
+            from runtime.ai_orchestrated.orchestrator import normalize_vi
             expressed = normalize_vi(str(user_text or "")).strip()
             generic_followups = {"day toi lai", "chi toi lai", "day toi tiep",
                                  "muon hoc tiep", "toi muon hoc tiep", "dang hoc",

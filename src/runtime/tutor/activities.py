@@ -379,6 +379,7 @@ class LearningActivities:
             result = "correct" if correct else "incorrect"
         elif mode in {"numeric", "reflection"}:
             value = decode_text_answer(answer or "")
+            semantic_detail = None
             if mode == "numeric":
                 if not re.fullmatch(r"[+-]?[0-9]{1,12}", value):
                     raise ValueError("invalid_numeric_answer")

@@ -175,6 +175,8 @@ class RuntimeCoordinator(
         try:
             from runtime.ai_orchestrated.bootstrap import install_ai_orchestrated_runtime
             install_ai_orchestrated_runtime(self, self.llm_service)
+            from runtime.conversation.bootstrap import ensure_conversation_kernel
+            ensure_conversation_kernel(self)
         except Exception as exc:
             self.logger.warning("[RuntimeCoordinator] Failed to install AI orchestrated runtime: %s", exc)
 

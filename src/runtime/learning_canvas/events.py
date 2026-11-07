@@ -73,6 +73,24 @@ def enqueue_canvas_event(host, payload: dict) -> None:
                         "metadata": {"origin": "user_ui", "canvas_action": payload["action"],
                                      "canvas_scope": scope,
                                      "canvas_capability": payload}})
+
+    # Soft Queue: Nếu Kernel đang bận (THINKING, WORKING, WRITING, DELIVERING),
+    # giữ event trong hàng đợi mà không đánh thức loop làm đứt quãng lời thoại
+    # hoặc gây race condition giữa writer và dispatch.
+    # Khi delivery kết thúc (settle), on_settled sẽ tự động đánh thức loop
+    # với 'capability_events_after_delivery' để Eris đón nhận node mới nhất.
+    kernel = getattr(host, "conversation_kernel", None)
+    if kernel is not None and hasattr(kernel, "snapshot"):
+        try:
+            busy_phases = {"thinking", "working", "writing", "delivering"}
+            current_state = kernel.snapshot(session_id(host))
+            if current_state:
+                phase_val = getattr(getattr(current_state, "phase", None), "value", str(getattr(current_state, "phase", ""))).lower()
+                if phase_val in busy_phases:
+                    return
+        except Exception:
+            pass
+
     wake = getattr(host, "_wake_autonomous_loop", None)
     if callable(wake):
         wake("learning_canvas:" + str(payload["action"]))

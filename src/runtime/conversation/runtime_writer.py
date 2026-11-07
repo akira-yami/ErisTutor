@@ -60,16 +60,7 @@ def _prelocalize_v03_speech(payload: Mapping[str, Any], *, host: Any,
             explicit = str(nested_speech.get("text", "") or "").strip()
         if not explicit:
             raise RuntimeError("v03_document_speech_missing")
-    try:
-        from runtime.stage_contracts import _contains_japanese_script
-    except ImportError:
-        def _contains_japanese_script(text: str) -> bool:
-            for ch in str(text or ""):
-                point = ord(ch)
-                if 0x3040 <= point <= 0x30FF or 0x3400 <= point <= 0x9FFF:
-                    return True
-            return False
-
+    from runtime.stage_contracts import _contains_japanese_script
     from runtime.utterance_spec import UtteranceSpec
 
     if str(language_hint or '').lower() in ('vi', 'vi-vn', 'vietnamese'):

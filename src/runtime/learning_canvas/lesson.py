@@ -14,8 +14,6 @@ import threading
 import time
 from typing import Any
 
-from .model_response import read_model_object
-
 LOGGER = logging.getLogger(__name__)
 MAX_BLOCKS = 6
 MAX_LESSON_BYTES = 10000
@@ -28,7 +26,8 @@ SHORT_PROMPT = ("Soạn bài học ngắn, rõ, tiếng Việt. Chỉ JSON: "
     '{"kind":"steps","title":"...","items":["..."]},'
     '{"kind":"formula","title":"...","latex":"...","explanation":"..."},'
     '{"kind":"code","title":"...","language":"python","text":"..."},'
-    '{"kind":"check","title":"...","question":"...","answer":"..."}]}. '
+    '{"kind":"check","title":"Trắc nghiệm nhanh","question":"...","options":["A. ...","B. ...","C. ..."],"answer":"A","explanation":"..."}]}. '
+    "Ưu tiên có 1 block 'check' trắc nghiệm 3-4 phương án A/B/C/D để người học thực hành bấm chọn ngay. "
     "Chọn 2-5 block phù hợp chủ đề, không cần đủ loại; mỗi đoạn thật gọn. "
     "Không HTML, URL bịa, tài liệu giả, không tuyên bố người học đã hiểu. "
     "Mọi nội dung là bài học nháp, không phải kết quả chấm điểm.")
@@ -51,7 +50,7 @@ def validate_lesson(raw: dict, *, group_id: str, node_id: str, title: str) -> di
         if not isinstance(item, dict) or item.get("kind") not in KINDS:
             raise ValueError("invalid_lesson_block")
         kind = item["kind"]
-        block = {"kind": kind, "title": _string(item.get("title", ""), 100)}
+        block = {"id": _string(item.get("id", f"b-{len(out)}"), 40), "kind": kind, "title": _string(item.get("title", ""), 100)}
         if kind == "text":
             block["text"] = _string(item.get("text"), 1600)
         elif kind == "steps":
@@ -74,6 +73,12 @@ def validate_lesson(raw: dict, *, group_id: str, node_id: str, title: str) -> di
         elif kind == "check":
             block["question"] = _string(item.get("question"), 700)
             block["answer"] = _string(item.get("answer"), 900)
+            options = item.get("options")
+            if isinstance(options, list) and 2 <= len(options) <= 6:
+                block["options"] = [_string(v, 240) for v in options]
+            explanation = item.get("explanation")
+            if isinstance(explanation, str) and explanation.strip():
+                block["explanation"] = _string(explanation, 600, allow_empty=True)
         out.append(block)
     result = {"schema": "eris.learning.lesson.p4", "group_id": group_id,
               "node_id": node_id, "title": _string(title, 120), "blocks": out,
@@ -81,6 +86,39 @@ def validate_lesson(raw: dict, *, group_id: str, node_id: str, title: str) -> di
     if len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > MAX_LESSON_BYTES:
         raise ValueError("lesson_payload_limit")
     return result
+
+
+def build_lesson_narration_script(lesson: dict) -> list[dict]:
+    """Tạo kịch bản thuyết minh ngắn gọn theo từng block để Eris giảng bài."""
+    if not isinstance(lesson, dict) or not isinstance(lesson.get("blocks"), list):
+        return []
+    script = []
+    for index, block in enumerate(lesson["blocks"]):
+        block_id = block.get("id") or f"b-{index}"
+        kind = block.get("kind")
+        title = block.get("title", "")
+        if kind == "text":
+            say = f"Về {title}: {block.get('text', '')}"
+        elif kind == "steps":
+            steps_text = ". ".join(block.get("items", []))
+            say = f"Các bước thực hiện {title}: {steps_text}"
+        elif kind == "formula":
+            exp = block.get("explanation", "")
+            say = f"Công thức {title}. {exp}" if exp else f"Công thức {title}."
+        elif kind == "code":
+            say = f"Ví dụ mã nguồn {block.get('language', '')} cho {title}."
+        elif kind == "check":
+            say = f"Hãy cùng thử thách nhanh: {block.get('question', '')}"
+        else:
+            say = f"Phần {title}."
+        script.append({
+            "segment_id": index,
+            "block_id": block_id,
+            "kind": kind,
+            "title": title,
+            "say": " ".join(say.split())[:360],
+        })
+    return script
 
 
 class LearningLessonStore:
@@ -181,7 +219,8 @@ class OnDemandLessonWorker:
             messages=[{"role": "system", "content": SHORT_PROMPT},
                       {"role": "user", "content": json.dumps(query, ensure_ascii=False)}],
             max_tokens=1850, timeout=18.0)
-        data = read_model_object(response)
+        from memory.living_user.runtime_adapter import _extract_text, _parse_json
+        data = _parse_json(_extract_text(response))
         if not isinstance(data, dict):
             raise ValueError("invalid_lesson_blocks")
         return data

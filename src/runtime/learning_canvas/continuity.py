@@ -25,10 +25,6 @@ def _safe_text(value: Any, limit: int = 120) -> str:
     return "".join(ch for ch in value.strip() if ord(ch) >= 32)[:limit]
 
 
-def _subject_recency(subject: dict) -> tuple[float, int]:
-    return subject.get("updated_at", 0), subject.get("updated_revision", 0)
-
-
 class LearningContinuity:
     """Timeline & state đọc được sau restart; KHÔNG ghi sang LearningCore evidence."""
 
@@ -76,11 +72,10 @@ class LearningContinuity:
             subjects, nodes = state["subjects"], state["nodes"]
             subject = subjects.setdefault(group_id, {"title": subject_title, "visits": 0,
                                                     "last_node_id": node_id, "last_node_title": title,
-                                                    "updated_at": now, "updated_revision": state["revision"] + 1})
+                                                    "updated_at": now})
             subject["title"] = subject_title
             if activate:
-                subject.update(last_node_id=node_id, last_node_title=title, updated_at=now,
-                               updated_revision=state["revision"] + 1)
+                subject.update(last_node_id=node_id, last_node_title=title, updated_at=now)
                 subject["visits"] = subject.get("visits", 0) + 1
             node_key = group_id + "/" + node_id
             previous = nodes.get(node_key, {})
@@ -127,7 +122,6 @@ class LearningContinuity:
                                     "node_id": node_id, "title": _safe_text(title) or node_id, "at": now})
             state["events"] = state["events"][-EVENT_LIMIT:]
             subject["updated_at"] = now
-            subject["updated_revision"] = state["revision"] + 1
             return status
         return self._apply(update)
 
@@ -195,7 +189,7 @@ class LearningContinuity:
             if key not in self._brief_cache:
                 state = self._load()
                 recent = sorted(state["subjects"].values(),
-                                key=_subject_recency, reverse=True)
+                                key=lambda subject: subject.get("updated_at", 0), reverse=True)
                 self._brief_cache[key] = {
                     "subjects": [{"title": _safe_text(s.get("title"), text_limit),
                                   "at": _safe_text(s.get("last_node_title"), text_limit)}
@@ -230,7 +224,7 @@ class LearningContinuity:
                                   "estimated_seconds": value.get("estimated_seconds", 0)}
                               for key, value in candidates[:64]}
             recent = sorted(state["subjects"].items(),
-                            key=lambda kv: _subject_recency(kv[1]), reverse=True)
+                            key=lambda kv: kv[1].get("updated_at", 0), reverse=True)
             state["recent_subjects"] = [{"group_id": key, **value} for key, value in recent[:12]]
             if group_id:
                 # Tránh packet >60KB với 24 môn; Root/library vẫn đọc đầy đủ khi cần.

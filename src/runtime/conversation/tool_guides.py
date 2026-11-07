@@ -87,6 +87,7 @@ TOOL_GUIDES["canvas"] = (
     "Root gọi operation=graph_create,title. Nếu Learning đang đóng, chỉ lưu môn và job deferred; Gemini CHƯA chạy. Khi người dùng mở và chọn môn, job mới chạy để dựng 2–4 nhánh "
     "và trả learning_job={job_id,status=deferred|queued}; nếu deferred hãy nói 'Đã lưu môn, khi bạn mở Learning tôi sẽ tạo vài nhánh'. Nếu queued có thể nói 'Tôi đang dựng vài nhánh, "
     "xong tôi báo' mà KHÔNG khẳng định đã xong khi Gemini chưa trả. "
+    "Khi người học kêu mất căn bản hoặc xin học từ đầu ở một chủ đề/môn nền tảng lớn (như Bean/IoC, OOP, Concurrency...), Root PHẢI chủ động gọi operation=graph_create (ví dụ title='Spring Bean & Dependency Injection') hoặc mở bài có sẵn (như operation=open_group,group_id=java-di). Đồng thời trong lời nói phải giải thích trực giác zero-level và dứt khoát thúc ép người học mở Learning Canvas lên xem ngay nhánh đầu tiên, vì mở panel thì bản đồ bài bản mới kích hoạt và người học mới có móng vững chắc để học tiếp. "
     "operation=learning_brief đọc tóm tắt ngắn; learning_history hoặc snapshot_full chỉ truy xuất khi người dùng thực sự hỏi chi tiết. "
     "Nếu môn đã tồn tại, graph_create trả existing=true và KHÔNG tạo trùng; hãy dùng operation=library "
     "hoặc operation=learning_history xem danh sách, các nút gần đây, trạng thái và lịch sử. "

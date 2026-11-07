@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:eris:presentation-intent:v1",
+  "title": "Eris PresentationIntent v1",
+  "type": "object",
+  "required": ["type", "intent_id", "turn_id", "mode", "targets"],
+  "properties": {
+    "type": {"const": "presentation.intent.v1"},
+    "intent_id": {"type": "string", "minLength": 1},
+    "turn_id": {"type": "string", "minLength": 1},
+    "mode": {"enum": ["speech_only", "artifacts_only", "speech_and_artifacts"]},
+    "targets": {"type": "array", "items": {"enum": ["rich_chat", "workspace", "bubble", "tts"]}},
+    "artifact_refs": {"type": "array", "maxItems": 120, "items": {"type": "string"}},
+    "speech": {"type": "object"},
+    "feedback": {"type": "object"},
+    "fallback": {"type": "string"}
+  }
+}

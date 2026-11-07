@@ -90,8 +90,7 @@ class MathWorkspaceService:
         result = json.loads(result_path.read_text(encoding='utf-8'))
         # Kiểm tra mọi ảnh thuộc thư mục job, hash khớp bản gốc.
         for item in result.get('artifacts', []):
-            if item.get('type') != 'image':
-                continue
+            if item.get('type') != 'image': continue
             filename = str(item.get('path',''))
             if filename not in {'plot.png','matrix.png','formula.png','formula_1.png','formula_2.png'}:
                 raise ValueError('Tên asset chưa được cấp phép')

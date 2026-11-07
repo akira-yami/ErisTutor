@@ -40,14 +40,10 @@ def _expr(source: str, *, x=None):
             return value if isinstance(node.op, ast.UAdd) else -value
         if isinstance(node, ast.BinOp):
             a, b = walk(node.left, depth+1), walk(node.right, depth+1)
-            if isinstance(node.op, ast.Add):
-                return a+b
-            if isinstance(node.op, ast.Sub):
-                return a-b
-            if isinstance(node.op, ast.Mult):
-                return a*b
-            if isinstance(node.op, ast.Div):
-                return a/b
+            if isinstance(node.op, ast.Add): return a+b
+            if isinstance(node.op, ast.Sub): return a-b
+            if isinstance(node.op, ast.Mult): return a*b
+            if isinstance(node.op, ast.Div): return a/b
             if isinstance(node.op, ast.Pow):
                 if not b.is_number or abs(float(b)) > 12:
                     raise ValueError('Lũy thừa quá lớn hoặc không xác định')
@@ -106,8 +102,7 @@ def _plot(expr, raw: dict, folder: Path, artifacts: list[dict]):
     fn = sp.lambdify(x, expr, modules=['numpy'])
     with np.errstate(all='ignore'):
         yy = np.asarray(fn(xx), dtype=float)
-    if yy.ndim == 0:
-        yy = np.full_like(xx, float(yy))
+    if yy.ndim == 0: yy = np.full_like(xx, float(yy))
     if yy.shape != xx.shape:
         raise ValueError('Giá trị đồ thị không hợp lệ')
     yy[~np.isfinite(yy)] = np.nan
@@ -119,8 +114,7 @@ def _plot(expr, raw: dict, folder: Path, artifacts: list[dict]):
     ax.plot(xx, yy, color='#70d2fa', linewidth=2.2)
     ax.axhline(0, color='#b3c0cc', linewidth=.8); ax.axvline(0, color='#b3c0cc', linewidth=.8)
     ax.grid(alpha=.15); ax.tick_params(colors='#e2e8f0')
-    for spine in ax.spines.values():
-        spine.set_color('#596577')
+    for spine in ax.spines.values(): spine.set_color('#596577')
     ax.set_xlabel('x', color='white'); ax.set_ylabel('y', color='white')
     ax.set_title('y = '+str(expr)[:70], color='white')
     _save_figure(fig, folder, 'plot.png', artifacts)
@@ -238,15 +232,11 @@ def run(request: dict, folder: Path) -> dict:
             _plot(expr, request, folder, artifacts)
         else:
             var = sp.Symbol('x')
-            if kind == 'simplify':
-                answer = sp.simplify(expr)
-            elif kind == 'differentiate':
-                answer = sp.diff(expr, var)
-            elif kind == 'integrate':
-                answer = sp.integrate(expr, var)
+            if kind == 'simplify': answer = sp.simplify(expr)
+            elif kind == 'differentiate': answer = sp.diff(expr, var)
+            elif kind == 'integrate': answer = sp.integrate(expr, var)
             else:
-                if expr.free_symbols - {var}:
-                    raise ValueError('Giải phương trình hiện chỉ theo x')
+                if expr.free_symbols - {var}: raise ValueError('Giải phương trình hiện chỉ theo x')
                 solutions = sp.solve(expr, var)
                 artifacts.append({'type':'text','text':'Nghiệm: '+', '.join(map(str,solutions))})
                 answer = None

@@ -21,11 +21,7 @@ from typing import Any, Mapping, Sequence
 
 from runtime.affective_voice_state import project_affective_voice_state
 from runtime.public_reply_context import compile_public_reply_context
-try:
-    from runtime.subject_initiative_runtime import build_initiative_runtime_context
-except ImportError:
-    def build_initiative_runtime_context(host: Any = None) -> Mapping[str, Any]:
-        return {}
+from runtime.subject_initiative_runtime import build_initiative_runtime_context
 from runtime.world_state import ensure_world_state_service
 
 

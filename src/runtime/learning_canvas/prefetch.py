@@ -14,7 +14,6 @@ import time
 from typing import Any
 
 from .graph import GraphWorkspace, MAX_VISIBLE_SUGGESTIONS
-from .model_response import read_model_object
 
 LOGGER = logging.getLogger(__name__)
 
@@ -114,7 +113,8 @@ class ProgressiveGraphPrefetch:
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": json.dumps(query, ensure_ascii=False)},
         ], max_tokens=1300, timeout=16.0)
-        result = read_model_object(response)
+        from memory.living_user.runtime_adapter import _extract_text, _parse_json
+        result = _parse_json(_extract_text(response))
         if not isinstance(result, dict):
             raise ValueError("invalid_gemini_graph")
         return result

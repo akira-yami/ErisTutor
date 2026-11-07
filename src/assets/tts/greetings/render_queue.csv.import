@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dj6fvsvi2but7"
+
+[deps]
+
+files=["res://src/assets/tts/greetings/render_queue.text.translation", "res://src/assets/tts/greetings/render_queue.emotion.translation", "res://src/assets/tts/greetings/render_queue.motion.translation", "res://src/assets/tts/greetings/render_queue.prosody.translation", "res://src/assets/tts/greetings/render_queue.output.translation"]
+
+source_file="res://src/assets/tts/greetings/render_queue.csv"
+dest_files=["res://src/assets/tts/greetings/render_queue.text.translation", "res://src/assets/tts/greetings/render_queue.emotion.translation", "res://src/assets/tts/greetings/render_queue.motion.translation", "res://src/assets/tts/greetings/render_queue.prosody.translation", "res://src/assets/tts/greetings/render_queue.output.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
