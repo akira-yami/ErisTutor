@@ -80,7 +80,6 @@ cache/
 
 
 # Editors / OS / Godot build artifacts
-.godot/
 *.pdb
 .vscode/
 .idea/

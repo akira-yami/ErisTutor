@@ -1,0 +1,17 @@
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\Eris.deps.json
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\Eris.runtimeconfig.json
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\Eris.dll
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\Eris.pdb
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\GodotSharp.dll
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.csproj.AssemblyReference.cache
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.AssemblyInfoInputs.cache
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.AssemblyInfo.cs
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.csproj.CoreCompileInputs.cache
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.sourcelink.json
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.csproj.Up2Date
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.dll
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\refint\Eris.dll
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.pdb
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\Eris.genruntimeconfig.cache
+C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\obj\Debug\ref\Eris.dll
