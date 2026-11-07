@@ -37,32 +37,6 @@ def _env_flag(name: str, default: str = "0") -> bool:
     return os.environ.get(name, default).strip().lower() in {"1", "true", "yes", "on"}
 
 
-def _vscode_service_mode() -> bool:
-    return _env_flag("ERIS_VSCODE_SERVICE_MODE")
-
-
-def _apply_vscode_service_quiet_env() -> None:
-    if not _vscode_service_mode():
-        return
-    for key, value in {
-        "ERIS_TTS_ENABLED": "0",
-        "ERIS_COMMENTARY_ENABLED": "0",
-        "ERIS_AUTONOMOUS_EXPRESSION_ENABLED": "0",
-        "ERIS_INITIATIVE_ENABLED": "0",
-        "ERIS_AI_STARTUP_GREETING_ENABLED": "0",
-        "ERIS_AI_STARTUP_SCREEN_OPENING": "0",
-        "ERIS_AI_STARTUP_FORCE_SPEAK": "0",
-        "ERIS_RANDOM_CHAT_SEED_RESERVOIR_ENABLED": "0",
-        "ERIS_BACKGROUND_TUTOR_ENABLED": "0",
-        "ERIS_BACKGROUND_OBSERVER": "0",
-        "ERIS_MEMORY_BACKGROUND_DIGEST": "0",
-        "ERIS_BROWSER_BRIDGE_ENABLED": "0",
-        "ERIS_CHESS_BRIDGE_ENABLED": "0",
-        "ERIS_ELEVENLABS_POOL_UI_ENABLED": "0",
-    }.items():
-        os.environ[key] = value
-
-
 class AttentionOverseer:
     def __init__(self, model_path: str = "", n_ctx: int = 8192, n_gpu_layers: int = -1):
         self.logger = get_logger("Vision")
@@ -102,7 +76,6 @@ class AttentionOverseer:
             RuntimeSettingsStore().load(materialize_env=True)
         except Exception as exc:
             self.logger.debug("Runtime settings bootstrap trước provider bị bỏ qua: %s", exc)
-        _apply_vscode_service_quiet_env()
         self.process_manager = RemoteModelProcessManager(
             logger=self.process_logger,
             project_root=project_root,
@@ -271,16 +244,12 @@ class AttentionOverseer:
         self.coordinator.long_term_memory = long_term_memory
 
         # TTS engine — khởi động sau coordinator để biết cờ ERIS_TTS_ENABLED.
-        self.tts_engine = None
-        if _vscode_service_mode():
-            self.logger.info("[vscode-service] TTS disabled; IDE bridge runs headless.")
+        self.tts_engine = build_tts_engine()
+        bind_tts = getattr(self.coordinator, "bind_tts_engine", None)
+        if callable(bind_tts):
+            bind_tts(self.tts_engine)
         else:
-            self.tts_engine = build_tts_engine()
-            bind_tts = getattr(self.coordinator, "bind_tts_engine", None)
-            if callable(bind_tts):
-                bind_tts(self.tts_engine)
-            else:
-                self.coordinator.tts_engine = self.tts_engine
+            self.coordinator.tts_engine = self.tts_engine
 
     def _is_body_running(self) -> bool:
         try:

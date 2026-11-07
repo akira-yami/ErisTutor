@@ -98,8 +98,6 @@ tools/whale2api/data/
 
 # cline-bridge build artifacts (node_modules + compiled dist)
 cline-bridge/node_modules/
-cline-bridge/dist/
-src/vscode-extension/node_modules/
 
 # Vendored/generated tool copies
 src/tools/whale2api/
