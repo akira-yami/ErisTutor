@@ -22,6 +22,11 @@ MODULES = [
     # Step 3
     "llm.raw_trace_store",
     "llm.raw_trace",
+    # Step 4
+    "llm.deepseek",
+    "llm.deepseek_workers",
+    "llm.client",
+    "llm.process_manager",
     # Runtime support
     "runtime.diagnostic_logging",
     "runtime.observability",

@@ -71,3 +71,22 @@ def test_raw_trace_store(tmp_path) -> None:
     assert json.loads(restored.decode("utf-8")) == {"test": "data", "status": 200}
 
 
+def test_deepseek_models() -> None:
+    from llm.deepseek import DEEPSEEK_DEFAULT_MODEL, normalize_model
+    assert "deepseek" in DEEPSEEK_DEFAULT_MODEL
+    assert normalize_model("deepseek-chat") == DEEPSEEK_DEFAULT_MODEL
+
+
+def test_openai_compatible_client_init() -> None:
+    from llm.client import OpenAICompatibleClient
+    from llm.deepseek import DEEPSEEK_DEFAULT_MODEL
+    client = OpenAICompatibleClient(
+        base_url="https://api.deepseek.com",
+        api_key="sk-dummy",
+        model_name="deepseek-chat",
+    )
+    assert client.model_name == DEEPSEEK_DEFAULT_MODEL
+    assert client.base_url == "https://api.deepseek.com"
+
+
+
