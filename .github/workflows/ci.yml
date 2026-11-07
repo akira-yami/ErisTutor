@@ -38,5 +38,9 @@ jobs:
       - name: Import smoke test (foundation)
         run: python smoke_foundation.py
 
+      - name: Import smoke test (memory)
+        run: |
+          if (Test-Path smoke_memory.py) { python smoke_memory.py }
+
       - name: Unit tests
         run: pytest -q
