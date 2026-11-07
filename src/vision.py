@@ -252,6 +252,8 @@ class AttentionOverseer:
             self.coordinator.tts_engine = self.tts_engine
 
     def _is_body_running(self) -> bool:
+        if os.environ.get("ERIS_STANDALONE", "0").strip().lower() in {"1", "true", "yes"}:
+            return True
         try:
             result = subprocess.run(
                 ["tasklist", "/NH"],

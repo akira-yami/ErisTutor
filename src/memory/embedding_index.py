@@ -279,6 +279,8 @@ class EmbeddingIndex:
         os.makedirs(self.cache_dir, exist_ok=True)
         local_model_path = os.path.join(self.cache_dir, "config.json")
         load_path = self.cache_dir if os.path.isfile(local_model_path) else self.model_name
+        if not os.path.isdir(load_path) and "/" not in load_path:
+            load_path = f"sentence-transformers/{load_path}"
         cache_arg = None if os.path.isfile(local_model_path) else self.cache_dir
         trust_remote_code = os.getenv("ERIS_EMBEDDING_TRUST_REMOTE_CODE", "0").strip().lower() in {
             "1", "true", "yes", "on"
