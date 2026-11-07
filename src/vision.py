@@ -470,14 +470,24 @@ class AttentionOverseer:
         return procs
 
     def stop(self, reason: str = ""):
-        if not self.coordinator.running:
+        if getattr(self, "_stopped", False):
             return
+        self._stopped = True
         if reason:
             self.logger.info(reason)
-        self.coordinator.stop()
-        self.process_manager.stop()
+        try:
+            self.coordinator.stop()
+        except Exception as exc:
+            self.logger.debug("Coordinator stop error: %s", exc)
+        try:
+            self.process_manager.stop()
+        except Exception as exc:
+            self.logger.debug("ProcessManager stop error: %s", exc)
         if hasattr(self, "tts_engine") and self.tts_engine is not None:
-            self.tts_engine.shutdown()
+            try:
+                self.tts_engine.shutdown()
+            except Exception as exc:
+                self.logger.debug("TTS shutdown error: %s", exc)
         if hasattr(self, "ds2api_procs") and self.ds2api_procs:
             self.logger.info("Stopping DS2API daemons (%d instance(s))...", len(self.ds2api_procs))
             for proc in self.ds2api_procs:

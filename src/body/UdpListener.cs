@@ -656,7 +656,12 @@ public partial class UdpListener : Node2D
 	public override void _Notification(int what)
 	{
 		if (what == NotificationWMCloseRequest)
+		{
 			MarkShutdownReason("window close request");
+			CloseCharacterContextMenu();
+			StopVisionProcess();
+			GetTree().Quit();
+		}
 	}
 
 	private void UpdateMousePassthrough()
