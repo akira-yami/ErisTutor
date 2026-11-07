@@ -1,0 +1,264 @@
+{
+  "schema": "eris.learning.pack.v1",
+  "group_id": "java-di",
+  "version": "1",
+  "skill_namespace": "javadi:v1",
+  "path_id": "javadi:v1:path",
+  "title": "Dependency Injection · Java",
+  "goal": "Nhận diện dependency, truyền đối tượng từ bên ngoài và kiểm thử độc lập bằng test double.",
+  "nodes": [
+    {
+      "id": "javadi:v1:dependency",
+      "title": "Dependency là gì?",
+      "summary": "Dependency là đối tượng mà một đối tượng khác cần để thực hiện công việc.",
+      "prerequisites": [],
+      "blocks": [
+        {
+          "id": "di.dependency.meaning",
+          "kind": "explanation",
+          "title": "Ai cần ai?",
+          "text": "OrderService cần PaymentGateway để thu tiền: gateway là dependency của service. Khi service tự new gateway cụ thể, việc chọn cách thanh toán bị gắn vào chính service. Dependency Injection (DI) đưa việc tạo và chọn dependency ra bên ngoài; service nhận dependency đã được chuẩn bị. DI không đòi hỏi Spring hay một framework."
+        },
+        {
+          "id": "di.dependency.java",
+          "kind": "java",
+          "title": "Một dependency được tạo bên trong",
+          "text": "class PaymentGateway {\n    boolean charge(int amount) { return amount > 0; }\n}\n\nclass OrderService {\n    private final PaymentGateway gateway = new PaymentGateway();\n\n    boolean checkout(int amount) {\n        return gateway.charge(amount);\n    }\n}\n// OrderService vừa xử lý đơn hàng, vừa chọn gateway cụ thể.\n// Các nút tiếp theo sẽ tách hai trách nhiệm này."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "di.dependency.choice",
+          "type": "multiple_choice",
+          "prompt": "Trong ví dụ, dependency của OrderService là gì?",
+          "options": [
+            {
+              "id": "a",
+              "text": "PaymentGateway"
+            },
+            {
+              "id": "b",
+              "text": "Biến amount"
+            },
+            {
+              "id": "c",
+              "text": "Từ khóa return"
+            }
+          ],
+          "answer": "a",
+          "explanation": "OrderService gọi PaymentGateway để hoàn thành checkout; đó là đối tượng cộng tác mà service cần.",
+          "hint": "Tìm đối tượng mà checkout gọi phương thức để hoàn thành công việc."
+        }
+      ]
+    },
+    {
+      "id": "javadi:v1:constructor",
+      "title": "Constructor Injection",
+      "summary": "Truyền dependency bắt buộc qua constructor để đối tượng hợp lệ ngay từ lúc được tạo.",
+      "prerequisites": [
+        "javadi:v1:dependency"
+      ],
+      "blocks": [
+        {
+          "id": "di.constructor.meaning",
+          "kind": "explanation",
+          "title": "Nhận cộng tác viên ngay khi khởi tạo",
+          "text": "Constructor khai báo rõ những gì service cần. Field final giữ tham chiếu ổn định; Objects.requireNonNull từ chối dependency thiếu. Service chỉ biết interface PaymentGateway; bên ngoài có thể truyền gateway thật hoặc test double. DI là truyền đối tượng từ ngoài vào; dùng interface giúp thay thế implementation thuận tiện hơn."
+        },
+        {
+          "id": "di.constructor.java",
+          "kind": "java",
+          "title": "Dependency bắt buộc, khai báo tường minh",
+          "text": "interface PaymentGateway {\n    boolean charge(int amount);\n}\n\nclass OrderService {\n    private final PaymentGateway gateway;\n\n    OrderService(PaymentGateway gateway) {\n        this.gateway = java.util.Objects.requireNonNull(gateway);\n    }\n\n    boolean checkout(int amount) {\n        return gateway.charge(amount);\n    }\n}"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "di.constructor.choice",
+          "type": "multiple_choice",
+          "prompt": "Vì sao truyền gateway qua constructor thuận tiện khi kiểm thử?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Test có thể truyền gateway giả với kết quả kiểm soát được."
+            },
+            {
+              "id": "b",
+              "text": "Java tự tạo mọi dependency mà không cần code."
+            },
+            {
+              "id": "c",
+              "text": "Service không còn cần gọi gateway."
+            }
+          ],
+          "answer": "a",
+          "explanation": "Test chọn implementation tại thời điểm khởi tạo và quan sát hành vi của service mà không cần thanh toán thật.",
+          "hint": "Xét xem test có thể chọn cộng tác viên nào khi gọi new OrderService(...)."
+        },
+        {
+          "id": "di.constructor.code",
+          "type": "java",
+          "prompt": "Viết OrderService nhận PaymentGateway trong constructor, từ chối null, và chuyển nguyên amount cùng kết quả charge trong checkout. Interface và harness được backend cung cấp.",
+          "class_name": "OrderService",
+          "starter_code": "class OrderService {\n    OrderService(PaymentGateway gateway) {\n        // Lưu dependency được truyền vào.\n    }\n\n    boolean checkout(int amount) {\n        return false; // Gọi gateway thay vì cố định kết quả.\n    }\n}",
+          "tests": [
+            {
+              "id": "delegates",
+              "description": "Chuyển đúng amount tới gateway."
+            },
+            {
+              "id": "returns",
+              "description": "Giữ kết quả true/false của gateway."
+            },
+            {
+              "id": "null_guard",
+              "description": "Constructor từ chối null bằng NullPointerException."
+            }
+          ],
+          "harness": "interface PaymentGateway { boolean charge(int amount); }\nclass Harness {\n    static void report(String id, boolean ok) { System.out.println(id + \":\" + (ok ? \"PASS\" : \"FAIL\")); }\n    public static void main(String[] args) {\n        int[] seen = {-1};\n        OrderService service = new OrderService(amount -> { seen[0] = amount; return amount == 42; });\n        boolean yes = service.checkout(42);\n        report(\"delegates\", seen[0] == 42);\n        boolean no = service.checkout(7);\n        report(\"returns\", yes && !no);\n        boolean rejected = false;\n        try { new OrderService(null); } catch (NullPointerException expected) { rejected = true; }\n        report(\"null_guard\", rejected);\n    }\n}",
+          "hint": "Lưu tham số constructor vào một field final và dùng Objects.requireNonNull. checkout cần gọi charge với đúng amount rồi trả kết quả.",
+          "solution": "class OrderService {\n    private final PaymentGateway gateway;\n    OrderService(PaymentGateway gateway) {\n        this.gateway = java.util.Objects.requireNonNull(gateway);\n    }\n    boolean checkout(int amount) {\n        return gateway.charge(amount);\n    }\n}"
+        }
+      ]
+    },
+    {
+      "id": "javadi:v1:setter-field",
+      "title": "Setter / Field Injection",
+      "summary": "Hiểu thời điểm gán dependency và rủi ro trạng thái chưa sẵn sàng khi dùng setter hoặc field.",
+      "prerequisites": [
+        "javadi:v1:dependency"
+      ],
+      "blocks": [
+        {
+          "id": "di.setter.meaning",
+          "kind": "explanation",
+          "title": "Dependency được gán sau khi tạo",
+          "text": "Setter injection cho phép gán hoặc thay dependency sau constructor; cần quy định rõ điều gì xảy ra trước khi setter được gọi. Field injection gán trực tiếp vào field, thường nhờ framework, và có thể che khuất dependency đối với người gọi constructor. Với dependency bắt buộc, constructor giúp biểu đạt điều kiện khởi tạo rõ hơn. Setter phù hợp khi việc thay dependency là hành vi được chủ ý hỗ trợ."
+        },
+        {
+          "id": "di.setter.java",
+          "kind": "java",
+          "title": "Setter có guard trạng thái",
+          "text": "class OrderService {\n    private PaymentGateway gateway;\n\n    void setGateway(PaymentGateway gateway) {\n        this.gateway = java.util.Objects.requireNonNull(gateway);\n    }\n\n    boolean checkout(int amount) {\n        if (gateway == null) {\n            throw new IllegalStateException(\"Gateway chưa được gán\");\n        }\n        return gateway.charge(amount);\n    }\n}\n// Field injection: một bộ lắp ráp có thể gán field trực tiếp.\n// Annotation @Inject cần thư viện/container, không có sẵn trong Java SE."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "di.setter.choice",
+          "type": "multiple_choice",
+          "prompt": "Rủi ro nào cần xử lý khi dùng setter injection cho dependency bắt buộc?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Đối tượng có thể được dùng trước khi dependency được gán."
+            },
+            {
+              "id": "b",
+              "text": "Java cấm khai báo private field."
+            },
+            {
+              "id": "c",
+              "text": "Setter luôn tự chạy ngay sau constructor."
+            }
+          ],
+          "answer": "a",
+          "explanation": "new OrderService() chưa đảm bảo setGateway đã chạy; cần thiết kế lifecycle hoặc guard rõ ràng.",
+          "hint": "Sau new OrderService(), setter đã chắc chắn được gọi chưa?"
+        }
+      ]
+    },
+    {
+      "id": "javadi:v1:testing",
+      "title": "Unit Testing với test double",
+      "summary": "Thay dependency ngoài hệ thống bằng đối tượng có hành vi kiểm soát được trong test.",
+      "prerequisites": [
+        "javadi:v1:constructor"
+      ],
+      "blocks": [
+        {
+          "id": "di.testing.meaning",
+          "kind": "explanation",
+          "title": "Kiểm tra service, kiểm soát gateway",
+          "text": "Test double thay dependency thật trong một bài kiểm thử. Stub có thể trả kết quả cố định; fake có implementation đơn giản; spy ghi lại lời gọi. Kiểm tra cả kết quả trả về và dữ liệu chuyển tới dependency để tránh một service chỉ trả hằng số mà vẫn qua test. Ví dụ dưới dùng exception khi sai, vì Java assert chỉ hoạt động khi bật -ea."
+        },
+        {
+          "id": "di.testing.java",
+          "kind": "java",
+          "title": "Test double ghi nhận số tiền",
+          "text": "class GatewaySpy implements PaymentGateway {\n    int lastAmount = -1;\n    public boolean charge(int amount) {\n        lastAmount = amount;\n        return false;\n    }\n}\n\nclass OrderServiceTest {\n    public static void main(String[] args) {\n        GatewaySpy spy = new GatewaySpy();\n        OrderService service = new OrderService(spy);\n        boolean result = service.checkout(100);\n        if (result || spy.lastAmount != 100) {\n            throw new AssertionError(\"Sai delegation hoặc kết quả\");\n        }\n    }\n}\n// Dùng PaymentGateway và OrderService ở nút Constructor Injection."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "di.testing.choice",
+          "type": "multiple_choice",
+          "prompt": "Service luôn trả true. Test nào dễ bỏ sót lỗi này?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Chỉ kiểm tra true với một gateway luôn trả true."
+            },
+            {
+              "id": "b",
+              "text": "Kiểm tra false với gateway trả false."
+            },
+            {
+              "id": "c",
+              "text": "Kiểm tra gateway đã nhận đúng amount và được gọi."
+            }
+          ],
+          "answer": "a",
+          "explanation": "Một test chỉ mong true có thể qua dù service không dùng dependency. Cần trường hợp false và quan sát delegation.",
+          "hint": "Một service trả hằng số sẽ qua trường hợp kiểm tra nào?"
+        }
+      ]
+    },
+    {
+      "id": "javadi:v1:composition-root",
+      "title": "Composition root",
+      "summary": "Lắp ráp object graph ở điểm vào ứng dụng để logic nghiệp vụ không tự chọn implementation.",
+      "prerequisites": [
+        "javadi:v1:constructor",
+        "javadi:v1:setter-field"
+      ],
+      "blocks": [
+        {
+          "id": "di.root.meaning",
+          "kind": "explanation",
+          "title": "Tạo ở ngoài, dùng ở trong",
+          "text": "Composition root là nơi gần điểm vào ứng dụng, như main, tạo các đối tượng cụ thể và nối chúng lại. Dùng new ở đây hoàn toàn phù hợp với DI. Cùng một OrderService có thể nhận gateway thật trong ứng dụng hoặc test double trong test. DI container tự động hóa việc lắp ráp; nó không phải điều kiện bắt buộc để dùng DI."
+        },
+        {
+          "id": "di.root.java",
+          "kind": "java",
+          "title": "Lắp ráp bằng Java thuần",
+          "text": "class DemoGateway implements PaymentGateway {\n    public boolean charge(int amount) {\n        return amount > 0; // Chỉ minh họa, không thanh toán thật.\n    }\n}\n\nclass Application {\n    public static void main(String[] args) {\n        PaymentGateway gateway = new DemoGateway();\n        OrderService orders = new OrderService(gateway);\n        System.out.println(orders.checkout(100));\n    }\n}\n// Dùng PaymentGateway và OrderService từ nút Constructor Injection.\n// main chọn implementation; OrderService chỉ xử lý đơn hàng."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "di.root.choice",
+          "type": "multiple_choice",
+          "prompt": "Đặt new DemoGateway() ở đâu để OrderService không tự chọn implementation?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Trong main hoặc composition root rồi truyền vào service."
+            },
+            {
+              "id": "b",
+              "text": "Trong checkout mỗi khi nhận một đơn hàng."
+            },
+            {
+              "id": "c",
+              "text": "Trong một static field cố định bên trong OrderService."
+            }
+          ],
+          "answer": "a",
+          "explanation": "Điểm lắp ráp quyết định implementation và truyền dependency vào đối tượng nghiệp vụ.",
+          "hint": "Tách nơi chọn implementation khỏi nơi xử lý đơn hàng."
+        }
+      ]
+    }
+  ]
+}

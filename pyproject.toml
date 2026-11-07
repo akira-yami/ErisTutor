@@ -3,7 +3,7 @@ name = "eristutor"
 version = "0.1.0"
 description = "ErisTutor — clean incremental rebuild of the Eris runtime, layer by layer."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["requests>=2.28.0"]
 
 [project.optional-dependencies]
 screen = [
@@ -23,6 +23,7 @@ telemetry = [
   "Pillow",
   "psutil",
 ]
+math = ["numpy>=2.0.0", "sympy", "matplotlib"]
 
 [tool.setuptools]
 py-modules = ["eris_secrets", "failure_meta", "secret_versions"]
@@ -40,6 +41,8 @@ exclude = ["tests*", "assets*"]
 [tool.setuptools.package-data]
 evals = ["*.json"]
 "experiments.emergence" = ["scenarios/*.yaml"]
+"runtime.learning_canvas" = ["packs/*.json"]
+"native.uiaccess_broker" = ["*.manifest", "*.ps1"]
 
 [tool.ruff]
 target-version = "py311"
