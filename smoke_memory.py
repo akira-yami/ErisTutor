@@ -40,6 +40,8 @@ MODULES = [
     "memory.canonical_long_term",
     "memory.memory_retrieval_engine",
     "memory.memory_packet_builder",
+    # Step 5a — embedding index (numpy only at import; torch/transformers lazy)
+    "memory.embedding_index",
 ]
 
 failed = []
