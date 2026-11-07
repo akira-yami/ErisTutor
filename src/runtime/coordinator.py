@@ -105,6 +105,12 @@ class RuntimeCoordinator(
             health_registry=self.subsystem_health_registry,
             logger=self.logger,
         )
+        try:
+            from runtime.stage_event_bus import StageEventBus
+
+            self.stage_event_bus = StageEventBus(transport=transport, logger=self.logger)
+        except Exception:
+            self.stage_event_bus = None
         self.incoming_dispatcher = IncomingMessageDispatcher(
             self,
             settings=self.runtime_policy_settings.protocol,

@@ -3,7 +3,8 @@
   "FileReferences": {
     "Moc": "infj.moc3",
     "Textures": [
-      "infj.2048/texture_00.png"
+      "infj.2048/texture_00.png",
+      "infj.2048/lip-hires.png"
     ],
     "Physics": "infj.physics3.json",
     "DisplayInfo": "infj.cdi3.json",

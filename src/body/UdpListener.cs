@@ -223,6 +223,8 @@ public partial class UdpListener : Node2D
 	private string _latestIdentityRuntimeJson = "";
 	private const string IdentityRuntimeStatePath = "user://identity_runtime_state.json";
 	private const string LegacyDepthV2StatePath = "user://depth_v2_state.json";
+	private const string CharacterScaleStatePath = "user://character_scale.txt";
+	private float _characterScale = 1.0f;
 	private string _latestHardeningStatusJson = "";
 	private string _lastPanelPacketId = "";
 	private bool _grabModeArmed = false;
@@ -413,6 +415,7 @@ public partial class UdpListener : Node2D
 		_body.GlobalPosition = startPos;
 
 		_spriteHalfSize = ((RectangleShape2D)cs.Shape).Size / 2;
+		InitializeCharacterScale();
 
 		// Đặt nhân vật sát đáy màn hình ngay từ đầu, không cần rơi
 		Vector2 screenSize = GetViewportRect().Size;
@@ -1046,6 +1049,17 @@ public partial class UdpListener : Node2D
 
 		if (!mouseEvent.Pressed)
 			return;
+
+		if (mouseEvent.Pressed && (mouseEvent.ButtonIndex == MouseButton.WheelUp || mouseEvent.ButtonIndex == MouseButton.WheelDown))
+		{
+			if (!TryGetInteractivePanelCaptureRect(mouseEvent.Position, out _) && IsMouseOverCharacter(mouseEvent.Position))
+			{
+				float delta = mouseEvent.ButtonIndex == MouseButton.WheelUp ? 0.05f : -0.05f;
+				AdjustCharacterScale(delta);
+				GetViewport().SetInputAsHandled();
+				return;
+			}
+		}
 
 		if (mouseEvent.ButtonIndex == MouseButton.Right)
 		{
@@ -3978,12 +3992,75 @@ public partial class UdpListener : Node2D
 			ScheduleTransientOverlayRefresh();
 	}
 
+	private void InitializeCharacterScale()
+	{
+		_characterScale = ReadSavedCharacterScale();
+		if (_avatar != null)
+			ApplyCharacterScale(_characterScale);
+	}
+
+	private void AdjustCharacterScale(float delta)
+	{
+		if (_isLive2DMode)
+		{
+			SendLive2DScaleDelta(delta);
+			return;
+		}
+
+		_characterScale = Mathf.Clamp(_characterScale + delta, 0.2f, 3.0f);
+		ApplyCharacterScale(_characterScale);
+		SaveCharacterScale(_characterScale);
+	}
+
+	private void ApplyCharacterScale(float scale)
+	{
+		_characterScale = Mathf.Clamp(scale, 0.2f, 3.0f);
+		if (_avatar != null)
+		{
+			float flipX = Mathf.Sign(_avatar.Scale.X);
+			if (Mathf.IsZeroApprox(flipX)) flipX = 1f;
+			_avatar.Scale = new Vector2(flipX * _characterScale, _characterScale);
+		}
+	}
+
+	private void SaveCharacterScale(float scale)
+	{
+		try
+		{
+			string path = ProjectSettings.GlobalizePath(CharacterScaleStatePath);
+			Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");
+			File.WriteAllText(path, scale.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture), Encoding.UTF8);
+		}
+		catch (Exception ex)
+		{
+			RunLogger.LogErr($"[Scale] Lỗi lưu character scale: {ex.Message}");
+		}
+	}
+
+	private float ReadSavedCharacterScale()
+	{
+		try
+		{
+			string path = ProjectSettings.GlobalizePath(CharacterScaleStatePath);
+			if (File.Exists(path))
+			{
+				string text = File.ReadAllText(path, Encoding.UTF8).Trim();
+				if (float.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float val))
+					return Mathf.Clamp(val, 0.2f, 3.0f);
+			}
+		}
+		catch
+		{
+		}
+		return 1.0f;
+	}
+
 	private bool IsMouseOverCharacter(Vector2 mousePosition)
 	{
 		if (IsMouseOverLive2DWindow(mousePosition))
 			return true;
 
-		Vector2 halfSize = _spriteHalfSize;
+		Vector2 halfSize = _spriteHalfSize * _characterScale;
 		Rect2 hitRect = new(_body.GlobalPosition - halfSize, halfSize * 2f);
 		return hitRect.HasPoint(mousePosition);
 	}
@@ -4461,9 +4538,9 @@ public partial class UdpListener : Node2D
 		{
 			if (_avatar.Animation != "stand_walk") _avatar.Play("stand_walk");
 			float scaleX = _climbUpWallX > _body.Position.X ? -1f : 1f;
-			_avatar.Scale = new Vector2(scaleX, 1f);
+			_avatar.Scale = new Vector2(scaleX * _characterScale, _characterScale);
 			_bubble.Scale = new Vector2(scaleX, 1f);
-			_bubble.Position = new Vector2(_bubbleBasePos.X * scaleX, _bubbleBasePos.Y);
+			_bubble.Position = new Vector2(_bubbleBasePos.X * scaleX * _characterScale, _bubbleBasePos.Y * _characterScale);
 			return;
 		}
 		if (_climbPhase == ClimbPhase.Up || _climbPhase == ClimbPhase.Down)
@@ -4471,9 +4548,9 @@ public partial class UdpListener : Node2D
 			if (_avatar.Animation != "climb") _avatar.Play("climb");
 			float wallX = _climbPhase == ClimbPhase.Up ? _climbUpWallX : _climbDownWallX;
 			float scaleX = wallX < GetViewportRect().Size.X / 2f ? 1f : -1f;
-			_avatar.Scale = new Vector2(scaleX, 1f);
+			_avatar.Scale = new Vector2(scaleX * _characterScale, _characterScale);
 			_bubble.Scale = new Vector2(scaleX, 1f);
-			_bubble.Position = new Vector2(_bubbleBasePos.X * scaleX, _bubbleBasePos.Y);
+			_bubble.Position = new Vector2(_bubbleBasePos.X * scaleX * _characterScale, _bubbleBasePos.Y * _characterScale);
 			return;
 		}
 		if (_climbPhase == ClimbPhase.Top || _climbPhase == ClimbPhase.TopHold)
@@ -4511,9 +4588,9 @@ public partial class UdpListener : Node2D
 	{
 		_facingDir = facingDir >= 0 ? 1 : -1;
 		float flipX = _facingDir == 1 ? -1f : 1f;
-		_avatar.Scale = new Vector2(flipX, 1f);
+		_avatar.Scale = new Vector2(flipX * _characterScale, _characterScale);
 		_bubble.Scale = new Vector2(flipX, 1f);
-		_bubble.Position = new Vector2(_bubbleBasePos.X * flipX, _bubbleBasePos.Y);
+		_bubble.Position = new Vector2(_bubbleBasePos.X * flipX * _characterScale, _bubbleBasePos.Y * _characterScale);
 	}
 
 	private void ApplyFacingForCurrentAction()
@@ -6836,7 +6913,7 @@ public partial class UdpListener : Node2D
 					_currentAction = "stand";
 					_isWalking     = false;
 					_climbTopTargetX = float.NaN;
-					_avatar.Scale  = Vector2.One;
+					_avatar.Scale  = new Vector2(_characterScale, _characterScale);
 					_bubble.Scale  = Vector2.One;
 				}
 				break;
@@ -6864,7 +6941,7 @@ public partial class UdpListener : Node2D
 		else
 		{
 			_isWalking = false;
-			_avatar.Scale = new Vector2(1f, 1f);
+			_avatar.Scale = new Vector2(_characterScale, _characterScale);
 			_avatar.Play(animation);
 			GD.Print($"[Anim] Chế độ đi bộ TẮT. Đang phát: {animation}");
 		}

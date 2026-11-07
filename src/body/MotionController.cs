@@ -608,9 +608,11 @@ public sealed class MotionController
 
     private void ApplyFlip(AnimatedSprite2D avatar, Control bubble, float scaleX)
     {
-        avatar.Scale = new Vector2(scaleX, 1f);
+        float scaleY = Mathf.Abs(avatar.Scale.Y);
+        if (Mathf.IsZeroApprox(scaleY)) scaleY = 1f;
+        avatar.Scale = new Vector2(scaleX * scaleY, scaleY);
         bubble.Scale = new Vector2(scaleX, 1f);
-        bubble.Position = new Vector2(_bubbleBasePos.X * scaleX, _bubbleBasePos.Y);
+        bubble.Position = new Vector2(_bubbleBasePos.X * scaleX * scaleY, _bubbleBasePos.Y * scaleY);
     }
 
     private static string BuildClingMarker(float clingChance)
