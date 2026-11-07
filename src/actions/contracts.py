@@ -10,6 +10,8 @@ VALID_SYSTEM_ACTION_LIST = (
     "get_local_time",
     "get_now_playing",
     "focus_window",
+    "click_mouse",
+    "type_text",
     "open_url",
     "set_volume",
     "play_pause_media",
@@ -136,7 +138,7 @@ class ActionExecutionResult:
     def to_public_meta(self) -> dict[str, Any]:
         return {
             "action_name": self.action_name,
-            "action_input": self.action_input,
+            "action_input": "" if self.action_name == "type_text" else self.action_input,
             "success": bool(self.success),
             "status": self.status.value if isinstance(self.status, ActionExecutionStatus) else str(self.status),
             "public_mode": self.public_mode,

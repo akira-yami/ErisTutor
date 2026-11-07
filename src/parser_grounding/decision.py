@@ -1,22 +1,13 @@
 import json
-import os
 import re
-from llm.json_sanitizer import strip_reasoning_envelope
 import unicodedata
 
 from actions.contracts import VALID_SYSTEM_ACTIONS
+from actions.capability_registry import encode_capability_arguments, validate_capability_arguments
 from failure_meta import normalize_failure_meta
-
-VALID_ANIMATIONS = {
-    "stand", "sit_down", "sit", "sit_up", "read", "stand_walk",
-    "piano", "clone", "divine", "hop", "jump", "sleep", "sad", "food",
-    "affection", "climb", "climb_top", "air_swing_l", "air_swing_r",
-}
-
-
-def _no_fallback_mode_enabled() -> bool:
-    raw = os.getenv("ERIS_NO_FALLBACK_MODE", "")
-    return raw.strip().lower() in {"1", "true", "yes", "on", "y"}
+from llm.contracts import VALID_ANIMATIONS
+from llm.json_sanitizer import strip_reasoning_envelope
+from llm.no_fallback_policy import no_fallback_mode_enabled
 
 # Model thường mô tả biểu cảm bằng từ ngữ semantic (soft_smile, subtle_apology)
 # trong field ``animation`` dù Godot chỉ hiểu pose vật lý như stand/read. Thay vì
@@ -437,6 +428,7 @@ class ParserGroundingMixin:
             "parse_mode": final_parse_mode,
             "system_action": data.get("system_action", ""),
             "action_input": data.get("action_input", ""),
+            "capability_arguments": data.get("capability_arguments"),
             "motion_intent": data.get("motion_intent", ""),
             "motion_target_x": data.get("motion_target_x", target_x),
             "motion_facing": data.get("motion_facing", direction),
@@ -1379,9 +1371,22 @@ class ParserGroundingMixin:
             bounce_action = ""
         system_action = self._sanitize_system_action(decision.get("system_action", ""))
         raw_action_input = str(decision.get("action_input", "")).strip()
+        capability_arguments = decision.get("capability_arguments")
         # Project patch/task cần giữ newline và JSON dài. Các action desktop vẫn
         # giữ cap nhỏ để model không nhét một cuốn tiểu thuyết vào ô URL.
-        if system_action in {"project_apply_patch", "project_execute_task"}:
+        if system_action in {"click_mouse", "type_text"}:
+            if capability_arguments is None and len(raw_action_input) <= 16000:
+                try:
+                    capability_arguments = json.loads(raw_action_input)
+                except ValueError:
+                    pass
+            valid, _ = validate_capability_arguments(system_action, capability_arguments)
+            if valid:
+                action_input = encode_capability_arguments(system_action, capability_arguments)
+            else:
+                system_action = ""
+                action_input = ""
+        elif system_action in {"project_apply_patch", "project_execute_task"}:
             action_input = raw_action_input[:120000]
         elif system_action in {
             "project_run_command", "project_run_tests", "project_package_patch",
@@ -1392,6 +1397,10 @@ class ParserGroundingMixin:
             action_input = self._normalize_salvaged_text(raw_action_input)[:280]
         if not system_action:
             action_input = ""
+        if not isinstance(capability_arguments, dict) or not (
+            system_action and validate_capability_arguments(system_action, capability_arguments)[0]
+        ):
+            capability_arguments = None
 
         target_x = self._sanitize_target_x(decision.get("target_x", -1.0))
 
@@ -1488,6 +1497,7 @@ class ParserGroundingMixin:
             "parse_mode": parse_mode,
             "system_action": system_action,
             "action_input": action_input,
+            "capability_arguments": capability_arguments,
             "motion_intent": motion_intent,
             "motion_target_x": motion_target_x,
             "motion_facing": motion_facing,
@@ -1507,7 +1517,7 @@ class ParserGroundingMixin:
 
     def _salvage_non_json_response(self, cleaned: str, user_hint: str = ""):
         text = cleaned.strip()
-        if _no_fallback_mode_enabled():
+        if no_fallback_mode_enabled():
             return self._finalize_decision({
                 **self.fallback,
                 "text": "",
