@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ErisTutor\\Eris.csproj": {}
+    "C:\\Users\\Gtvkun\\Documents\\GitHub\\ErisTutor\\Eris.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ErisTutor\\Eris.csproj": {
+    "C:\\Users\\Gtvkun\\Documents\\GitHub\\ErisTutor\\Eris.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ErisTutor\\Eris.csproj",
+        "projectUniqueName": "C:\\Users\\Gtvkun\\Documents\\GitHub\\ErisTutor\\Eris.csproj",
         "projectName": "Eris",
-        "projectPath": "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ErisTutor\\Eris.csproj",
-        "packagesPath": "C:\\Users\\ADMIN\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ErisTutor\\.godot\\mono\\temp\\obj\\",
+        "projectPath": "C:\\Users\\Gtvkun\\Documents\\GitHub\\ErisTutor\\Eris.csproj",
+        "packagesPath": "C:\\Users\\Gtvkun\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Gtvkun\\Documents\\GitHub\\ErisTutor\\.godot\\mono\\temp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\ADMIN\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Gtvkun\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -54,6 +54,11 @@
               "target": "Package",
               "version": "[4.7.2, )",
               "autoReferenced": true
+            },
+            "GodotSharpEditor": {
+              "target": "Package",
+              "version": "[4.7.2, )",
+              "autoReferenced": true
             }
           },
           "imports": [
@@ -70,15 +75,15 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
+              "version": "[8.0.23, 8.0.23]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
+              "version": "[8.0.23, 8.0.23]"
             },
             {
               "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.22, 8.0.22]"
+              "version": "[8.0.23, 8.0.23]"
             }
           ],
           "frameworkReferences": {
@@ -86,7 +91,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
