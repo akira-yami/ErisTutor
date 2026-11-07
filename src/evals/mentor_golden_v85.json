@@ -1,0 +1,235 @@
+[
+  {
+    "name": "non_engineering_silent",
+    "user_text": "Hôm nay ăn gì?",
+    "expected": {
+      "relevant": false,
+      "mode": "none",
+      "primary_role": "none"
+    }
+  },
+  {
+    "name": "explicit_learning_mentor",
+    "user_text": "Chỉ tôi cách debug call flow code này.",
+    "expected": {
+      "relevant": true,
+      "mode": "explain",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "learning_with_bad_flow",
+    "flow_findings": [
+      "patch_before_inspection"
+    ],
+    "user_text": "Chỉ tôi tại sao lỗi code này phải inspect trước.",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "verification_supervisor",
+    "user_text": "Review diff và test code này giúp tôi kiểm tra.",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "fast_once_companion",
+    "user_text": "Fix code đi, làm luôn.",
+    "expected": {
+      "relevant": true,
+      "mode": "discuss",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "repeated_blind_warn",
+    "pre_observe": [
+      "Fix code đi, làm luôn.",
+      "Fix code đi, làm luôn.",
+      "Fix code đi, làm luôn.",
+      "Fix code đi, làm luôn."
+    ],
+    "user_text": "Fix code đi, làm luôn.",
+    "expected": {
+      "relevant": true,
+      "mode": "warn",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "patch_before_inspection_challenge",
+    "flow_findings": [
+      "patch_before_inspection"
+    ],
+    "user_text": "Lỗi code này giờ sao?",
+    "expected": {
+      "relevant": true,
+      "mode": "challenge",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "heated_bug_companion_first",
+    "flow_findings": [
+      "patch_before_inspection"
+    ],
+    "user_text": "dcm bug gì nữa vậy",
+    "expected": {
+      "relevant": true,
+      "mode": "challenge",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "scope_expansion_hint",
+    "flow_findings": [
+      "scope_expansion"
+    ],
+    "user_text": "Task code này scope sao rồi?",
+    "expected": {
+      "relevant": true,
+      "mode": "hint",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "missing_verification_hint",
+    "flow_findings": [
+      "no_structured_verification"
+    ],
+    "user_text": "Code này ổn chưa?",
+    "expected": {
+      "relevant": true,
+      "mode": "hint",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "review_not_seen_hint",
+    "flow_findings": [
+      "review_not_observed"
+    ],
+    "user_text": "Task này reviewer sao rồi?",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "status_check_supervisor",
+    "flow_findings": [],
+    "user_text": "GitPilot sửa gì rồi, xong chưa?",
+    "expected": {
+      "relevant": true,
+      "mode": "discuss",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "grounded_hypothesis_companion",
+    "user_text": "Tôi nghĩ lỗi do src/runtime/a.py gọi service sai lifecycle, có phải vậy không?",
+    "expected": {
+      "relevant": true,
+      "mode": "discuss",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "candidate_misconception_guide",
+    "user_text": "Test pass là xong, khỏi review diff code nữa.",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "heated_non_code_silent",
+    "user_text": "dcm nóng quá",
+    "expected": {
+      "relevant": false,
+      "mode": "none",
+      "primary_role": "none"
+    }
+  },
+  {
+    "name": "severe_flow_plus_blind_warn",
+    "flow_findings": [
+      "repeated_test_failure"
+    ],
+    "user_text": "Fix code đi, làm luôn.",
+    "expected": {
+      "relevant": true,
+      "mode": "warn",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "explicit_review_request",
+    "user_text": "Kiểm tra diff và regression test của repo này.",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "ordinary_code_discussion",
+    "user_text": "Runtime code này đang dùng path nào?",
+    "expected": {
+      "relevant": true,
+      "mode": "discuss",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "old_flow_not_current",
+    "flow_findings": [
+      "scope_expansion"
+    ],
+    "flow_age_seconds": 28800,
+    "user_text": "Bug code này giờ nên đọc gì?",
+    "expected": {
+      "relevant": true,
+      "mode": "discuss",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  },
+  {
+    "name": "review_question_with_flow",
+    "flow_findings": [
+      "scope_expansion"
+    ],
+    "user_text": "Review task này giúp tôi xem scope có phình không.",
+    "expected": {
+      "relevant": true,
+      "mode": "guide",
+      "primary_role": "none",
+      "delivery_owner": "adaptive_companion"
+    }
+  }
+]
