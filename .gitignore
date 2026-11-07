@@ -1,0 +1,119 @@
+# Python build/test debris
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.tmp_pytest/
+embedding_model/
+/src/paraphrase-multilingual-MiniLM-L12-v2/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and packaging
+.venv/
+venv/
+portable_python/
+/build/**
+!/build/
+!/build/.gdignore
+!/build/*.ps1
+!/build/*.spec
+dist/
+node_modules/
+*.tsbuildinfo
+*.egg-info/
+/ErisManager.exe
+/ErisSetup.exe
+*.vsix
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!env-examples/.env.*.example
+config/
+!/config/
+/config/*
+!/config/SECRETS_SETUP.md
+!/config/example.json
+!/config/low_level_speech_policy.yaml
+!/config/secrets.example.json
+# Gateway configuration package contains Go source, not local configuration.
+!/tools/whale2api/internal/config/
+/tools/whale2api/internal/config/*
+!/tools/whale2api/internal/config/*.go
+memory_core/
+data/subject_core/capability_keyring/
+
+# Runtime state and generated output
+.cache/
+.eris_home/
+.eris_state/
+.v57_runs/
+v57_reports/
+scratch/
+release/
+logs/
+*.log
+state/
+runtime_state/
+cache/
+*.tmp
+.tmp_*.py
+*.bak
+*.zip
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+/test.json
+/test_*.py
+/test.mp3
+/test.mp3.import
+/test_start.txt
+/output*.mp3
+/output*.mp3.import
+/.git-ls-tree.txt
+
+
+# Editors / OS / Godot build artifacts
+.godot/
+*.pdb
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Third-party tools
+tools/WebAI-to-API/
+tools/WebAI-to-API-2/
+tools/reference-repos/
+tools/whale2api/*.exe
+tools/whale2api/accounts.csv
+tools/whale2api/accounts.template.csv
+tools/whale2api/*.password.translation
+tools/whale2api/data/
+
+# cline-bridge build artifacts (node_modules + compiled dist)
+cline-bridge/node_modules/
+cline-bridge/dist/
+src/vscode-extension/node_modules/
+
+# Vendored/generated tool copies
+src/tools/whale2api/
+services/gitpilot/.git-disabled/
+eris-code/
+
+# Eris runtime data (specs duoc tao ra, khong phai steering)
+.eris/specs/
+
+# Local implementation worktrees
+.worktrees/
+
+# Source snapshots for external AI review
+/exports/
+output/
+tmp/
