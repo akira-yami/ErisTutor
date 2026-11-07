@@ -29,8 +29,13 @@ def _bool_env(name: str, default: bool) -> bool:
     return raw.strip().lower() not in {"", "0", "false", "off", "no", "none"}
 
 
+DEFAULT_LIVE2D_SCALE = 0.85
+MIN_LIVE2D_SCALE = 0.55
+MAX_LIVE2D_SCALE = 1.35
+
+
 def read_persisted_scale() -> float | None:
-    """Đọc scale Live2D đã lưu từ phiên chạy trước nếu có."""
+    """Đọc scale Live2D đã lưu từ phiên chạy trước nếu có, đảm bảo kích thước ổn định."""
     targets: list[Path] = []
     state_dir = os.getenv("ERIS_STATE_DIR")
     if state_dir:
@@ -45,15 +50,17 @@ def read_persisted_scale() -> float | None:
         try:
             if path.is_file():
                 val = float(path.read_text(encoding="utf-8").strip())
-                if 0.2 <= val <= 3.0:
+                if MIN_LIVE2D_SCALE <= val <= MAX_LIVE2D_SCALE:
                     return val
+                return DEFAULT_LIVE2D_SCALE
         except Exception:
             pass
-    return None
+    return DEFAULT_LIVE2D_SCALE
 
 
 def save_persisted_scale(scale: float) -> None:
     """Lưu scale Live2D để giữ nguyên khi khởi động lại Eris."""
+    clamped_scale = max(MIN_LIVE2D_SCALE, min(MAX_LIVE2D_SCALE, float(scale)))
     targets: list[Path] = []
     state_dir = os.getenv("ERIS_STATE_DIR")
     if state_dir:
@@ -67,7 +74,7 @@ def save_persisted_scale(scale: float) -> None:
     for path in targets:
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(f"{scale:.3f}", encoding="utf-8")
+            path.write_text(f"{clamped_scale:.3f}", encoding="utf-8")
         except Exception:
             pass
 
@@ -81,9 +88,9 @@ class Live2DBodyConfig:
     backend_port: int = 4243
     body_host: str = "127.0.0.1"
     body_port: int = 4242
-    width: int = 520
-    height: int = 900
-    scale: float = 1.0
+    width: int = 600
+    height: int = 960
+    scale: float = DEFAULT_LIVE2D_SCALE
     offset_x: float = 0.0
     offset_y: float = -0.02
     transparent: bool = True
@@ -109,7 +116,7 @@ class Live2DBodyConfig:
         default_model = project_root / "assets" / "live2d" / "infj" / "infj.model3.json"
         model_path = Path(os.getenv("ERIS_LIVE2D_MODEL", str(default_model))).expanduser()
         persisted_scale = read_persisted_scale()
-        default_scale = persisted_scale if persisted_scale is not None else 1.0
+        default_scale = persisted_scale if persisted_scale is not None else DEFAULT_LIVE2D_SCALE
         return cls(
             model_path=model_path,
             listen_host=os.getenv("ERIS_LIVE2D_HOST", "127.0.0.1").strip() or "127.0.0.1",
@@ -118,9 +125,9 @@ class Live2DBodyConfig:
             backend_port=max(1, min(65535, _int_env("ERIS_LIVE2D_BACKEND_PORT", 4243))),
             body_host=os.getenv("ERIS_LIVE2D_BODY_HOST", "127.0.0.1").strip() or "127.0.0.1",
             body_port=max(1, min(65535, _int_env("ERIS_LIVE2D_BODY_PORT", 4242))),
-            width=max(320, _int_env("ERIS_LIVE2D_WIDTH", 520)),
-            height=max(480, _int_env("ERIS_LIVE2D_HEIGHT", 900)),
-            scale=max(0.2, min(3.0, _float_env("ERIS_LIVE2D_SCALE", default_scale))),
+            width=max(400, _int_env("ERIS_LIVE2D_WIDTH", 600)),
+            height=max(600, _int_env("ERIS_LIVE2D_HEIGHT", 960)),
+            scale=max(0.55, min(1.35, _float_env("ERIS_LIVE2D_SCALE", default_scale))),
             offset_x=max(-2.0, min(2.0, _float_env("ERIS_LIVE2D_OFFSET_X", 0.0))),
             offset_y=max(-2.0, min(2.0, _float_env("ERIS_LIVE2D_OFFSET_Y", -0.02))),
             transparent=_bool_env("ERIS_LIVE2D_TRANSPARENT", True),

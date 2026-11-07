@@ -14,7 +14,13 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .config import Live2DBodyConfig, save_persisted_scale
+from .config import (
+    DEFAULT_LIVE2D_SCALE,
+    MAX_LIVE2D_SCALE,
+    MIN_LIVE2D_SCALE,
+    Live2DBodyConfig,
+    save_persisted_scale,
+)
 from .asset_playback import NativeAssetPlayback
 from .gaze import GazeController, GazeSample
 from .layer_visibility import Live2DLayerVisibility
@@ -131,8 +137,7 @@ class Live2DRenderer:
             model.LoadModelJson(str(model_path))
             fb_width, fb_height = glfw.get_framebuffer_size(window)
             model.Resize(max(1, fb_width), max(1, fb_height))
-            model.SetScale(self._runtime_scale)
-            model.SetOffset(self.config.offset_x, self.config.offset_y)
+            self._apply_model_scale_and_offset(model, self._runtime_scale)
             model.SetAutoBlinkEnable(True)
             model.SetAutoBreathEnable(True)
             self._parameter_indices = self._read_parameter_indices(model)
@@ -819,22 +824,35 @@ class Live2DRenderer:
         self._mouse_replay_guard_until = now + 0.08
         return self._bridge.replay_mouse_button_down(button_name)
 
+    def _compute_head_anchor_offset_y(self, scale: float) -> float:
+        """Bù trừ tọa độ Y theo tỉ lệ scale để đỉnh đầu không bị cắt ngang cửa sổ khi phóng to."""
+        head_compensation = -0.65 * (float(scale) - DEFAULT_LIVE2D_SCALE)
+        return self.config.offset_y + head_compensation
+
+    def _apply_model_scale_and_offset(self, model: Any, scale: float) -> None:
+        if model is None:
+            return
+        target_scale = max(MIN_LIVE2D_SCALE, min(MAX_LIVE2D_SCALE, round(float(scale), 3)))
+        target_offset_y = self._compute_head_anchor_offset_y(target_scale)
+        try:
+            model.SetScale(target_scale)
+            model.SetOffset(self.config.offset_x, target_offset_y)
+        except Exception as exc:
+            print(f"[Live2D][WARN] Không cập nhật được scale/offset model: {exc}", flush=True)
+
     def _apply_scale_delta(self, model: Any, delta: float) -> None:
-        target = max(0.2, min(3.0, round(self._runtime_scale + delta, 3)))
+        target = max(MIN_LIVE2D_SCALE, min(MAX_LIVE2D_SCALE, round(self._runtime_scale + delta, 3)))
         if abs(target - self._runtime_scale) < 1e-4:
             return
         self._runtime_scale = target
-        if model is not None:
-            try:
-                model.SetScale(self._runtime_scale)
-            except Exception as exc:
-                print(f"[Live2D][WARN] Không đặt được scale model: {exc}", flush=True)
+        self._apply_model_scale_and_offset(model, self._runtime_scale)
         save_persisted_scale(self._runtime_scale)
 
     def _install_callbacks(self, glfw: Any, window: Any, model: Any) -> None:
         def on_framebuffer_size(_window: Any, width: int, height: int) -> None:
             if width > 0 and height > 0:
                 model.Resize(width, height)
+                self._apply_model_scale_and_offset(model, self._runtime_scale)
 
         def on_key(_window: Any, key: int, _scancode: int, action: int, _mods: int) -> None:
             if action != glfw.PRESS:
@@ -845,6 +863,9 @@ class Live2DRenderer:
                 model.StopAllMotions()
                 model.ResetPose()
                 model.ResetParameters()
+                self._runtime_scale = DEFAULT_LIVE2D_SCALE
+                self._apply_model_scale_and_offset(model, self._runtime_scale)
+                save_persisted_scale(self._runtime_scale)
             elif key in (glfw.KEY_EQUAL, glfw.KEY_KP_ADD):
                 self._apply_scale_delta(model, 0.1)
             elif key in (glfw.KEY_MINUS, glfw.KEY_KP_SUBTRACT):

@@ -29,7 +29,7 @@ class CanvasCapability:
                 if operation == "learning_history":
                     return {"status": "completed", "learning_continuity": canvas.continuity.snapshot(),
                             "graph_workspace": canvas.graphs.snapshot()}
-                if operation in {"graph_create", "graph_expand", "graph_select", "graph_prefetch", "graph_resume"}:
+                if operation in {"graph_create", "graph_expand", "graph_select", "graph_prefetch", "graph_resume", "graph_delete", "delete_group"}:
                     current = canvas.graphs.snapshot()
                     base = arguments.get("base_graph_revision", current["revision"])
                     if operation == "graph_create":
@@ -78,6 +78,11 @@ class CanvasCapability:
                             node = canvas.focus.snapshot()["node_id"]
                             canvas.continuity.visit(canvas.pack.group_id, node, canvas.pack.node(node)["title"],
                                 subject_title=canvas.pack.path.title, action="resumed")
+                    elif operation in {"graph_delete", "delete_group"}:
+                        target_id = arguments.get("group_id", "")
+                        target_title = arguments.get("title", "")
+                        success = canvas.graphs.delete(group_id=target_id, title=target_title, base_revision=base)
+                        graph_update = {"deleted": bool(success), "group_id": target_id, "title": target_title}
                 elif operation == "open_group":
                     if arguments.get("group_id") != canvas.pack.group_id:
                         raise ValueError("unknown_canvas_group")
@@ -96,7 +101,7 @@ class CanvasCapability:
                 # không gửi state/auto-open web. Panel mở: giữ protocol/UI cũ.
                 active = canvas.is_active()
                 packet = canvas.state_packet() if active or operation == "snapshot_full" else None
-                if active and operation in {"open_group", "focus", "accept_focus", "graph_create", "graph_expand", "graph_select", "graph_resume", "graph_prefetch"}:
+                if active and operation in {"open_group", "focus", "accept_focus", "graph_create", "graph_expand", "graph_select", "graph_resume", "graph_prefetch", "graph_delete", "delete_group"}:
                     packet["open_panel"] = False
                     accepted = self.host._send_runtime_json(packet, channel="learning_canvas")
                     if accepted is False:

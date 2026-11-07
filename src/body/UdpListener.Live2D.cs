@@ -50,8 +50,8 @@ public partial class UdpListener
 	[Export] public string Live2DModelPath = "src/assets/live2d/infj/infj.model3.json";
 	[Export(PropertyHint.Range, "1,65535,1")] public int Live2DStagePort = 4252;
 	[Export] public bool RememberBodyRendererMode = true;
-	[Export(PropertyHint.Range, "320,1600,1")] public int Live2DWindowWidth = 520;
-	[Export(PropertyHint.Range, "480,1800,1")] public int Live2DWindowHeight = 900;
+	[Export(PropertyHint.Range, "320,1600,1")] public int Live2DWindowWidth = 600;
+	[Export(PropertyHint.Range, "480,1800,1")] public int Live2DWindowHeight = 960;
 	[Export(PropertyHint.Range, "0.20,0.50,0.01")] public float Live2DBubbleAnchorY = 0.34f;
 	[Export(PropertyHint.Range, "0.05,0.75,0.01")] public float Live2DBubbleSideAnchorY = 0.18f;
 	[Export(PropertyHint.Range, "8,96,1")] public float Live2DBubbleGap = 24f;

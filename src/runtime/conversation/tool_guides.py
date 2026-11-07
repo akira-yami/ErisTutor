@@ -105,7 +105,7 @@ TOOL_GUIDES["canvas"] = (
     "có thể nghiên cứu sâu đúng nhánh thay vì toàn cây; Writer trò chuyện không tự duyệt Gemini. "
     "operation=snapshot đọc trạng thái, operation=open_group,group_id=java-di mở bài Java cũ; "
     "operation=focus,node_id đề xuất focus Java; operation=accept_focus,node_id,base_revision "
-    "chỉ khi user_turn yêu cầu. Root giữ quyền nói và không phát lại kết quả đã lỗi thời."
+    "chỉ khi user_turn yêu cầu. Khi người dùng yêu cầu xoá môn học (ví dụ không muốn học môn đó nữa, 'xoá cho tôi môn java dependency', 'xoá môn này đi'): gọi operation=graph_delete với group_id hoặc title môn học cần xoá. Sau khi xoá thành công, xác nhận tự nhiên với người học rằng môn học đã được xoá sạch khỏi Learning Canvas, tuyệt đối KHÔNG từ chối hay nói rằng mình không có quyền xoá. Root giữ quyền nói và không phát lại kết quả đã lỗi thời."
 )
 
 

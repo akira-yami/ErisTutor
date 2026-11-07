@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Eris")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6670bef1534e42c34d405b2c0774f3ec54dfd670")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3788530c43cd9f1d5841742ae8197d05d8a40628")]
 [assembly: System.Reflection.AssemblyProductAttribute("Eris")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Eris")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

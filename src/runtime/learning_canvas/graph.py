@@ -101,11 +101,14 @@ class GraphWorkspace:
                 graph["prepared_counts"] = {key: len(value) for key, value in
                                             next(g for g in state["groups"] if g["group_id"] == selected).get("prepared", {}).items()
                                             if value}
+            groups = []
+            if not state.get("legacy_hidden", False):
+                groups.append({"group_id": self.legacy_group_id, "title": "Java · Dependency Injection", "kind": "lesson"})
+            groups.extend([{"group_id": item["group_id"], "title": item["title"],
+                            "kind": "exploration", "node_count": len(item["nodes"])} for item in state["groups"]])
             return {"schema": "eris.learning.graph.p3", "revision": state["revision"],
                     "selected_group_id": selected,
-                    "groups": [{"group_id": self.legacy_group_id, "title": "Java · Dependency Injection", "kind": "lesson"}]
-                    + [{"group_id": item["group_id"], "title": item["title"],
-                        "kind": "exploration", "node_count": len(item["nodes"])} for item in state["groups"]],
+                    "groups": groups,
                     "graph": graph}
 
     def inspect(self, group_id: str, node_id: str) -> dict:
@@ -166,6 +169,45 @@ class GraphWorkspace:
                 state["selected_group_id"] = group_id
             self._write(state, base_revision)
             return copy.deepcopy(group)
+
+    def delete(self, *, group_id: str = "", title: str = "", base_revision: int | None = None) -> bool:
+        """Xoá một môn học/nhóm khám phá khỏi Learning Canvas theo group_id hoặc title."""
+        with self._lock:
+            state = self._load()
+            revision = state["revision"] if base_revision is None else base_revision
+            target_group = None
+            norm_title = _key(title) if title else ""
+
+            # Kiểm tra xem có trỏ tới legacy java-di không
+            if (group_id and group_id == self.legacy_group_id) or (
+                norm_title and any(k in norm_title for k in ("java-di", "java · dependency injection", "java dependency", "java depency"))
+            ):
+                state["legacy_hidden"] = True
+                if state.get("selected_group_id") == self.legacy_group_id:
+                    state["selected_group_id"] = state["groups"][0]["group_id"] if state["groups"] else ""
+                self._write(state, revision)
+                return True
+
+            for g in state["groups"]:
+                if (group_id and g["group_id"] == group_id) or (
+                    norm_title and (_key(g["title"]) == norm_title or norm_title in _key(g["title"]))
+                ):
+                    target_group = g
+                    break
+
+            if target_group is None:
+                return False
+
+            state["groups"] = [g for g in state["groups"] if g["group_id"] != target_group["group_id"]]
+            if state.get("selected_group_id") == target_group["group_id"]:
+                state["selected_group_id"] = (
+                    state["groups"][0]["group_id"]
+                    if state["groups"]
+                    else (self.legacy_group_id if not state.get("legacy_hidden") else "")
+                )
+
+            self._write(state, revision)
+            return True
 
     def _promote(self, group: dict, node_id: str) -> list[dict]:
         """Mở cache khi user chọn nhánh; không tự hiện cả cây."""
