@@ -40,12 +40,6 @@ from runtime.pedagogical_runtime import ensure_pedagogical_runtime
 from runtime.runtime_status import emit_runtime_status
 from runtime.runtime_settings_store import runtime_bool
 from runtime.world_state import attach_world_state_projection
-from runtime.chess.surface import (
-    authoritative_chess_answer_text,
-    chess_move_question,
-    chess_surface_text_grounded,
-    chess_turn_relevant,
-)
 from runtime.discourse_state import assistant_proposition_link
 from runtime.discourse_surface import DiscourseSurface, DiscourseSurfaceRenderer
 from runtime.json_boundary import public_payload
@@ -381,18 +375,7 @@ def _serializable_public_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _authoritative_chess_result_text(report: Any, user_text: str) -> str:
-    """Lấy tool result có thẩm quyền cho câu hỏi nước đi trực tiếp.
-
-    Không dùng cho autonomous và không giả lập banter. Chỉ structured chess
-    state có provenance mới được phép trả một nước analyzer đã tính.
-    """
-
-    if str(getattr(report, "structured_kind", "") or "") != "chess":
-        return ""
-    state = getattr(report, "structured_state", None) or {}
-    if not state or not chess_turn_relevant(user_text, engagement_active=True):
-        return ""
-    return authoritative_chess_answer_text(state, user_text=user_text)
+    return ""
 
 
 def _previous_active_proposition_root(ledger: Any) -> int:
