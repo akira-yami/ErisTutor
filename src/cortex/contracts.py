@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass, field, is_dataclass
 
-
+from .internal_state import PersistentInternalState
 
 
 def _to_plain_contract(value):
