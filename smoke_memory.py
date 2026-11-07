@@ -32,6 +32,14 @@ MODULES = [
     "memory.unresolved_memory",
     "memory.active_state_snapshot",
     "memory.event_ledger",
+    # Step 4 — scoring, retrieval & packet building
+    "memory.memory_admission",
+    "memory.memory_scoring",
+    "memory.memory_activation",
+    "memory.memory_feed_trace",
+    "memory.canonical_long_term",
+    "memory.memory_retrieval_engine",
+    "memory.memory_packet_builder",
 ]
 
 failed = []
