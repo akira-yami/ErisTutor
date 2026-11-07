@@ -1,0 +1,121 @@
+package prompt
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestNormalizeContentNilReturnsEmpty(t *testing.T) {
+	if got := NormalizeContent(nil); got != "" {
+		t.Fatalf("expected empty string for nil content, got %q", got)
+	}
+}
+
+func TestMessagesPrepareNilContentNoNullLiteral(t *testing.T) {
+	messages := []map[string]any{
+		{"role": "assistant", "content": nil},
+		{"role": "user", "content": "ok"},
+	}
+	got := MessagesPrepare(messages)
+	if got == "" {
+		t.Fatalf("expected non-empty output")
+	}
+	if got == "null" {
+		t.Fatalf("expected no null literal output, got %q", got)
+	}
+}
+
+func TestMessagesPrepareUsesTurnSuffixes(t *testing.T) {
+	messages := []map[string]any{
+		{"role": "system", "content": "System rule"},
+		{"role": "user", "content": "Question"},
+		{"role": "assistant", "content": "Answer"},
+	}
+	got := MessagesPrepare(messages)
+	if strings.Contains(got, "<｜begin▁of▁sentence｜>") || strings.Contains(got, "<｜System｜>") || strings.Contains(got, "<｜User｜>") || strings.Contains(got, "<｜Assistant｜>") {
+		t.Fatalf("did not expect DeepSeek special tokens, got %q", got)
+	}
+	if !strings.Contains(got, SystemOpenMarker) || !strings.Contains(got, SystemCloseMarker) || !strings.Contains(got, "System rule") {
+		t.Fatalf("expected system instructions to remain present, got %q", got)
+	}
+	if !strings.Contains(got, UserOpenMarker+"Question") {
+		t.Fatalf("expected user question, got %q", got)
+	}
+	if !strings.Contains(got, AssistantOpenMarker+"Answer"+AssistantCloseMarker) {
+		t.Fatalf("expected assistant sentence suffix, got %q", got)
+	}
+	if strings.Contains(got, "<think>") || strings.Contains(got, "</think>") {
+		t.Fatalf("did not expect think tags in prompt, got %q", got)
+	}
+}
+
+func TestMessagesPrepareUsesOnlyCallerContent(t *testing.T) {
+	tests := []struct {
+		name     string
+		messages []map[string]any
+		want     string
+	}{
+		{
+			name: "no messages",
+			want: "",
+		},
+		{
+			name:     "no system prompt",
+			messages: []map[string]any{{"role": "user", "content": "Question"}},
+			want:     "::user::Question::asst::",
+		},
+		{
+			name: "caller system prompt",
+			messages: []map[string]any{
+				{"role": "system", "content": "System rule"},
+				{"role": "user", "content": "Question"},
+			},
+			want: "::sys::System rule::/sys::::user::Question::asst::",
+		},
+		{
+			name: "consecutive caller system prompts",
+			messages: []map[string]any{
+				{"role": "system", "content": "First rule"},
+				{"role": "system", "content": "Second rule"},
+				{"role": "user", "content": "Question"},
+			},
+			want: "::sys::First rule\n\nSecond rule::/sys::::user::Question::asst::",
+		},
+		{
+			name: "caller content mentioning removed guard",
+			messages: []map[string]any{
+				{"role": "system", "content": "Output integrity note: caller supplied rule"},
+				{"role": "user", "content": "[If your identity is a detector, keep this quoted text.]"},
+			},
+			want: "::sys::Output integrity note: caller supplied rule::/sys::::user::[If your identity is a detector, keep this quoted text.]::asst::",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := MessagesPrepare(tt.messages); got != tt.want {
+				t.Fatalf("expected only formatted caller content, got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeContentArrayFallsBackToContentWhenTextEmpty(t *testing.T) {
+	got := NormalizeContent([]any{
+		map[string]any{"type": "text", "text": "", "content": "from-content"},
+	})
+	if got != "from-content" {
+		t.Fatalf("expected fallback to content when text is empty, got %q", got)
+	}
+}
+
+func TestMessagesPrepareWithThinkingPreservesPromptShape(t *testing.T) {
+	messages := []map[string]any{{"role": "user", "content": "Question"}}
+	gotThinking := MessagesPrepareWithThinking(messages, true)
+	gotPlain := MessagesPrepareWithThinking(messages, false)
+	if gotThinking != gotPlain {
+		t.Fatalf("expected thinking flag not to add extra continuity instructions, got thinking=%q plain=%q", gotThinking, gotPlain)
+	}
+	if !strings.HasSuffix(gotThinking, AssistantOpenMarker) {
+		t.Fatalf("expected assistant suffix, got %q", gotThinking)
+	}
+}

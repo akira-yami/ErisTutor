@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 280px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+    }
+    h3 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #38bdf8;
+    }
+    p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    button {
+      width: 100%;
+      background: #38bdf8;
+      color: #000;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+    #msg {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h3>🔮 Gemini Sync</h3>
+  <p>Đảm bảo bạn đang đăng nhập vào <b>gemini.google.com</b> và Docker đang chạy.</p>
+  <button id="syncBtn">🚀 Đồng bộ Cookie vào Docker</button>
+  <div id="msg"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

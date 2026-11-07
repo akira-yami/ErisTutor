@@ -1,0 +1,10 @@
+services:
+  gemini-vision:
+    build: .
+    image: eris-gemini-vision:latest
+    container_name: eris-gemini-vision
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data_cache:/app/cache
