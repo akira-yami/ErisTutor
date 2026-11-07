@@ -22,7 +22,7 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 # Only the packages that currently exist in the repo. Expand as later layers land.
-include = ["domain*", "transport*", "core*", "screen*", "runtime*"]
+include = ["domain*", "transport*", "core*", "screen*", "runtime*", "native*"]
 exclude = ["tests*", "assets*"]
 
 [tool.ruff]
