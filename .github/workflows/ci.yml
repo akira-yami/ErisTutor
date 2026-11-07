@@ -33,18 +33,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Lint (ruff)
-        run: ruff check src
+        run: ruff check src tests
 
-      - name: Import smoke test (foundation)
-        run: python smoke_foundation.py
-
-      - name: Import smoke test (memory)
-        run: |
-          if (Test-Path smoke_memory.py) { python smoke_memory.py }
-
-      - name: Import smoke test (llm)
-        run: |
-          if (Test-Path smoke_llm.py) { python smoke_llm.py }
-
-      - name: Unit tests
-        run: pytest -q
+      - name: Unit and integration tests
+        run: python run_tests.py

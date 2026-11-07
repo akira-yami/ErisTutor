@@ -41,9 +41,8 @@ python -m venv .venv
 $env:PYTHONUTF8 = "1"
 $env:PYTHONPATH = "src"
 
-.\.venv\Scripts\ruff.exe check src       # lint
-.\.venv\Scripts\python.exe smoke_foundation.py   # import smoke test
-.\.venv\Scripts\python.exe -m pytest -q  # unit tests
+.\.venv\Scripts\ruff.exe check src tests       # lint
+python run_tests.py                          # unit and integration tests
 ```
 
 CI (`.github/workflows/ci.yml`) runs the same three gates on every push to
