@@ -27,6 +27,9 @@ MODULES = [
     "llm.deepseek_workers",
     "llm.client",
     "llm.process_manager",
+    # Step 5
+    "llm.tutor_backend",
+    "llm.service",
     # Runtime support
     "runtime.diagnostic_logging",
     "runtime.observability",

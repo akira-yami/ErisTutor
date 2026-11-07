@@ -89,4 +89,18 @@ def test_openai_compatible_client_init() -> None:
     assert client.base_url == "https://api.deepseek.com"
 
 
+def test_llm_package_exports() -> None:
+    from llm import (
+        LlmService,
+        OpenAICompatibleClient,
+        FormatViolationException,
+        DECISION_GBNF,
+    )
+    assert LlmService is not None
+    assert OpenAICompatibleClient is not None
+    assert issubclass(FormatViolationException, Exception)
+    assert isinstance(DECISION_GBNF, str)
+
+
+
 
