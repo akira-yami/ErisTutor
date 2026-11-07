@@ -48,10 +48,14 @@ class IncomingMessageDispatcher:
         *,
         settings: ProtocolSettings | None = None,
         clock: Callable[[], float] | None = None,
+        health_registry: Any = None,
+        logger: Any = None,
     ) -> None:
         self.owner = owner
         self.settings = resolve_dependency(settings, ProtocolSettings.load)
         self.clock = clock or time.time
+        self.health_registry = health_registry
+        self.logger = logger
         self._handled = 0
         self._unknown = 0
         self._invalid = 0
