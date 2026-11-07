@@ -27,28 +27,7 @@ except Exception:  # pragma: no cover
         return str(text or "")
 
 
-_GENERIC_TELEMETRY_PREFIXES = (
-    "active window is ",
-    "focus kind is ",
-    "there has been no input for ",
-    "browser target is visible:",
-    "context classification:",
-)
 
-
-def is_generic_telemetry_line(text: str) -> bool:
-    """True nếu một dòng chỉ là telemetry chung chung, KHÔNG phải nội dung màn hình thật."""
-
-    lowered = str(text or "").strip().lower()
-    if not lowered:
-        return True
-    if lowered.startswith(_GENERIC_TELEMETRY_PREFIXES):
-        return True
-    if re.fullmatch(r"\d+ browser tabs are visible", lowered):
-        return True
-    if re.fullmatch(r"\d+ windows are open", lowered):
-        return True
-    return False
 
 
 def build_tutor_daemon_from_runtime(runtime_owner: Any) -> Optional[Any]:
@@ -235,7 +214,6 @@ def _build_generate_fn(runtime_owner: Any, logger: Any) -> Optional[Callable[[st
 
     import os
     import json as _json
-    import re
     import hashlib
     import time as _time
 
@@ -349,7 +327,6 @@ def _build_distill_fn(runtime_owner: Any, logger: Any) -> Optional[Callable[[str
 
     import os
     import json as _json
-    import re
     import hashlib
     import time as _time
 

@@ -1142,7 +1142,7 @@ public partial class UdpListener : Node2D
 
 		_settingsProviderSelect.ItemSelected += _ =>
 		{
-			RemoteApiProvider = SelectedOptionText(_settingsProviderSelect, "deepseek_web");
+			RemoteApiProvider = SelectedOptionText(_settingsProviderSelect, "deepseek");
 			ApplyProviderDefaults(RemoteApiProvider);
 			RefreshSettingsProviderInputs();
 			RefreshSettingsRuntimeModelSummary();
@@ -2381,7 +2381,7 @@ public partial class UdpListener : Node2D
 		{
 			RemoteApiBaseUrl = "";
 			RemoteApiModelName = "";
-			ApplyProviderDefaults("deepseek_web");
+			ApplyProviderDefaults("deepseek");
 		}
 	}
 
@@ -3785,7 +3785,18 @@ public partial class UdpListener : Node2D
 				? expanded
 				: Path.Combine(GetRuntimeBaseDirForSettings(), expanded);
 		}
+		string erisHome = System.Environment.GetEnvironmentVariable("ERIS_HOME");
+		if (!string.IsNullOrWhiteSpace(erisHome))
+			return Path.Combine(erisHome, "config", "runtime_settings.json");
+		string localHome = Path.Combine(GetRuntimeBaseDirForSettings(), ".eris_home", "config", "runtime_settings.json");
+		if (File.Exists(localHome))
+			return localHome;
 		string documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+		if (string.IsNullOrWhiteSpace(documents) || !Directory.Exists(documents))
+		{
+			string user = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+			documents = Path.Combine(user, "Documents");
+		}
 		return Path.Combine(documents, "ErisLive", "config", "runtime_settings.json");
 	}
 
@@ -4009,10 +4020,17 @@ public partial class UdpListener : Node2D
 	{
 		try
 		{
-			string userDocs = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-			if (string.IsNullOrWhiteSpace(userDocs))
-				userDocs = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-			string buildDir = Path.Combine(userDocs, "Documents", "eris");
+			string buildDir = System.Environment.GetEnvironmentVariable("ERIS_DEPLOY_DIR");
+			if (string.IsNullOrWhiteSpace(buildDir))
+			{
+				string userDocs = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+				if (string.IsNullOrWhiteSpace(userDocs) || !Directory.Exists(userDocs))
+				{
+					string user = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+					userDocs = Path.Combine(user, "Documents");
+				}
+				buildDir = Path.Combine(userDocs, "eris");
+			}
 			if (!Directory.Exists(buildDir))
 				buildDir = Path.Combine(GetRuntimeBaseDirForSettings(), "dist");
 			Directory.CreateDirectory(buildDir);

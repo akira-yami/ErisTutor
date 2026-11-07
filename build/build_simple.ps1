@@ -9,14 +9,27 @@
 # Chay tu goc repo:
 #   powershell -ExecutionPolicy Bypass -File build\build_simple.ps1
 # Tham so:
-#   -Out <duong dan>   Thu muc dau ra (mac dinh: Documents\eris cua user hien tai)
+#   -Out <duong dan>   Thu muc dau ra (dong: ERIS_DEPLOY_DIR hoac Documents\eris)
 # ============================================================================
 param(
-    [string]$Out = (Join-Path $env:USERPROFILE "Documents\eris")
+    [string]$Out = ""
 )
 
 $ErrorActionPreference = "Stop"
-$Repo = Split-Path -Parent $PSScriptRoot
+$ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+$Repo = Split-Path -Parent $ScriptDir
+
+if (-not $Out) {
+    if ($env:ERIS_DEPLOY_DIR) {
+        $Out = $env:ERIS_DEPLOY_DIR
+    } else {
+        $docs = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)
+        if (-not $docs -or -not (Test-Path $docs)) {
+            $docs = Join-Path $env:USERPROFILE "Documents"
+        }
+        $Out = Join-Path $docs "eris"
+    }
+}
 
 Write-Host "[build] Repo   : $Repo"
 Write-Host "[build] Output : $Out"

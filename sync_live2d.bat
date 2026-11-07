@@ -1,10 +1,25 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 echo === Syncing Live2D assets from infj source to Eris project ===
-rem Optional first argument overrides the source model folder.
-set "SRC=%USERPROFILE%\Documents\infj"
-if defined ERIS_LIVE2D_SOURCE set "SRC=%ERIS_LIVE2D_SOURCE%"
-if not "%~1"=="" set "SRC=%~f1"
+rem Dynamic resolution of source model folder:
+set "SRC="
+if not "%~1"=="" if exist "%~1\infj.moc3" set "SRC=%~f1"
+if not defined SRC if defined ERIS_LIVE2D_SOURCE if exist "%ERIS_LIVE2D_SOURCE%\infj.moc3" set "SRC=%ERIS_LIVE2D_SOURCE%"
+if not defined SRC if exist "%~dp0..\infj\infj.moc3" set "SRC=%~dp0..\infj"
+if not defined SRC if exist "%~dp0asset\live2d\infj\infj.moc3" set "SRC=%~dp0asset\live2d\infj"
+if not defined SRC if exist "%USERPROFILE%\Documents\infj\infj.moc3" set "SRC=%USERPROFILE%\Documents\infj"
+if not defined SRC if exist "%USERPROFILE%\OneDrive\Documents\infj\infj.moc3" set "SRC=%USERPROFILE%\OneDrive\Documents\infj"
+
+rem Fallback if still not found
+if not defined SRC (
+    if defined ERIS_LIVE2D_SOURCE (
+        set "SRC=%ERIS_LIVE2D_SOURCE%"
+    ) else if not "%~1"=="" (
+        set "SRC=%~f1"
+    ) else (
+        set "SRC=%USERPROFILE%\Documents\infj"
+    )
+)
 set "DST=%~dp0src\assets\live2d\infj"
 if not exist "%SRC%\infj.moc3" (
     echo [ERROR] Missing source model: "%SRC%\infj.moc3"

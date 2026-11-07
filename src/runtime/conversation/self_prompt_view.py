@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import Counter
 from copy import deepcopy
 import json
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 def _same_json(left: Any, right: Any) -> bool:

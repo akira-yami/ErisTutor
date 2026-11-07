@@ -202,12 +202,34 @@ public sealed class Live2DBodyManager
 
 	private static string ResolveRuntimePath(string root, string path)
 	{
+		string envModel = System.Environment.GetEnvironmentVariable("ERIS_LIVE2D_MODEL");
+		if (!string.IsNullOrWhiteSpace(envModel) && File.Exists(envModel))
+			return envModel;
+
 		string value = string.IsNullOrWhiteSpace(path)
 			? "src/assets/live2d/infj/infj.model3.json"
 			: path.Trim();
-		return Path.IsPathRooted(value)
-			? value
-			: Path.Combine(root, value.Replace('/', Path.DirectorySeparatorChar));
+		if (Path.IsPathRooted(value) && File.Exists(value))
+			return value;
+
+		string direct = Path.Combine(root, value.Replace('/', Path.DirectorySeparatorChar));
+		if (File.Exists(direct))
+			return direct;
+
+		string[] candidates = new[]
+		{
+			Path.Combine(root, "src", "assets", "live2d", "infj", "infj.model3.json"),
+			Path.Combine(root, "asset", "live2d", "infj", "infj.model3.json"),
+			Path.Combine(root, "assets", "live2d", "infj", "infj.model3.json"),
+			Path.Combine(GetProjectRoot(), value.Replace('/', Path.DirectorySeparatorChar)),
+			Path.Combine(GetProjectRoot(), "src", "assets", "live2d", "infj", "infj.model3.json")
+		};
+		foreach (string candidate in candidates)
+		{
+			if (File.Exists(candidate))
+				return candidate;
+		}
+		return direct;
 	}
 
 	private static string GetProjectRoot() => ProjectSettings.GlobalizePath("res://");
@@ -222,6 +244,17 @@ public sealed class Live2DBodyManager
 
 	private static string ResolvePythonExecutable(string configured, string root)
 	{
+		string virtualEnv = System.Environment.GetEnvironmentVariable("VIRTUAL_ENV");
+		if (!string.IsNullOrWhiteSpace(virtualEnv))
+		{
+			string venvExe = Path.Combine(virtualEnv, "Scripts", "python.exe");
+			if (File.Exists(venvExe))
+			{
+				RunLogger.Log($"[Live2D] Python (active VIRTUAL_ENV): {venvExe}");
+				return venvExe;
+			}
+		}
+
 		if (!string.IsNullOrWhiteSpace(configured) && Path.IsPathRooted(configured) && File.Exists(configured))
 		{
 			RunLogger.Log($"[Live2D] Python (absolute): {configured}");

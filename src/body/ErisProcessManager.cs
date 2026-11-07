@@ -16,7 +16,7 @@ public sealed class ErisServiceConfig
 	public string TtsLanguage { get; init; } = "ja";
 	public string TtsQuality { get; init; } = "high";
 	public string DefaultRemoteApiKey { get; init; } = "";
-	public string RemoteApiProvider { get; init; } = "deepseek_web";
+	public string RemoteApiProvider { get; init; } = "deepseek";
 	public string RemoteApiBaseUrl { get; init; } = "";
 	public string RemoteApiModelName { get; init; } = "";
 	public bool TutorEnabled { get; init; } = true;
@@ -79,9 +79,8 @@ public sealed class ErisProcessManager
 		}
 		else
 		{
-			// Che do dev / chua dong goi: chay truc tiep python src/vision.py.
-			string visionScriptFullPath = Path.Combine(
-				baseDir, (config.VisionScriptPath ?? "").Replace('/', Path.DirectorySeparatorChar));
+			// Che do dev / chua dong goi: chay truc tiep python src/vision.py (hoac duong dan dong phu hop).
+			string visionScriptFullPath = ResolveVisionScriptPath(baseDir, config.VisionScriptPath);
 			if (!File.Exists(visionScriptFullPath))
 			{
 				RunLogger.LogErr(
@@ -220,9 +219,16 @@ public sealed class ErisProcessManager
 		startInfo.Environment["ERIS_TTS_EVENT_PAYLOAD"] = "1";
 		// Settings panel da load secrets/user settings vao config truoc khi start.
 		// Gan truc tiep de Restart ap dung ngay ca khi user chua bam Save.
-		startInfo.Environment["ERIS_REMOTE_PROVIDER"] = string.IsNullOrWhiteSpace(config.RemoteApiProvider) ? "deepseek_web" : config.RemoteApiProvider.Trim();
-		startInfo.Environment["ERIS_REMOTE_BASE_URL"] = config.RemoteApiBaseUrl ?? "";
-		startInfo.Environment["ERIS_REMOTE_MODEL"] = config.RemoteApiModelName ?? "";
+		string effectiveProvider = string.IsNullOrWhiteSpace(config.RemoteApiProvider) ? "deepseek" : config.RemoteApiProvider.Trim();
+		if (startInfo.Environment.TryGetValue("ERIS_REMOTE_PROVIDER", out var secretProvider)
+			&& !string.IsNullOrWhiteSpace(secretProvider)
+			&& effectiveProvider == "deepseek_web")
+		{
+			effectiveProvider = secretProvider.Trim();
+		}
+		startInfo.Environment["ERIS_REMOTE_PROVIDER"] = effectiveProvider;
+		SetEnvIfAbsent(startInfo, "ERIS_REMOTE_BASE_URL", config.RemoteApiBaseUrl ?? "");
+		SetEnvIfAbsent(startInfo, "ERIS_REMOTE_MODEL", config.RemoteApiModelName ?? "");
 		startInfo.Environment["ERIS_LOCAL_STYLE_REWRITE_ENABLED"] = "0";
 		startInfo.Environment["ERIS_LOCAL_VISION_FACTS"] = "0";
 		startInfo.Environment["ERIS_TUTOR_ENABLED"] = config.TutorEnabled ? "1" : "0";
@@ -277,7 +283,18 @@ public sealed class ErisProcessManager
 				? expanded
 				: Path.Combine(GetRuntimeBaseDir(), expanded);
 		}
+		string erisHome = System.Environment.GetEnvironmentVariable("ERIS_HOME");
+		if (!string.IsNullOrWhiteSpace(erisHome))
+			return Path.Combine(erisHome, "config", "runtime_settings.json");
+		string localHome = Path.Combine(GetRuntimeBaseDir(), ".eris_home", "config", "runtime_settings.json");
+		if (File.Exists(localHome))
+			return localHome;
 		string documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+		if (string.IsNullOrWhiteSpace(documents) || !Directory.Exists(documents))
+		{
+			string user = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+			documents = Path.Combine(user, "Documents");
+		}
 		return Path.Combine(documents, "ErisLive", "config", "runtime_settings.json");
 	}
 
@@ -411,8 +428,48 @@ public sealed class ErisProcessManager
 	/// 3. .venv\Scripts\python.exe trong thư mục gốc project (khi chạy từ editor sub-folder).
 	/// 4. configuredExe gốc (fallback — dùng PATH hệ thống).
 	/// </summary>
+	private static string ResolveVisionScriptPath(string baseDir, string configuredPath)
+	{
+		string target = (configuredPath ?? "src/vision.py").Replace('/', Path.DirectorySeparatorChar);
+		if (Path.IsPathRooted(target) && File.Exists(target))
+			return target;
+
+		string direct = Path.Combine(baseDir, target);
+		if (File.Exists(direct))
+			return direct;
+
+		string[] candidates = new[]
+		{
+			Path.Combine(baseDir, "src", "vision.py"),
+			Path.Combine(baseDir, "vision.py"),
+			Path.Combine(baseDir, "src", "vision.pyc"),
+			Path.Combine(baseDir, "vision.pyc"),
+			Path.Combine(GetProjectRoot(), target),
+			Path.Combine(GetProjectRoot(), "src", "vision.py"),
+			Path.Combine(GetProjectRoot(), "vision.py")
+		};
+		foreach (string candidate in candidates)
+		{
+			if (File.Exists(candidate))
+				return candidate;
+		}
+		return direct;
+	}
+
 	private static string ResolvePythonExecutable(string configuredExe, string baseDir)
 	{
+		// 0. Active VIRTUAL_ENV trong shell
+		string virtualEnv = System.Environment.GetEnvironmentVariable("VIRTUAL_ENV");
+		if (!string.IsNullOrWhiteSpace(virtualEnv))
+		{
+			string venvExe = Path.Combine(virtualEnv, "Scripts", "python.exe");
+			if (File.Exists(venvExe))
+			{
+				RunLogger.Log($"[Vision] Python (active VIRTUAL_ENV): {venvExe}");
+				return venvExe;
+			}
+		}
+
 		// 1. Đường dẫn tuyệt đối có sẵn
 		if (!string.IsNullOrWhiteSpace(configuredExe)
 			&& Path.IsPathRooted(configuredExe)
@@ -449,7 +506,19 @@ public sealed class ErisProcessManager
 			}
 		}
 
-		// 4. Fallback: dùng nguyên configuredExe (hy vọng có trong PATH)
+		// 4. .venv ở thư mục cha
+		string parentDir = Directory.GetParent(baseDir)?.FullName;
+		if (!string.IsNullOrWhiteSpace(parentDir))
+		{
+			string venvInParent = Path.Combine(parentDir, ".venv", "Scripts", "python.exe");
+			if (File.Exists(venvInParent))
+			{
+				RunLogger.Log($"[Vision] Python (venv parent): {venvInParent}");
+				return venvInParent;
+			}
+		}
+
+		// 5. Fallback: dùng nguyên configuredExe (hy vọng có trong PATH)
 		string fallback = string.IsNullOrWhiteSpace(configuredExe) ? "python" : configuredExe;
 		RunLogger.Log($"[Vision] Python (fallback PATH): {fallback}");
 		return fallback;

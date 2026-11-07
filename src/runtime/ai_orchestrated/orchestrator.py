@@ -13,7 +13,10 @@ import json
 import logging
 import os
 import time
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
+
+if TYPE_CHECKING:
+    from runtime.conversation.context import RootCapabilityRegistry
 
 from failure_meta import build_failure_meta
 

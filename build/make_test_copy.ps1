@@ -11,14 +11,27 @@ Usage:
       -Target "$env:USERPROFILE\Documents\eris" [-NoModels]
 #>
 param(
-    [string]$Target = (Join-Path $env:USERPROFILE "Documents\eris"),
+    [string]$Target = "",
     [switch]$NoModels
 )
 
 $ErrorActionPreference = "Stop"
-$Root = (Resolve-Path "$PSScriptRoot\..").Path
+$ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+$Root = (Resolve-Path "$ScriptDir\..").Path
 $Py   = Join-Path $Root ".venv\Scripts\python.exe"
 if (-not (Test-Path $Py)) { $Py = "python" }
+
+if (-not $Target) {
+    if ($env:ERIS_DEPLOY_DIR) {
+        $Target = $env:ERIS_DEPLOY_DIR
+    } else {
+        $docs = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)
+        if (-not $docs -or -not (Test-Path $docs)) {
+            $docs = Join-Path $env:USERPROFILE "Documents"
+        }
+        $Target = Join-Path $docs "eris"
+    }
+}
 
 Write-Host "=== ERIS test copy ===" -ForegroundColor Cyan
 Write-Host "Source : $Root"

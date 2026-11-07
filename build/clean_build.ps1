@@ -7,12 +7,26 @@
 #   powershell -ExecutionPolicy Bypass -File build\clean_build.ps1
 # ============================================================================
 param(
-    [string]$Out   = (Join-Path $env:USERPROFILE "Documents\eris"),
+    [string]$Out   = "",
     [string]$Godot = $env:ERIS_GODOT
 )
 
 $ErrorActionPreference = "Stop"
-$Repo = Split-Path -Parent $PSScriptRoot
+$ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+$Repo = Split-Path -Parent $ScriptDir
+
+if (-not $Out) {
+    if ($env:ERIS_DEPLOY_DIR) {
+        $Out = $env:ERIS_DEPLOY_DIR
+    } else {
+        $docs = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)
+        if (-not $docs -or -not (Test-Path $docs)) {
+            $docs = Join-Path $env:USERPROFILE "Documents"
+        }
+        $Out = Join-Path $docs "eris"
+    }
+}
+
 if (-not $Godot) {
     foreach ($name in @("godot-mono", "godot", "godot4")) {
         $command = Get-Command $name -CommandType Application -ErrorAction SilentlyContinue

@@ -4,11 +4,24 @@
 # Giup Eris chay doc lap ma khong lo xung dot version Python tren may.
 # ============================================================================
 param(
-    [string]$Target = (Join-Path $env:USERPROFILE "Documents\eris")
+    [string]$Target = ""
 )
 
 $ErrorActionPreference = "Stop"
-$Root = (Resolve-Path "$PSScriptRoot\..").Path
+$ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+$Root = (Resolve-Path "$ScriptDir\..").Path
+
+if (-not $Target) {
+    if ($env:ERIS_DEPLOY_DIR) {
+        $Target = $env:ERIS_DEPLOY_DIR
+    } else {
+        $docs = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::MyDocuments)
+        if (-not $docs -or -not (Test-Path $docs)) {
+            $docs = Join-Path $env:USERPROFILE "Documents"
+        }
+        $Target = Join-Path $docs "eris"
+    }
+}
 
 Write-Host "=== ERIS SELF-CONTAINED DEPLOY SETUP (USING UV) ===" -ForegroundColor Cyan
 Write-Host "Repo Root: $Root"

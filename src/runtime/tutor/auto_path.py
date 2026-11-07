@@ -78,8 +78,6 @@ def _intent_to_learn(host: Any, *, user_text: str, recent_history: Sequence[Mapp
     B/C là tín hiệu để thử TeachingPlanBuilder, không phải bằng chứng mastery.
     Nếu dấu hiệu chỉ là 'chưa hiểu' một câu độc lập không có chủ đề, không thử.
     """
-    from runtime.ai_orchestrated.orchestrator import _explicit_pedagogical_activation
-
     text = " ".join(str(user_text or "").split())[:1200]
     if not text:
         return False
