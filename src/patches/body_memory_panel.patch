@@ -1,0 +1,1117 @@
+diff -ruN a/body/MEMORY_PANEL_BODY_VI.md b/body/MEMORY_PANEL_BODY_VI.md
+--- a/body/MEMORY_PANEL_BODY_VI.md	1970-01-01 00:00:00.000000000 +0000
++++ b/body/MEMORY_PANEL_BODY_VI.md	2026-07-26 12:14:28.861216884 +0000
+@@ -0,0 +1,27 @@
++# Godot Body — Panel Living User Memory
++
++## Cài đặt
++
++Chép toàn bộ thư mục `body` này đè lên thư mục `body` hiện tại của dự án.
++Không cần sửa `udpListener.tscn`; panel và nút context menu được tạo động trong
++`UdpListener._Ready()`.
++
++Backend cần hỗ trợ hai message:
++
++- request: `memory_panel_request`
++- response: `memory_panel_ack`
++
++Bản backend V40 đi kèm trong bundle đã có bridge này.
++
++## Cách dùng
++
++Nhấp chuột phải ERIS → **ERIS nhớ gì về bạn**.
++
++Panel có cache tại:
++
++```text
++user://living_user_panel_cache.json
++```
++
++Cache chỉ để xem khi Brain offline. Mọi thao tác sửa, xác nhận, đổi phạm vi và
++quên đều phải được Brain xác nhận trước khi UI coi là thành công.
+diff -ruN a/body/UdpListener.MemoryPanel.cs b/body/UdpListener.MemoryPanel.cs
+--- a/body/UdpListener.MemoryPanel.cs	1970-01-01 00:00:00.000000000 +0000
++++ b/body/UdpListener.MemoryPanel.cs	2026-07-26 12:11:05.065209515 +0000
+@@ -0,0 +1,971 @@
++using Godot;
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Text;
++using System.Text.Json;
++
++public partial class UdpListener : Node2D
++{
++	// Panel này chỉ gửi request có cấu trúc cho Brain. Không ghi trực tiếp JSON
++	// memory từ Godot, vì hai tiến trình cùng sửa một file là cách rất hiệu quả để
++	// biến dữ liệu người dùng thành món mì trộn không còn parse được.
++	private const string MemoryPanelCachePath = "user://living_user_panel_cache.json";
++	private static readonly Vector2 MemoryPanelMinSize = new(1120f, 720f);
++
++	private sealed class MemoryPanelRecord
++	{
++		public string Id { get; init; } = "";
++		public string Path { get; init; } = "";
++		public string Label { get; init; } = "";
++		public string Category { get; init; } = "other";
++		public string DisplayValue { get; init; } = "";
++		public string Explicitness { get; init; } = "inferred";
++		public string ExplicitnessLabel { get; init; } = "ERIS đang suy đoán";
++		public string CertaintyLabel { get; init; } = "Cần xác nhận";
++		public string ScopeKind { get; init; } = "global";
++		public string ScopeKey { get; init; } = "";
++		public string ScopeLabel { get; init; } = "Mọi cuộc trò chuyện";
++		public string Source { get; init; } = "";
++		public float Confidence { get; init; }
++		public int EvidenceCount { get; init; }
++		public int Recurrence { get; init; }
++		public double UpdatedAt { get; init; }
++	}
++
++	private sealed class MemoryPanelActionItem
++	{
++		public string Kind { get; init; } = "";
++		public string Title { get; init; } = "";
++		public string Detail { get; init; } = "";
++		public string Status { get; init; } = "";
++	}
++
++	private Panel _memoryPanel;
++	private Button _contextMemoryButton;
++	private VBoxContainer _memoryItemList;
++	private Label _memorySummaryLabel;
++	private Label _memoryCountLabel;
++	private Label _memoryStatusLabel;
++	private LineEdit _memorySearchInput;
++	private OptionButton _memoryCategorySelect;
++	private CheckButton _memoryIncludeInferredToggle;
++	private Label _memoryDetailTitle;
++	private Label _memoryDetailMeta;
++	private Label _memoryDetailPath;
++	private TextEdit _memoryEditValue;
++	private OptionButton _memoryScopeSelect;
++	private LineEdit _memoryProjectInput;
++	private CheckButton _memoryHardDeleteToggle;
++	private Button _memorySaveButton;
++	private Button _memoryConfirmButton;
++	private Button _memoryExplainButton;
++	private Button _memoryMoveScopeButton;
++	private Button _memoryForgetButton;
++	private Label _memoryExplanationLabel;
++
++	private readonly List<MemoryPanelRecord> _memoryRecords = new();
++	private readonly List<MemoryPanelActionItem> _memoryActions = new();
++	private MemoryPanelRecord _selectedMemoryRecord;
++	private string _memorySummaryText = "ERIS chưa gửi bản tổng hợp.";
++	private string _memoryLastRequestId = "";
++	private ulong _memoryRequestSentAtMs;
++	private bool _memoryRequestPending;
++	private string _memoryHardDeleteArmedPath = "";
++
++	private static readonly Color MemoryInk = new(0.39f, 0.08f, 0.25f);
++	private static readonly Color MemoryInkSoft = new(0.62f, 0.35f, 0.49f);
++	private static readonly Color MemoryPink = new(0.95f, 0.34f, 0.62f);
++	private static readonly Color MemoryBorder = new(0.96f, 0.76f, 0.86f, 0.92f);
++	private static readonly Color MemoryCard = new(1f, 0.975f, 0.987f, 0.92f);
++
++	private void InitializeMemoryPanel()
++	{
++		_memoryPanel = new Panel
++		{
++			Name = "MemoryPanel",
++			Visible = false,
++			CustomMinimumSize = MemoryPanelMinSize,
++			Size = MemoryPanelMinSize,
++			ZIndex = 99,
++		};
++		GetNode<Control>("CanvasLayer/Control").AddChild(_memoryPanel);
++		BuildMemoryPanelUi();
++		LoadMemoryPanelCache();
++		if (_contextMemoryButton != null)
++			_contextMemoryButton.Pressed += OnContextMemoryPressed;
++	}
++
++	private void OnContextMemoryPressed()
++	{
++		if (_memoryPanel == null)
++			return;
++		if (_memoryPanel.Visible)
++			CloseMemoryPanel();
++		else
++			ShowMemoryPanel();
++	}
++
++	private void ShowMemoryPanel()
++	{
++		if (_memoryPanel == null)
++			return;
++		CloseCharacterContextMenu();
++		_memoryPanel.Visible = true;
++		_memoryPanel.Size = MemoryPanelMinSize;
++		Vector2 viewport = GetViewportRect().Size;
++		_memoryPanel.Position = new Vector2(
++			Mathf.Max(0f, (viewport.X - MemoryPanelMinSize.X) * 0.5f),
++			Mathf.Max(0f, (viewport.Y - MemoryPanelMinSize.Y) * 0.5f));
++		RefreshMemoryPanel();
++		SendMemoryPanelRequest("snapshot");
++	}
++
++	private void CloseMemoryPanel()
++	{
++		if (_memoryPanel != null)
++			_memoryPanel.Visible = false;
++	}
++
++	private void BuildMemoryPanelUi()
++	{
++		if (_memoryPanel == null)
++			return;
++
++		_memoryPanel.AddThemeStyleboxOverride("panel", new StyleBoxFlat
++		{
++			BgColor = new Color(1f, 0.97f, 0.985f, 0.98f),
++			BorderColor = MemoryBorder,
++			BorderWidthLeft = 2,
++			BorderWidthTop = 2,
++			BorderWidthRight = 2,
++			BorderWidthBottom = 2,
++			CornerRadiusTopLeft = 24,
++			CornerRadiusTopRight = 24,
++			CornerRadiusBottomLeft = 24,
++			CornerRadiusBottomRight = 24,
++			ShadowColor = new Color(0.55f, 0.10f, 0.30f, 0.20f),
++			ShadowSize = 16,
++		});
++		_memoryPanel.ClipContents = true;
++
++		var margin = new MarginContainer();
++		margin.SetAnchorsPreset(Control.LayoutPreset.FullRect);
++		margin.AddThemeConstantOverride("margin_left", 28);
++		margin.AddThemeConstantOverride("margin_right", 28);
++		margin.AddThemeConstantOverride("margin_top", 22);
++		margin.AddThemeConstantOverride("margin_bottom", 22);
++		_memoryPanel.AddChild(margin);
++
++		var root = new VBoxContainer();
++		root.AddThemeConstantOverride("separation", 12);
++		margin.AddChild(root);
++
++		var header = new HBoxContainer();
++		header.AddThemeConstantOverride("separation", 10);
++		root.AddChild(header);
++		var title = CreateUiLabel("ERIS nhớ gì về bạn?", 30, MemoryInk);
++		title.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
++		header.AddChild(title);
++		var refresh = CreateMemoryButton("Đọc lại", () => SendMemoryPanelRequest("snapshot"), primary: false);
++		refresh.CustomMinimumSize = new Vector2(104f, 36f);
++		header.AddChild(refresh);
++		var controls = CreateWindowControlCapsule(() => _memoryPanel.Visible = false, CloseMemoryPanel);
++		header.AddChild(controls);
++
++		var summaryCard = CreateMemoryCard(new Color(1f, 0.94f, 0.97f, 0.90f), 18);
++		summaryCard.CustomMinimumSize = new Vector2(0f, 104f);
++		root.AddChild(summaryCard);
++		var summaryMargin = new MarginContainer();
++		summaryMargin.AddThemeConstantOverride("margin_left", 18);
++		summaryMargin.AddThemeConstantOverride("margin_right", 18);
++		summaryMargin.AddThemeConstantOverride("margin_top", 12);
++		summaryMargin.AddThemeConstantOverride("margin_bottom", 12);
++		summaryCard.AddChild(summaryMargin);
++		var summaryBox = new VBoxContainer();
++		summaryBox.AddThemeConstantOverride("separation", 5);
++		summaryMargin.AddChild(summaryBox);
++		_memorySummaryLabel = CreateUiLabel(_memorySummaryText, 13, MemoryInk);
++		_memorySummaryLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		_memorySummaryLabel.MaxLinesVisible = 4;
++		_memorySummaryLabel.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
++		summaryBox.AddChild(_memorySummaryLabel);
++		_memoryCountLabel = CreateUiLabel("Chưa có thống kê", 10, MemoryInkSoft);
++		summaryBox.AddChild(_memoryCountLabel);
++
++		var filters = new HBoxContainer();
++		filters.AddThemeConstantOverride("separation", 10);
++		root.AddChild(filters);
++		_memoryCategorySelect = new OptionButton { CustomMinimumSize = new Vector2(190f, 36f) };
++		foreach (string label in new[] { "Tất cả", "Về bạn", "Sở thích", "Dự án & mục tiêu", "Cách làm việc", "Chưa chắc" })
++			_memoryCategorySelect.AddItem(label);
++		_memoryCategorySelect.ItemSelected += _ => RefreshMemoryPanelList();
++		StyleMemoryInput(_memoryCategorySelect);
++		filters.AddChild(_memoryCategorySelect);
++
++		_memorySearchInput = new LineEdit
++		{
++			PlaceholderText = "Tìm trong những gì ERIS nhớ...",
++			SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
++			CustomMinimumSize = new Vector2(280f, 36f),
++		};
++		_memorySearchInput.TextChanged += _ => RefreshMemoryPanelList();
++		StyleMemoryInput(_memorySearchInput);
++		filters.AddChild(_memorySearchInput);
++
++		_memoryIncludeInferredToggle = new CheckButton { Text = "Hiện suy đoán", ButtonPressed = true };
++		_memoryIncludeInferredToggle.AddThemeFontSizeOverride("font_size", 11);
++		_memoryIncludeInferredToggle.AddThemeColorOverride("font_color", MemoryInkSoft);
++		_memoryIncludeInferredToggle.Toggled += enabled =>
++		{
++			RefreshMemoryPanelList();
++			SendMemoryPanelRequest("snapshot", new Dictionary<string, object> { ["include_inferred"] = enabled });
++		};
++		filters.AddChild(_memoryIncludeInferredToggle);
++
++		_memoryStatusLabel = CreateUiLabel("Đang dùng dữ liệu gần nhất.", 10, MemoryInkSoft);
++		_memoryStatusLabel.CustomMinimumSize = new Vector2(180f, 36f);
++		_memoryStatusLabel.VerticalAlignment = VerticalAlignment.Center;
++		filters.AddChild(_memoryStatusLabel);
++
++		var body = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
++		body.AddThemeConstantOverride("separation", 12);
++		root.AddChild(body);
++
++		var listCard = CreateMemoryCard(MemoryCard, 18);
++		listCard.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
++		listCard.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
++		body.AddChild(listCard);
++		var listMargin = new MarginContainer();
++		listMargin.AddThemeConstantOverride("margin_left", 12);
++		listMargin.AddThemeConstantOverride("margin_right", 8);
++		listMargin.AddThemeConstantOverride("margin_top", 12);
++		listMargin.AddThemeConstantOverride("margin_bottom", 12);
++		listCard.AddChild(listMargin);
++		var scroll = new ScrollContainer
++		{
++			SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
++			SizeFlagsVertical = Control.SizeFlags.ExpandFill,
++			HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
++		};
++		listMargin.AddChild(scroll);
++		_memoryItemList = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill };
++		_memoryItemList.AddThemeConstantOverride("separation", 8);
++		scroll.AddChild(_memoryItemList);
++
++		var detailCard = CreateMemoryCard(new Color(1f, 0.955f, 0.978f, 0.96f), 18);
++		detailCard.CustomMinimumSize = new Vector2(346f, 0f);
++		detailCard.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
++		body.AddChild(detailCard);
++		BuildMemoryDetailPane(detailCard);
++	}
++
++	private void BuildMemoryDetailPane(PanelContainer card)
++	{
++		var margin = new MarginContainer();
++		margin.AddThemeConstantOverride("margin_left", 16);
++		margin.AddThemeConstantOverride("margin_right", 16);
++		margin.AddThemeConstantOverride("margin_top", 16);
++		margin.AddThemeConstantOverride("margin_bottom", 16);
++		card.AddChild(margin);
++		var box = new VBoxContainer();
++		box.AddThemeConstantOverride("separation", 8);
++		margin.AddChild(box);
++
++		_memoryDetailTitle = CreateUiLabel("Chọn một mục để xem", 18, MemoryInk);
++		_memoryDetailTitle.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		box.AddChild(_memoryDetailTitle);
++		_memoryDetailMeta = CreateUiLabel("Bạn có thể xem nguồn, sửa, xác nhận hoặc quên từng mục.", 10, MemoryInkSoft);
++		_memoryDetailMeta.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		box.AddChild(_memoryDetailMeta);
++		_memoryDetailPath = CreateUiLabel("", 9, new Color(0.70f, 0.48f, 0.59f));
++		_memoryDetailPath.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		box.AddChild(_memoryDetailPath);
++
++		var editTitle = CreateUiLabel("Giá trị", 10, MemoryInkSoft);
++		box.AddChild(editTitle);
++		_memoryEditValue = new TextEdit
++		{
++			CustomMinimumSize = new Vector2(0f, 112f),
++			WrapMode = TextEdit.LineWrappingMode.Boundary,
++			PlaceholderText = "Chọn một memory trước.",
++		};
++		StyleMemoryInput(_memoryEditValue);
++		box.AddChild(_memoryEditValue);
++
++		var editRow = new HBoxContainer();
++		editRow.AddThemeConstantOverride("separation", 6);
++		box.AddChild(editRow);
++		_memorySaveButton = CreateMemoryButton("Lưu sửa", SaveSelectedMemory, primary: true);
++		_memoryConfirmButton = CreateMemoryButton("Xác nhận", ConfirmSelectedMemory, primary: false);
++		editRow.AddChild(_memorySaveButton);
++		editRow.AddChild(_memoryConfirmButton);
++
++		var sourceRow = new HBoxContainer();
++		sourceRow.AddThemeConstantOverride("separation", 6);
++		box.AddChild(sourceRow);
++		_memoryExplainButton = CreateMemoryButton("Xem nguồn", ExplainSelectedMemory, primary: false);
++		_memoryMoveScopeButton = CreateMemoryButton("Đổi phạm vi", MoveSelectedMemoryScope, primary: false);
++		sourceRow.AddChild(_memoryExplainButton);
++		sourceRow.AddChild(_memoryMoveScopeButton);
++
++		var scopeTitle = CreateUiLabel("Phạm vi mới", 10, MemoryInkSoft);
++		box.AddChild(scopeTitle);
++		_memoryScopeSelect = new OptionButton();
++		_memoryScopeSelect.AddItem("Mọi cuộc trò chuyện");
++		_memoryScopeSelect.AddItem("Chỉ một dự án");
++		_memoryScopeSelect.ItemSelected += index => _memoryProjectInput.Visible = index == 1;
++		StyleMemoryInput(_memoryScopeSelect);
++		box.AddChild(_memoryScopeSelect);
++		_memoryProjectInput = new LineEdit { PlaceholderText = "Mã dự án, ví dụ: eris", Visible = false };
++		StyleMemoryInput(_memoryProjectInput);
++		box.AddChild(_memoryProjectInput);
++
++		var separator = new HSeparator();
++		box.AddChild(separator);
++		_memoryHardDeleteToggle = new CheckButton { Text = "Xóa hoàn toàn cả lịch sử" };
++		_memoryHardDeleteToggle.AddThemeFontSizeOverride("font_size", 10);
++		_memoryHardDeleteToggle.AddThemeColorOverride("font_color", new Color(0.72f, 0.20f, 0.30f));
++		box.AddChild(_memoryHardDeleteToggle);
++		_memoryForgetButton = CreateMemoryButton("Quên mục này", ForgetSelectedMemory, primary: false, danger: true);
++		box.AddChild(_memoryForgetButton);
++
++		var explainTitle = CreateUiLabel("Nguồn hình thành", 10, MemoryInkSoft);
++		box.AddChild(explainTitle);
++		_memoryExplanationLabel = CreateUiLabel("Chưa đọc nguồn.", 10, MemoryInkSoft);
++		_memoryExplanationLabel.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		_memoryExplanationLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
++		box.AddChild(_memoryExplanationLabel);
++		SetMemoryDetailEnabled(false);
++	}
++
++	private void SendMemoryPanelRequest(string action, Dictionary<string, object> extra = null)
++	{
++		if (_chatSend == null)
++			return;
++		_memoryLastRequestId = $"memory-{Time.GetTicksMsec()}-{GD.Randi()}";
++		var payload = new Dictionary<string, object>
++		{
++			["type"] = "memory_panel_request",
++			["action"] = action,
++			["request_id"] = _memoryLastRequestId,
++			["include_inferred"] = _memoryIncludeInferredToggle?.ButtonPressed ?? true,
++		};
++		if (extra != null)
++			foreach (var pair in extra)
++				payload[pair.Key] = pair.Value;
++		Error error = _chatSend.PutPacket(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload)));
++		if (error != Error.Ok)
++		{
++			SetMemoryStatus($"Không gửi được request: {error}", true);
++			return;
++		}
++		_memoryRequestPending = true;
++		_memoryRequestSentAtMs = Time.GetTicksMsec();
++		SetMemoryStatus(action == "snapshot" ? "Đang đọc memory..." : "Đang áp dụng thay đổi...");
++	}
++
++	private bool TryHandleMemoryPanelPacket(string raw)
++	{
++		if (string.IsNullOrWhiteSpace(raw))
++			return false;
++		try
++		{
++			using JsonDocument doc = JsonDocument.Parse(raw);
++			JsonElement root = doc.RootElement;
++			if (root.ValueKind != JsonValueKind.Object
++				|| !root.TryGetProperty("type", out JsonElement typeNode)
++				|| !string.Equals(typeNode.GetString(), "memory_panel_ack", StringComparison.Ordinal))
++				return false;
++
++			string requestId = ReadJsonString(root, "request_id");
++			if (!string.IsNullOrWhiteSpace(_memoryLastRequestId)
++				&& !string.IsNullOrWhiteSpace(requestId)
++				&& !string.Equals(requestId, _memoryLastRequestId, StringComparison.Ordinal))
++				return true;
++
++			_memoryRequestPending = false;
++			string status = ReadJsonString(root, "status");
++			string message = ReadJsonString(root, "message");
++			if (root.TryGetProperty("memory_panel", out JsonElement panel) && panel.ValueKind == JsonValueKind.Object)
++			{
++				ApplyMemoryPanelSnapshot(panel);
++				SaveMemoryPanelCache(panel.GetRawText());
++			}
++			SetMemoryStatus(string.IsNullOrWhiteSpace(message) ? "Đã cập nhật." : message, status == "error");
++			return true;
++		}
++		catch (JsonException)
++		{
++			return false;
++		}
++		catch (Exception ex)
++		{
++			SetMemoryStatus($"Không đọc được dữ liệu memory: {ex.Message}", true);
++			return true;
++		}
++	}
++
++	private void ApplyMemoryPanelSnapshot(JsonElement panel)
++	{
++		_memoryRecords.Clear();
++		_memoryActions.Clear();
++		_memorySummaryText = ReadJsonString(panel, "summary_text");
++		if (string.IsNullOrWhiteSpace(_memorySummaryText))
++			_memorySummaryText = "ERIS chưa có đủ thông tin bền vững để tổng hợp về bạn.";
++
++		if (panel.TryGetProperty("records", out JsonElement records) && records.ValueKind == JsonValueKind.Array)
++		{
++			foreach (JsonElement row in records.EnumerateArray())
++			{
++				if (row.ValueKind != JsonValueKind.Object)
++					continue;
++				_memoryRecords.Add(new MemoryPanelRecord
++				{
++					Id = ReadJsonString(row, "id"),
++					Path = ReadJsonString(row, "path"),
++					Label = ReadJsonString(row, "label"),
++					Category = ReadJsonString(row, "category"),
++					DisplayValue = ReadJsonString(row, "display_value"),
++					Explicitness = ReadJsonString(row, "explicitness"),
++					ExplicitnessLabel = ReadJsonString(row, "explicitness_label"),
++					CertaintyLabel = ReadJsonString(row, "certainty_label"),
++					ScopeKind = ReadJsonString(row, "scope_kind"),
++					ScopeKey = ReadJsonString(row, "scope_key"),
++					ScopeLabel = ReadJsonString(row, "scope_label"),
++					Source = ReadJsonString(row, "source"),
++					Confidence = ReadJsonFloat(row, "confidence"),
++					EvidenceCount = ReadJsonInt(row, "evidence_count"),
++					Recurrence = ReadJsonInt(row, "recurrence"),
++					UpdatedAt = ReadJsonDouble(row, "updated_at"),
++				});
++			}
++		}
++		ReadMemoryActionRows(panel, "goals", "goal");
++		ReadMemoryActionRows(panel, "commitments", "commitment");
++		ReadMemoryActionRows(panel, "workflows", "workflow");
++
++		if (panel.TryGetProperty("counts", out JsonElement counts) && counts.ValueKind == JsonValueKind.Object)
++		{
++			_memoryCountLabel.Text = $"{ReadJsonInt(counts, "confirmed")} đã xác nhận  ·  "
++				+ $"{ReadJsonInt(counts, "observed")} quan sát  ·  "
++				+ $"{ReadJsonInt(counts, "inferred")} suy đoán  ·  "
++				+ $"{ReadJsonInt(counts, "goals")} mục tiêu  ·  "
++				+ $"{ReadJsonInt(counts, "workflows")} quy trình";
++		}
++
++		if (panel.TryGetProperty("explanation", out JsonElement explanation))
++			_memoryExplanationLabel.Text = FormatMemoryExplanation(explanation);
++		RefreshMemoryPanel();
++	}
++
++	private void ReadMemoryActionRows(JsonElement panel, string property, string kind)
++	{
++		if (!panel.TryGetProperty(property, out JsonElement rows) || rows.ValueKind != JsonValueKind.Array)
++			return;
++		foreach (JsonElement row in rows.EnumerateArray())
++		{
++			if (row.ValueKind != JsonValueKind.Object)
++				continue;
++			string title = kind switch
++			{
++				"goal" => ReadJsonString(row, "title"),
++				"commitment" => ReadJsonString(row, "action"),
++				_ => ReadJsonString(row, "trigger"),
++			};
++			string detail = kind == "workflow" && row.TryGetProperty("steps", out JsonElement steps)
++				? JoinJsonArray(steps, " → ")
++				: ReadJsonString(row, "description");
++			_memoryActions.Add(new MemoryPanelActionItem
++			{
++				Kind = kind,
++				Title = title,
++				Detail = detail,
++				Status = ReadJsonString(row, "status"),
++			});
++		}
++	}
++
++	private void RefreshMemoryPanel()
++	{
++		if (_memorySummaryLabel != null)
++			_memorySummaryLabel.Text = CompactSummaryForPanel(_memorySummaryText);
++		RefreshMemoryPanelList();
++		if (_selectedMemoryRecord != null)
++		{
++			MemoryPanelRecord current = _memoryRecords.FirstOrDefault(x => x.Path == _selectedMemoryRecord.Path && x.ScopeKey == _selectedMemoryRecord.ScopeKey);
++			SelectMemoryRecord(current);
++		}
++	}
++
++	private void RefreshMemoryPanelList()
++	{
++		if (_memoryItemList == null)
++			return;
++		foreach (Node child in _memoryItemList.GetChildren())
++		{
++			_memoryItemList.RemoveChild(child);
++			child.QueueFree();
++		}
++
++		string query = (_memorySearchInput?.Text ?? "").Trim();
++		int tab = _memoryCategorySelect?.Selected ?? 0;
++		bool includeInferred = _memoryIncludeInferredToggle?.ButtonPressed ?? true;
++		IEnumerable<MemoryPanelRecord> rows = _memoryRecords.Where(record =>
++			(includeInferred || record.Explicitness != "inferred")
++			&& MemoryRecordMatchesTab(record, tab)
++			&& MemoryRecordMatchesSearch(record, query));
++
++		int shown = 0;
++		foreach (MemoryPanelRecord record in rows)
++		{
++			_memoryItemList.AddChild(CreateMemoryRecordCard(record));
++			shown++;
++		}
++
++		if (tab == 0 || tab == 3 || tab == 4)
++		{
++			foreach (MemoryPanelActionItem action in _memoryActions.Where(a => ActionMatchesTab(a, tab) && ActionMatchesSearch(a, query)))
++			{
++				_memoryItemList.AddChild(CreateMemoryActionCard(action));
++				shown++;
++			}
++		}
++
++		if (shown == 0)
++		{
++			var empty = CreateUiLabel("Không có mục nào khớp bộ lọc. Ít nhất panel không bịa thêm cho đủ chỗ trống.", 12, MemoryInkSoft);
++			empty.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++			empty.CustomMinimumSize = new Vector2(0f, 68f);
++			_memoryItemList.AddChild(empty);
++		}
++	}
++
++	private Control CreateMemoryRecordCard(MemoryPanelRecord record)
++	{
++		Color accent = record.Explicitness switch
++		{
++			"explicit" => new Color(0.30f, 0.67f, 0.42f),
++			"observed" => new Color(0.32f, 0.56f, 0.86f),
++			_ => new Color(0.88f, 0.58f, 0.22f),
++		};
++		var card = CreateMemoryCard(new Color(1f, 1f, 1f, 0.88f), 13, accent);
++		var margin = new MarginContainer();
++		margin.AddThemeConstantOverride("margin_left", 13);
++		margin.AddThemeConstantOverride("margin_right", 10);
++		margin.AddThemeConstantOverride("margin_top", 10);
++		margin.AddThemeConstantOverride("margin_bottom", 10);
++		card.AddChild(margin);
++		var box = new VBoxContainer();
++		box.AddThemeConstantOverride("separation", 4);
++		margin.AddChild(box);
++
++		var header = new HBoxContainer();
++		box.AddChild(header);
++		var title = CreateUiLabel(record.Label, 13, MemoryInk);
++		title.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
++		title.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		header.AddChild(title);
++		var badge = CreateUiLabel(record.CertaintyLabel, 9, accent);
++		header.AddChild(badge);
++
++		var value = CreateUiLabel(record.DisplayValue, 12, new Color(0.47f, 0.18f, 0.32f));
++		value.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		value.MaxLinesVisible = 3;
++		value.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
++		box.AddChild(value);
++		var footer = new HBoxContainer();
++		box.AddChild(footer);
++		var meta = CreateUiLabel($"{record.ExplicitnessLabel}  ·  {record.ScopeLabel}  ·  {record.EvidenceCount} nguồn", 9, MemoryInkSoft);
++		meta.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
++		footer.AddChild(meta);
++		var view = CreateMemoryButton("Xem", () => SelectMemoryRecord(record), primary: false);
++		view.CustomMinimumSize = new Vector2(62f, 28f);
++		footer.AddChild(view);
++		return card;
++	}
++
++	private Control CreateMemoryActionCard(MemoryPanelActionItem action)
++	{
++		Color accent = action.Kind == "goal" ? new Color(0.64f, 0.38f, 0.88f)
++			: action.Kind == "workflow" ? new Color(0.23f, 0.63f, 0.68f)
++			: new Color(0.90f, 0.45f, 0.45f);
++		var card = CreateMemoryCard(new Color(0.985f, 0.965f, 1f, 0.90f), 13, accent);
++		var margin = new MarginContainer();
++		margin.AddThemeConstantOverride("margin_left", 13);
++		margin.AddThemeConstantOverride("margin_right", 13);
++		margin.AddThemeConstantOverride("margin_top", 10);
++		margin.AddThemeConstantOverride("margin_bottom", 10);
++		card.AddChild(margin);
++		var box = new VBoxContainer();
++		margin.AddChild(box);
++		string kind = action.Kind == "goal" ? "Mục tiêu" : action.Kind == "workflow" ? "Quy trình" : "Cam kết";
++		var title = CreateUiLabel($"{kind}: {action.Title}", 12, MemoryInk);
++		title.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++		box.AddChild(title);
++		if (!string.IsNullOrWhiteSpace(action.Detail))
++		{
++			var detail = CreateUiLabel(action.Detail, 10, MemoryInkSoft);
++			detail.AutowrapMode = TextServer.AutowrapMode.WordSmart;
++			box.AddChild(detail);
++		}
++		return card;
++	}
++
++	private void SelectMemoryRecord(MemoryPanelRecord record)
++	{
++		_selectedMemoryRecord = record;
++		bool enabled = record != null;
++		SetMemoryDetailEnabled(enabled);
++		_memoryExplanationLabel.Text = "Chưa đọc nguồn.";
++		if (!enabled)
++		{
++			_memoryDetailTitle.Text = "Chọn một mục để xem";
++			_memoryDetailMeta.Text = "Bạn có thể xem nguồn, sửa, xác nhận hoặc quên từng mục.";
++			_memoryDetailPath.Text = "";
++			_memoryEditValue.Text = "";
++			return;
++		}
++		_memoryDetailTitle.Text = record.Label;
++		_memoryDetailMeta.Text = $"{record.ExplicitnessLabel} · {record.CertaintyLabel} · {record.ScopeLabel}\n"
++			+ $"Độ chắc chắn hiển thị: {Mathf.RoundToInt(record.Confidence * 100f)}% · lặp lại {record.Recurrence} lần";
++		_memoryDetailPath.Text = $"Đường dẫn nội bộ: {record.Path}";
++		_memoryEditValue.Text = record.DisplayValue;
++		_memoryScopeSelect.Select(record.ScopeKind == "project" ? 1 : 0);
++		_memoryProjectInput.Visible = record.ScopeKind == "project";
++		_memoryProjectInput.Text = record.ScopeKey;
++		_memoryHardDeleteToggle.ButtonPressed = false;
++		_memoryHardDeleteArmedPath = "";
++		_memoryForgetButton.Text = "Quên mục này";
++	}
++
++	private void SaveSelectedMemory()
++	{
++		if (_selectedMemoryRecord == null)
++			return;
++		SendMemoryPanelRequest("correct", new Dictionary<string, object>
++		{
++			["path"] = _selectedMemoryRecord.Path,
++			["value"] = _memoryEditValue.Text,
++			["project_id"] = _selectedMemoryRecord.ScopeKind == "project" ? _selectedMemoryRecord.ScopeKey : "",
++		});
++	}
++
++	private void ConfirmSelectedMemory()
++	{
++		if (_selectedMemoryRecord == null)
++			return;
++		SendMemoryPanelRequest("confirm", new Dictionary<string, object>
++		{
++			["path"] = _selectedMemoryRecord.Path,
++			["project_id"] = _selectedMemoryRecord.ScopeKind == "project" ? _selectedMemoryRecord.ScopeKey : "",
++		});
++	}
++
++	private void ExplainSelectedMemory()
++	{
++		if (_selectedMemoryRecord == null)
++			return;
++		_memoryExplanationLabel.Text = "Đang đọc nguồn...";
++		SendMemoryPanelRequest("explain", new Dictionary<string, object>
++		{
++			["path"] = _selectedMemoryRecord.Path,
++			["project_id"] = _selectedMemoryRecord.ScopeKind == "project" ? _selectedMemoryRecord.ScopeKey : "",
++		});
++	}
++
++	private void MoveSelectedMemoryScope()
++	{
++		if (_selectedMemoryRecord == null)
++			return;
++		bool project = _memoryScopeSelect.Selected == 1;
++		SendMemoryPanelRequest("move_scope", new Dictionary<string, object>
++		{
++			["path"] = _selectedMemoryRecord.Path,
++			["project_id"] = _selectedMemoryRecord.ScopeKind == "project" ? _selectedMemoryRecord.ScopeKey : "",
++			["target_scope_kind"] = project ? "project" : "global",
++			["target_scope_key"] = project ? _memoryProjectInput.Text.Trim() : "",
++		});
++	}
++
++	private void ForgetSelectedMemory()
++	{
++		if (_selectedMemoryRecord == null)
++			return;
++		bool hard = _memoryHardDeleteToggle.ButtonPressed;
++		if (hard && !string.Equals(_memoryHardDeleteArmedPath, _selectedMemoryRecord.Path, StringComparison.Ordinal))
++		{
++			_memoryHardDeleteArmedPath = _selectedMemoryRecord.Path;
++			_memoryForgetButton.Text = "Bấm lần nữa để xóa";
++			SetMemoryStatus("Xóa hoàn toàn không thể hoàn tác. Bấm nút lần nữa để xác nhận.", true);
++			return;
++		}
++		_memoryHardDeleteArmedPath = "";
++		_memoryForgetButton.Text = "Quên mục này";
++		SendMemoryPanelRequest("forget", new Dictionary<string, object>
++		{
++			["path"] = _selectedMemoryRecord.Path,
++			["project_id"] = _selectedMemoryRecord.ScopeKind == "project" ? _selectedMemoryRecord.ScopeKey : "",
++			["hard"] = hard,
++		});
++	}
++
++	private void TickMemoryPanelStatus()
++	{
++		if (!_memoryRequestPending)
++			return;
++		ulong elapsed = Time.GetTicksMsec() - _memoryRequestSentAtMs;
++		if (elapsed > 6500)
++		{
++			_memoryRequestPending = false;
++			SetMemoryStatus("Brain chưa trả lời; vẫn đang hiển thị cache gần nhất.", true);
++		}
++	}
++
++	private void SetMemoryStatus(string text, bool error = false)
++	{
++		if (_memoryStatusLabel == null)
++			return;
++		_memoryStatusLabel.Text = text;
++		_memoryStatusLabel.AddThemeColorOverride("font_color", error ? new Color(0.76f, 0.18f, 0.28f) : MemoryInkSoft);
++	}
++
++	private void SetMemoryDetailEnabled(bool enabled)
++	{
++		foreach (BaseButton button in new BaseButton[] { _memorySaveButton, _memoryConfirmButton, _memoryExplainButton, _memoryMoveScopeButton, _memoryForgetButton })
++			if (button != null) button.Disabled = !enabled;
++		if (_memoryEditValue != null) _memoryEditValue.Editable = enabled;
++		if (_memoryScopeSelect != null) _memoryScopeSelect.Disabled = !enabled;
++		if (_memoryProjectInput != null) _memoryProjectInput.Editable = enabled;
++		if (_memoryHardDeleteToggle != null) _memoryHardDeleteToggle.Disabled = !enabled;
++	}
++
++	private Button CreateMemoryButton(string text, Action onPressed, bool primary, bool danger = false)
++	{
++		var button = new Button
++		{
++			Text = text,
++			MouseDefaultCursorShape = Control.CursorShape.PointingHand,
++			CustomMinimumSize = new Vector2(96f, 32f),
++			ClipText = true,
++			TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis,
++		};
++		Color bg = danger ? new Color(0.98f, 0.88f, 0.90f) : primary ? MemoryPink : new Color(1f, 0.98f, 0.99f);
++		Color border = danger ? new Color(0.88f, 0.42f, 0.48f) : MemoryBorder;
++		var normal = new StyleBoxFlat
++		{
++			BgColor = bg,
++			BorderColor = border,
++			BorderWidthLeft = 1,
++			BorderWidthTop = 1,
++			BorderWidthRight = 1,
++			BorderWidthBottom = 1,
++			CornerRadiusTopLeft = 10,
++			CornerRadiusTopRight = 10,
++			CornerRadiusBottomLeft = 10,
++			CornerRadiusBottomRight = 10,
++			ContentMarginLeft = 8,
++			ContentMarginRight = 8,
++			ContentMarginTop = 4,
++			ContentMarginBottom = 4,
++		};
++		var hover = (StyleBoxFlat)normal.Duplicate();
++		hover.BgColor = danger ? new Color(1f, 0.82f, 0.86f) : primary ? new Color(0.98f, 0.43f, 0.68f) : new Color(1f, 0.92f, 0.96f);
++		button.AddThemeStyleboxOverride("normal", normal);
++		button.AddThemeStyleboxOverride("hover", hover);
++		button.AddThemeStyleboxOverride("pressed", hover);
++		button.AddThemeStyleboxOverride("focus", hover);
++		button.AddThemeColorOverride("font_color", primary ? Colors.White : danger ? new Color(0.72f, 0.15f, 0.23f) : MemoryInk);
++		button.AddThemeColorOverride("font_hover_color", primary ? Colors.White : MemoryPink);
++		button.AddThemeFontSizeOverride("font_size", 10);
++		button.Pressed += onPressed;
++		return button;
++	}
++
++	private static PanelContainer CreateMemoryCard(Color background, int radius, Color? leftAccent = null)
++	{
++		var card = new PanelContainer();
++		var style = new StyleBoxFlat
++		{
++			BgColor = background,
++			BorderColor = new Color(0.95f, 0.78f, 0.86f, 0.82f),
++			BorderWidthLeft = leftAccent.HasValue ? 4 : 1,
++			BorderWidthTop = 1,
++			BorderWidthRight = 1,
++			BorderWidthBottom = 1,
++			CornerRadiusTopLeft = radius,
++			CornerRadiusTopRight = radius,
++			CornerRadiusBottomLeft = radius,
++			CornerRadiusBottomRight = radius,
++		};
++		if (leftAccent.HasValue)
++			style.BorderColor = leftAccent.Value;
++		card.AddThemeStyleboxOverride("panel", style);
++		return card;
++	}
++
++	private static void StyleMemoryInput(Control control)
++	{
++		var normal = new StyleBoxFlat
++		{
++			BgColor = new Color(1f, 1f, 1f, 0.86f),
++			BorderColor = MemoryBorder,
++			BorderWidthLeft = 1,
++			BorderWidthTop = 1,
++			BorderWidthRight = 1,
++			BorderWidthBottom = 1,
++			CornerRadiusTopLeft = 10,
++			CornerRadiusTopRight = 10,
++			CornerRadiusBottomLeft = 10,
++			CornerRadiusBottomRight = 10,
++			ContentMarginLeft = 9,
++			ContentMarginRight = 9,
++			ContentMarginTop = 6,
++			ContentMarginBottom = 6,
++		};
++		control.AddThemeStyleboxOverride("normal", normal);
++		control.AddThemeStyleboxOverride("focus", normal);
++		control.AddThemeColorOverride("font_color", MemoryInk);
++		control.AddThemeFontSizeOverride("font_size", 11);
++	}
++
++	private static bool MemoryRecordMatchesTab(MemoryPanelRecord record, int tab) => tab switch
++	{
++		1 => record.Category == "about" || record.Category == "communication" || record.Category == "interaction",
++		2 => record.Category == "preferences",
++		3 => record.Category == "projects",
++		4 => record.Category == "workflow",
++		5 => record.Explicitness == "inferred" || record.Confidence < 0.72f,
++		_ => true,
++	};
++
++	private static bool ActionMatchesTab(MemoryPanelActionItem action, int tab) => tab switch
++	{
++		3 => action.Kind is "goal" or "commitment",
++		4 => action.Kind == "workflow",
++		_ => true,
++	};
++
++	private static bool MemoryRecordMatchesSearch(MemoryPanelRecord record, string query)
++	{
++		if (string.IsNullOrWhiteSpace(query)) return true;
++		return ContainsIgnoreCase(record.Label, query)
++			|| ContainsIgnoreCase(record.DisplayValue, query)
++			|| ContainsIgnoreCase(record.Path, query)
++			|| ContainsIgnoreCase(record.ScopeLabel, query);
++	}
++
++	private static bool ActionMatchesSearch(MemoryPanelActionItem action, string query)
++	{
++		if (string.IsNullOrWhiteSpace(query)) return true;
++		return ContainsIgnoreCase(action.Title, query) || ContainsIgnoreCase(action.Detail, query);
++	}
++
++	private static bool ContainsIgnoreCase(string value, string query) =>
++		(value ?? "").IndexOf(query ?? "", StringComparison.OrdinalIgnoreCase) >= 0;
++
++	private static string CompactSummaryForPanel(string text)
++	{
++		string clean = (text ?? "").Replace("\r", "").Trim();
++		if (clean.Length <= 760) return clean;
++		return clean[..757].TrimEnd() + "...";
++	}
++
++	private static string FormatMemoryExplanation(JsonElement explanation)
++	{
++		if (explanation.ValueKind != JsonValueKind.Array || explanation.GetArrayLength() == 0)
++			return "Không tìm thấy evidence chi tiết. Memory có thể đến từ dữ liệu legacy hoặc bản tổng hợp cũ.";
++		var lines = new List<string>();
++		foreach (JsonElement row in explanation.EnumerateArray())
++		{
++			if (row.ValueKind != JsonValueKind.Object) continue;
++			string summary = ReadJsonString(row, "summary");
++			string reason = ReadJsonString(row, "reason");
++			string note = ReadJsonString(row, "note");
++			if (string.IsNullOrWhiteSpace(summary)) summary = ReadJsonString(row, "detail");
++			if (!string.IsNullOrWhiteSpace(summary)) lines.Add("• " + summary);
++			if (!string.IsNullOrWhiteSpace(note)) lines.Add("• " + note);
++			if (!string.IsNullOrWhiteSpace(reason)) lines.Add("  " + reason);
++			JsonElement evidence = default;
++			bool hasEvidence = row.TryGetProperty("evidence", out evidence) || row.TryGetProperty("sources", out evidence);
++			if (hasEvidence && evidence.ValueKind == JsonValueKind.Array)
++			{
++				foreach (JsonElement item in evidence.EnumerateArray().Take(4))
++				{
++					string excerpt = item.ValueKind == JsonValueKind.Object ? ReadJsonString(item, "excerpt") : item.ToString();
++					if (!string.IsNullOrWhiteSpace(excerpt)) lines.Add("  - " + excerpt);
++				}
++			}
++		}
++		return lines.Count > 0 ? string.Join("\n", lines) : "Nguồn tồn tại nhưng không có đoạn trích hiển thị.";
++	}
++
++	private static string ReadJsonString(JsonElement root, string name)
++	{
++		if (!root.TryGetProperty(name, out JsonElement value)) return "";
++		return value.ValueKind switch
++		{
++			JsonValueKind.String => value.GetString() ?? "",
++			JsonValueKind.Null => "",
++			_ => value.ToString(),
++		};
++	}
++
++	private static int ReadJsonInt(JsonElement root, string name)
++	{
++		if (!root.TryGetProperty(name, out JsonElement value)) return 0;
++		if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out int number)) return number;
++		return int.TryParse(value.ToString(), out int parsed) ? parsed : 0;
++	}
++
++	private static float ReadJsonFloat(JsonElement root, string name)
++	{
++		if (!root.TryGetProperty(name, out JsonElement value)) return 0f;
++		if (value.ValueKind == JsonValueKind.Number && value.TryGetSingle(out float number)) return number;
++		return float.TryParse(value.ToString(), out float parsed) ? parsed : 0f;
++	}
++
++	private static double ReadJsonDouble(JsonElement root, string name)
++	{
++		if (!root.TryGetProperty(name, out JsonElement value)) return 0.0;
++		if (value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out double number)) return number;
++		return double.TryParse(value.ToString(), out double parsed) ? parsed : 0.0;
++	}
++
++	private static string JoinJsonArray(JsonElement value, string separator)
++	{
++		if (value.ValueKind != JsonValueKind.Array) return "";
++		return string.Join(separator, value.EnumerateArray().Select(x => x.ValueKind == JsonValueKind.String ? x.GetString() : x.ToString()).Where(x => !string.IsNullOrWhiteSpace(x)));
++	}
++
++	private void SaveMemoryPanelCache(string json)
++	{
++		try
++		{
++			using var file = Godot.FileAccess.Open(MemoryPanelCachePath, Godot.FileAccess.ModeFlags.Write);
++			file?.StoreString(json);
++		}
++		catch (Exception ex)
++		{
++			GD.PrintErr($"[MemoryPanel] Cache save failed: {ex.Message}");
++		}
++	}
++
++	private void LoadMemoryPanelCache()
++	{
++		try
++		{
++			if (!Godot.FileAccess.FileExists(MemoryPanelCachePath)) return;
++			using var file = Godot.FileAccess.Open(MemoryPanelCachePath, Godot.FileAccess.ModeFlags.Read);
++			string json = file?.GetAsText() ?? "";
++			if (string.IsNullOrWhiteSpace(json)) return;
++			using JsonDocument doc = JsonDocument.Parse(json);
++			if (doc.RootElement.ValueKind == JsonValueKind.Object)
++				ApplyMemoryPanelSnapshot(doc.RootElement);
++		}
++		catch (Exception ex)
++		{
++			GD.PrintErr($"[MemoryPanel] Cache load failed: {ex.Message}");
++		}
++	}
++}
+diff -ruN a/body/UdpListener.MemoryPanel.cs.uid b/body/UdpListener.MemoryPanel.cs.uid
+--- a/body/UdpListener.MemoryPanel.cs.uid	1970-01-01 00:00:00.000000000 +0000
++++ b/body/UdpListener.MemoryPanel.cs.uid	2026-07-26 12:07:28.209201673 +0000
+@@ -0,0 +1 @@
++uid://bq7mem0rypane1
+diff -ruN a/body/UdpListener.cs b/body/UdpListener.cs
+--- a/body/UdpListener.cs	2026-07-23 19:29:36.000000000 +0000
++++ b/body/UdpListener.cs	2026-07-26 12:06:25.189199394 +0000
+@@ -331,6 +331,7 @@
+ 		_characterContextMenu.Size = CharacterContextMenuMinSize;
+ 		_characterContextMenu.ZIndex = 100;
+ 		BuildCharacterContextMenuUi();
++		InitializeMemoryPanel();
+ 		_emotionPanel = GetNode<Panel>("CanvasLayer/Control/EmotionPanel");
+ 		_emotionPanel.CustomMinimumSize = EmotionPanelMinSize;
+ 		_emotionPanel.Size = EmotionPanelMinSize;
+@@ -396,6 +397,7 @@
+ 		MakePanelDraggable(_tutorPanel);
+ 		MakePanelDraggable(_depthPanel);
+ 		MakePanelDraggable(_settingsPanel);
++		MakePanelDraggable(_memoryPanel);
+ 
+ 		var cs  = GetNode<CollisionShape2D>("Monika2/CollisionShape2D");
+ 
+@@ -490,6 +492,7 @@
+ 			|| (_privateMindPanel?.Visible ?? false)
+ 			|| (_depthPanel?.Visible ?? false)
+ 			|| (_settingsPanel?.Visible ?? false)
++			|| (_memoryPanel?.Visible ?? false)
+ 			|| _grabModeArmed
+ 			|| _isDraggingCharacter;
+ 
+@@ -602,6 +605,7 @@
+ 		UpdateBubbleAutoHide();
+ 		UpdateTutorPanelAutoHide();
+ 		TickSettingsPanelRuntimeStatus();
++		TickMemoryPanelStatus();
+ 
+ 		while (_udp.GetAvailablePacketCount() > 0)
+ 		{
+@@ -707,6 +711,11 @@
+ 				GetViewport().SetInputAsHandled();
+ 				return;
+ 			}
++			if (_memoryPanel != null && _memoryPanel.Visible && IsMouseOverControl(_memoryPanel, mouseEvent.Position))
++			{
++				GetViewport().SetInputAsHandled();
++				return;
++			}
+ 
+ 			if (IsMouseOverCharacter(mouseEvent.Position))
+ 			{
+@@ -736,6 +745,11 @@
+ 				CloseSettingsPanel();
+ 				GetViewport().SetInputAsHandled();
+ 			}
++			if (_memoryPanel != null && _memoryPanel.Visible)
++			{
++				CloseMemoryPanel();
++				GetViewport().SetInputAsHandled();
++			}
+ 
+ 			return;
+ 		}
+@@ -775,6 +789,15 @@
+ 		{
+ 			CloseSettingsPanel();
+ 		}
++		if (
++			mouseEvent.ButtonIndex == MouseButton.Left
++			&& _memoryPanel != null
++			&& _memoryPanel.Visible
++			&& !IsMouseOverControl(_memoryPanel, mouseEvent.Position)
++		)
++		{
++			CloseMemoryPanel();
++		}
+ 	}
+ 
+ 	public override void _UnhandledInput(InputEvent @event)
+@@ -1213,6 +1236,13 @@
+ 				int closeIndex = _contextCloseButton != null ? _contextCloseButton.GetIndex() : container.GetChildCount() - 1;
+ 				container.MoveChild(_contextDepthButton, Mathf.Max(0, closeIndex));
+ 			}
++			if (_contextMemoryButton == null)
++			{
++				_contextMemoryButton = new Button { Name = "MemoryButton" };
++				container.AddChild(_contextMemoryButton);
++				int closeIndex = _contextCloseButton != null ? _contextCloseButton.GetIndex() : container.GetChildCount() - 1;
++				container.MoveChild(_contextMemoryButton, Mathf.Max(0, closeIndex));
++			}
+ 			if (_contextSettingsButton == null)
+ 			{
+ 				_contextSettingsButton = new Button { Name = "SettingsButton" };
+@@ -1236,6 +1266,7 @@
+ 		ConfigureContextMenuButton(_contextEmotionButton, "Cam xuc", "res://asset/Resource/emotion.png");
+ 		ConfigureContextMenuButton(_contextPrivateMindButton, "Nhật ký nội tâm", "res://asset/Resource/emotion.png");
+ 		ConfigureContextMenuButton(_contextDepthButton, "Identity Runtime", "res://asset/Resource/emotion.png");
++		ConfigureContextMenuButton(_contextMemoryButton, "ERIS nhớ gì về bạn", "res://asset/Resource/emotion.png");
+ 		ConfigureContextMenuButton(_contextSettingsButton, "Cai dat", "res://asset/Resource/emotion.png");
+ 		ConfigureContextMenuButton(_contextExitButton, "Thoat ERIS", "res://asset/Resource/exit.png");
+ 		ConfigureContextMenuButton(_contextCloseButton, "Dong", "res://asset/Resource/exit.png");
+@@ -3740,6 +3771,8 @@
+ 			return;
+ 		if (TryHandleTutorEvent(raw))
+ 			return;
++		if (TryHandleMemoryPanelPacket(raw))
++			return;
+ 		var payload = _decisionParser.Parse(raw);
+ 		if (payload.HasEmotionDebug)
+ 		{
