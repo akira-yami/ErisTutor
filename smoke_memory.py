@@ -19,6 +19,19 @@ MODULES = [
     "memory.memory_cue",
     "memory.memory_models",
     "memory.memory_candidate",
+    # Step 3 — persistence helpers, predicates & memory stores
+    "memory.json_store_io",
+    "memory.predicate_catalog",
+    "memory.predicate_registry",
+    "memory.episodic_memory",
+    "memory.semantic_memory",
+    "memory.procedural_memory",
+    "memory.relational_memory",
+    "memory.repair_memory",
+    "memory.affective_residue_memory",
+    "memory.unresolved_memory",
+    "memory.active_state_snapshot",
+    "memory.event_ledger",
 ]
 
 failed = []
