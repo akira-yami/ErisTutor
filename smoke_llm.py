@@ -5,6 +5,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 MODULES = [
+    # Step 1
     "llm.contracts",
     "llm.json_sanitizer",
     "llm.model_catalog",
@@ -12,6 +13,22 @@ MODULES = [
     "llm.provider_errors",
     "llm.dialogue_recovery",
     "llm.prompt_compaction",
+    # Step 2
+    "llm.key_pool",
+    "llm.token_budget",
+    "llm.token_pressure",
+    "llm.dds",
+    "llm.web_session_guard",
+    # Runtime support
+    "runtime.diagnostic_logging",
+    "runtime.observability",
+    "runtime.pdf_rollout",
+    "runtime.broker_state_store",
+    "runtime.inference_broker",
+    "runtime.rollout_control",
+    "runtime.hardening_metrics",
+    "runtime.provider_health",
+    "runtime.work_keys",
     "llm",
 ]
 
@@ -28,3 +45,4 @@ if failed:
     sys.exit(1)
 
 print("\nAll step-1 LLM modules imported cleanly.")
+

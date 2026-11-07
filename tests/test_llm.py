@@ -37,3 +37,26 @@ def test_recover_dialogue() -> None:
     assert res is not None
     assert res["text"] == "Xin chào bạn!"
     assert res["llm_malformed_json_repair"] is True
+
+
+def test_token_budget_estimate() -> None:
+    from llm.token_budget import estimate_tokens
+    assert estimate_tokens("Hello world") >= 1
+    assert estimate_tokens("Một đoạn văn tiếng Việt mẫu") >= 4
+
+
+def test_web_session_guard() -> None:
+    from llm.web_session_guard import WebSessionGuard
+    guard = WebSessionGuard(max_scopes=10)
+    messages = [{"role": "user", "content": "Hello"}]
+    lease = guard.reserve(
+        base_session_id="sess_1",
+        base_url="https://api.openai.com",
+        model="gpt-4o",
+        credential="sk-test",
+        messages=messages,
+        request_contract={"schema": "v1"},
+    )
+    assert lease.session_id.startswith("sess_1")
+    guard.commit(lease, "Hi there!")
+
