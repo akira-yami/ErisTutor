@@ -148,7 +148,7 @@ class AutonomousLoopRuntimeMixin:
             if _goal_driver is not None:
                 _goal_driver.pump()
         except Exception as _exc:
-            self.logger.warning("[identity-goal-runtime] degraded: %s", _exc)
+            self.logger.debug("[identity-goal-runtime] degraded: %s", _exc)
         from runtime.autonomy.authority_trace import emit as autonomy_trace, span as autonomy_span
         with autonomy_span("autonomous_loop"):
             autonomy_trace("autonomous.iteration.start", source="autonomous_loop")
