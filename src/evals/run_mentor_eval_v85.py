@@ -12,9 +12,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from runtime.engineering_mentor import EngineeringMentorService
-
-
 def _flow(findings: list[str], *, now: float, age_seconds: float = 1.0) -> dict[str, Any]:
     ended = now - max(0.0, float(age_seconds))
     return {
@@ -37,6 +34,8 @@ def _flow(findings: list[str], *, now: float, age_seconds: float = 1.0) -> dict[
 
 
 def evaluate_scenario(scenario: dict[str, Any], *, index: int = 0) -> dict[str, Any]:
+    from runtime.engineering_mentor import EngineeringMentorService
+
     now = 10_000.0 + index * 100.0
     with tempfile.TemporaryDirectory(prefix="eris-v85-eval-") as root:
         base = Path(root)
