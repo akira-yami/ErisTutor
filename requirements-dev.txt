@@ -3,3 +3,8 @@
 
 pytest>=8.0
 ruff>=0.5
+
+# Vision bootstrap tests construct the telemetry service.
+mss
+Pillow
+psutil
