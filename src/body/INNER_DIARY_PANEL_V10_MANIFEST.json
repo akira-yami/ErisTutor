@@ -1,0 +1,26 @@
+{
+  "schema": "eris.body.inner_diary_panel.v10",
+  "target_contract": "eris.inner_diary.v2",
+  "panel_title": "Inner Diary",
+  "cache": {
+    "primary": "user://inner_diary_state.json",
+    "legacy_read_only": "user://inner_state_panel.json"
+  },
+  "sections": [
+    "Suy nghĩ hiện tại",
+    "Suy nghĩ tương lai",
+    "Đang bận tâm",
+    "Phân tích gần đây",
+    "Muốn nói"
+  ],
+  "canonical_inputs": [
+    "inner_diary.sections",
+    "inner_diary.memory_echo",
+    "inner_diary.writer",
+    "inner_diary_contract.writer"
+  ],
+  "removed_adapter": "UdpListener.IdentityPrivateMind.cs",
+  "emotion_debug_changed": false,
+  "compiled": false,
+  "compile_note": "Không có Godot hoặc .NET compiler trong môi trường kiểm tra."
+}

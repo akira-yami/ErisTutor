@@ -14,8 +14,10 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="ErisTutor"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+config/name="Eris"
+run/main_scene="res://src/body/udpListener.tscn"
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
+config/icon="res://icon.jpg"
 
 [display]
 

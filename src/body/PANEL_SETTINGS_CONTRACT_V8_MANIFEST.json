@@ -1,0 +1,15 @@
+{
+  "contract": "panel-settings-v8",
+  "runtime_schema": 14,
+  "runtime_sections": 24,
+  "runtime_fields": 196,
+  "credential_owners": ["main", "gemini", "groq", "elevenlabs"],
+  "surfaces": {
+    "basic": "body_local",
+    "voice": "brain_runtime:tts",
+    "advanced": "brain_runtime:advanced",
+    "data": "bootstrap_credentials",
+    "danger": "maintenance"
+  },
+  "raw_secrets_in_health": false
+}

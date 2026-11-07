@@ -1,0 +1,12 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="src/body/richchat/**/*" Exclude="src/body/richchat/**/*.txt" />
+    <Compile Remove="src\UdpListener.cs;src\integration\body_contracts\**" />
+    <Compile Remove="dist\**;build\**;scratch\**" />
+  </ItemGroup>
+</Project>
