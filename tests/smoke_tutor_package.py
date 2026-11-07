@@ -18,6 +18,12 @@ MODULES = [
     "runtime.pedagogical_contracts",
     "runtime.pedagogical_plan_builder",
     "runtime.capabilities.tutor",
+    "runtime.ai_orchestrated.bootstrap",
+    "runtime.ai_orchestrated.model_router",
+    "runtime.stage_contracts",
+    "runtime.stage_output",
+    "runtime.public_surface_commit",
+    "runtime.voice_profile_compiler",
 ]
 
 
@@ -25,3 +31,4 @@ MODULES = [
 def test_import_tutor_module(mod):
     imported = importlib.import_module(mod)
     assert imported is not None
+

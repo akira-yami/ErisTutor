@@ -5,7 +5,8 @@ import logging
 import os
 import threading
 import time
-from typing import Any, Callable
+import uuid
+from typing import Any, Callable, Mapping
 
 from domain import Decision
 from failure_meta import is_technical_failure_meta
@@ -65,6 +66,19 @@ class RuntimeCoordinator(
         self.subconscious_runtime_enabled = False
         self.cognitive_substrate = type("SubstrateStub", (), {"stop": lambda self: None})()
 
+        # Chat Cycle State
+        self.chat_mode = False
+        self._chat_processing = False
+        self._chat_last_activity_at = 0.0
+        self._temporal_session_started_at = time.time()
+        self._temporal_last_user_turn_at = 0.0
+        self._temporal_last_assistant_turn_at = 0.0
+        self.repeated_user_count = 0
+        self.last_user_signature = ""
+        self.last_user_text_for_semantics = ""
+        self.last_chat_answer = ""
+        self.chat_history: list[dict[str, str]] = []
+
         # Settings & Health
         try:
             self.runtime_settings_store = get_runtime_settings_store(logger=self.logger)
@@ -95,7 +109,15 @@ class RuntimeCoordinator(
         self.world_state_service = ensure_world_state_service(self)
         self.open_loop_store = ensure_open_loop_store(self)
 
-        # AI Orchestrated Runtime (Architecture C)
+        # Conversation history buffer
+        self.chat_history: list[dict[str, str]] = []
+
+        # AI Orchestrated Runtime (Architecture C) with Tutor & Kernel
+        self.learning_service = None
+        self.tutor_executive = None
+        self.tutor_capability = None
+        self.conversation_kernel = None
+        self.ai_runtime_enabled = False
         try:
             from runtime.ai_orchestrated.bootstrap import install_ai_orchestrated_runtime
             install_ai_orchestrated_runtime(self, self.llm_service)
@@ -106,6 +128,81 @@ class RuntimeCoordinator(
 
     def bind_tts_engine(self, engine: Any) -> None:
         self.tts_engine = engine
+
+    def _send_decision_to_body(self, decision: Any, *, channel: str | None = None, **kwargs: Any) -> bool:
+        """Send synthesized decision payload over transport to Godot Live2D body."""
+        payload = decision.to_payload() if hasattr(decision, "to_payload") else dict(decision)
+        if hasattr(self, "transport") and hasattr(self.transport, "send_json"):
+            try:
+                self.transport.send_json(payload)
+                return True
+            except Exception as exc:
+                self.logger.warning("[RuntimeCoordinator] Failed to send decision to body: %s", exc)
+                return False
+        return True
+
+    def _send_runtime_json(self, payload: Mapping[str, Any], *, channel: str | None = None) -> bool:
+        """Send raw runtime telemetry or canvas payload over transport."""
+        if hasattr(self, "transport") and hasattr(self.transport, "send_json"):
+            try:
+                self.transport.send_json(dict(payload))
+                return True
+            except Exception as exc:
+                self.logger.warning("[RuntimeCoordinator] Failed to send runtime json: %s", exc)
+                return False
+        return False
+
+    def _append_chat_history(
+        self,
+        role: str,
+        text: str,
+        *,
+        invalid: bool = False,
+        pending_delivery_id: str = "",
+        **kwargs: Any,
+    ) -> None:
+        """Append turn to local sliding chat history."""
+        if not hasattr(self, "chat_history") or not isinstance(self.chat_history, list):
+            self.chat_history = []
+        entry: dict[str, Any] = {
+            "role": role,
+            "content": text,
+            "created_at": time.time(),
+            "history_id": f"history:{uuid.uuid4().hex}",
+        }
+        if invalid:
+            entry["invalid"] = True
+        if role == "assistant" and pending_delivery_id:
+            entry["delivery_id"] = str(pending_delivery_id)[:180]
+            entry["delivery_status"] = "pending"
+        self.chat_history.append(entry)
+        if len(self.chat_history) > 64:
+            self.chat_history = self.chat_history[-64:]
+
+    def _chat_history_for_llm(self, limit: int = 32) -> list[dict[str, str]]:
+        """Retrieve recent chat history window for LLM context."""
+        hist = getattr(self, "chat_history", []) or []
+        return list(hist[-limit:])
+
+    def _link_previous_public_turn_for_chat(self, user_timestamp: float) -> Any:
+        return None
+
+    def _previous_public_turn_context(self, public_turn: Any) -> str:
+        return ""
+
+    def _capture_speech_interrupt_for_user(self, user_text: str, *, timestamp: float | None = None) -> Any:
+        return None
+
+    def _supersede_tts_for_new_user_turn(self, reason: str = "") -> None:
+        pass
+
+    def _handle_force_speak_request(self) -> None:
+        orchestrator = getattr(self, "ai_autonomous_orchestrator", None)
+        if orchestrator is not None:
+            orchestrator.run_force_speak("Eris xin chào!")
+
+    def _handle_stage_inbound_event(self, msg: Mapping[str, Any]) -> None:
+        pass
 
     def _get_internal_state(self) -> Any:
         return None
