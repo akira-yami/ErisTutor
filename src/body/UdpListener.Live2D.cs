@@ -191,23 +191,23 @@ public partial class UdpListener
 	{
 		if (_body != null)
 			_body.Visible = true;
-		if (_monika == null)
+		if (_avatar == null)
 			return;
 		if (!_capturedSpriteVisual)
 		{
-			_spriteSelfModulateBeforeLive2D = _monika.SelfModulate;
+			_spriteSelfModulateBeforeLive2D = _avatar.SelfModulate;
 			_capturedSpriteVisual = true;
 		}
 		Color original = _spriteSelfModulateBeforeLive2D;
-		_monika.SelfModulate = new Color(original.R, original.G, original.B, 0f);
+		_avatar.SelfModulate = new Color(original.R, original.G, original.B, 0f);
 	}
 
 	private void Restore2DSpriteVisual()
 	{
 		if (_body != null)
 			_body.Visible = true;
-		if (_monika != null && _capturedSpriteVisual)
-			_monika.SelfModulate = _spriteSelfModulateBeforeLive2D;
+		if (_avatar != null && _capturedSpriteVisual)
+			_avatar.SelfModulate = _spriteSelfModulateBeforeLive2D;
 		_capturedSpriteVisual = false;
 	}
 
@@ -388,8 +388,8 @@ public partial class UdpListener
 		EnsureControlOnCanvasLayer(liveBubble, 999);
 		// Live2D không lật cả sprite như body pixel. Giữ bubble và chữ không bị
 		// mirror theo trạng thái facing còn sót lại của MotionController.
-		if (_monika != null)
-			_monika.Scale = Vector2.One;
+		if (_avatar != null)
+			_avatar.Scale = Vector2.One;
 		liveBubble.Scale = Vector2.One;
 		if (_hasLive2DWindowRect)
 			PositionLive2DBubbleBesideModel(liveBubble);
