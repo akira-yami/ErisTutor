@@ -1,0 +1,20 @@
+# ErisTutor — runtime dependencies
+#
+# FOUNDATION (feat/foundation): the foundation modules (domain, transport, core,
+# screen policy/store, app_logging, eris_secrets, failure_meta, secret_versions,
+# runtime.secure_redaction) import on the Python standard library alone. Nothing
+# here is required just to import or test the foundation layer.
+#
+# The entries below are OPTIONAL and only needed when a later feature actually
+# uses them. They are listed (commented) so other machines know exactly what to
+# install when enabling that feature, instead of hitting a missing-module error
+# at runtime. Screen OCR/vision workers are lazy-imported, so leaving these out
+# does NOT break foundation import.
+
+# --- screen text / OCR workers (optional; lazy-imported by screen/) ---
+# mss              # screen capture
+# Pillow           # image processing (PIL)
+# numpy>=2.0.0     # OCR preprocessing
+# pytesseract      # OCR — ALSO needs the Tesseract OCR binary installed on the OS
+# requests         # vision perception worker HTTP calls
+# uiautomation     # Windows UI Automation reader (Windows-only)
