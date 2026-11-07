@@ -85,6 +85,7 @@ cache/
 
 # Editors / OS / Godot build artifacts
 *.pdb
+.godot/mono/temp/bin/Debug/GodotSharpEditor.dll
 .vscode/
 .idea/
 .DS_Store

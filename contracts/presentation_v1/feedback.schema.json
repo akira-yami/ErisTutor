@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:eris:renderer-feedback:v1",
+  "title": "Eris RendererFeedback v1",
+  "type": "object",
+  "required": ["type", "renderer_id", "intent_id", "artifact_id", "revision", "status", "code", "retryable"],
+  "properties": {
+    "type": {"const": "renderer.feedback.v1"},
+    "renderer_id": {"type": "string", "minLength": 1},
+    "intent_id": {"type": "string", "minLength": 1},
+    "artifact_id": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["accepted", "applied", "rendered", "visible", "failed"]},
+    "code": {"enum": ["OK_ACCEPTED", "OK_APPLIED", "OK_RENDERED", "OK_VISIBLE", "E_SCHEMA", "E_UNSUPPORTED_KIND", "E_STALE_REVISION", "E_RENDER", "E_BUSY", "E_TIMEOUT", "E_TRANSPORT"]},
+    "retryable": {"type": "boolean"},
+    "detail": {"type": ["string", "null"]},
+    "render_ms": {"type": "number", "minimum": 0}
+  }
+}

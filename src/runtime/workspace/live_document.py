@@ -104,16 +104,14 @@ class LiveDocument:
                 index = self.order.index(after_id) + 1 if after_id else len(self.order)
                 self.order.insert(index, block_id)
                 self.blocks[block_id] = normalized
-                if owner == "writer":
-                    self.writer_touched.add(block_id)
+                if owner == "writer": self.writer_touched.add(block_id)
             elif operation == "replace_block":
                 if owner == "presenter" and block_id in self.writer_touched:
                     raise RevisionConflict("Writer đã sửa khối này; Presenter không được ghi đè")
                 if block_id not in self.blocks:
                     raise ValueError("Không tìm thấy khối cần sửa")
                 self.blocks[block_id] = normalized
-                if owner == "writer":
-                    self.writer_touched.add(block_id)
+                if owner == "writer": self.writer_touched.add(block_id)
             elif operation == "remove_block":
                 if block_id not in self.blocks:
                     raise ValueError("Không tìm thấy khối cần xóa")
@@ -273,10 +271,8 @@ class LiveWorkspaceService:
                 if block.get("type") == "formula":
                     # Mỗi block có PNG riêng; dùng cùng document_id sẽ ghi đè math_0.png
                     # và khiến các block trước không còn khớp SHA-256 khi Godot đọc.
-                    try:
-                        _render_math([block], self.workspace, f"{doc.document_id}_b{index:03d}")
-                    except (ImportError, OSError, ValueError):
-                        pass
+                    try: _render_math([block], self.workspace, f"{doc.document_id}_b{index:03d}")
+                    except (ImportError, OSError, ValueError): pass
                 if not self.revise(doc, operation="insert_block", block_id=f"b{index:03d}", block=block,
                                    owner="presenter", host=host, port=port):
                     return False
@@ -284,14 +280,11 @@ class LiveWorkspaceService:
             improved = compose_with_model(router, doc.source_text)
             if improved and self.is_current():
                 for index, block in enumerate(improved):
-                    if not self.is_current():
-                        return False
+                    if not self.is_current(): return False
                     item = dict(block)
                     if item.get("type") == "formula":
-                        try:
-                            _render_math([item], self.workspace, f"{doc.document_id}_b{index:03d}")
-                        except (ImportError, OSError, ValueError):
-                            pass
+                        try: _render_math([item], self.workspace, f"{doc.document_id}_b{index:03d}")
+                        except (ImportError, OSError, ValueError): pass
                     if index < len(doc.order):
                         op, key = "replace_block", doc.order[index]
                         if key in doc.writer_touched:
@@ -299,34 +292,27 @@ class LiveWorkspaceService:
                     else:
                         op, key = "insert_block", f"b{index:03d}"
                     if not self.revise(doc, operation=op, block_id=key, block=item,
-                                       owner="presenter", host=host, port=port):
-                                           return False
+                                       owner="presenter", host=host, port=port): return False
                 while len(doc.order) > len(improved):
                     if not self.revise(doc, operation="remove_block", block_id=doc.order[-1],
-                                       owner="presenter", host=host, port=port):
-                                           return False
+                                       owner="presenter", host=host, port=port): return False
             if router is not None and self.is_current():
                 edits = review_with_writer(router, doc.source_text, doc.snapshot())
                 for item in edits:
-                    if not self.is_current():
-                        return False
+                    if not self.is_current(): return False
                     revision = doc.revision
                     block = item['block']
                     if block.get('type') == 'formula':
-                        try:
-                            _render_math([block], self.workspace, f"{doc.document_id}_{item['block_id']}_writer")
-                        except (ImportError, OSError, ValueError):
-                            pass
+                        try: _render_math([block], self.workspace, f"{doc.document_id}_{item['block_id']}_writer")
+                        except (ImportError, OSError, ValueError): pass
                     try:
                         if not self.revise(doc, operation='replace_block', block_id=item['block_id'],
                                            block=block, base_revision=revision, owner='writer',
-                                           host=host, port=port):
-                                               return False
+                                           host=host, port=port): return False
                     except RevisionConflict:
                         # Có chỉnh sửa đồng thời: giữ bản mới, không ghi đè mù.
                         continue
-            if not self.is_current():
-                return False
+            if not self.is_current(): return False
             return self.revise(doc, operation="finalize", host=host, port=port)
         except Exception:
             # Mọi lỗi của nhánh trình bày đều không làm hỏng cuộc thoại/TTS.
@@ -437,17 +423,13 @@ def review_with_writer(router: Any, source: str, snapshot: Mapping[str, Any]) ->
         cognitive_lane='workspace_writer_revision', temperature=0,
     )
     edits = result.get('edits') if isinstance(result, dict) else None
-    if not isinstance(edits, list) or len(edits)>12:
-        return []
+    if not isinstance(edits, list) or len(edits)>12: return []
     clean=[]
     valid_ids={b.get('block_id') for b in snapshot.get('blocks', [])}
     for entry in edits:
-        if not isinstance(entry, Mapping) or entry.get('block_id') not in valid_ids:
-            continue
+        if not isinstance(entry, Mapping) or entry.get('block_id') not in valid_ids: continue
         block={k:v for k,v in entry.items() if k!='block_id'}
-        try:
-            block=_bounded_block(block)
-        except (ValueError, TypeError):
-            continue
+        try: block=_bounded_block(block)
+        except (ValueError, TypeError): continue
         clean.append({'block_id':entry['block_id'], 'block':block})
     return clean

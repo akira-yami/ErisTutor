@@ -890,7 +890,11 @@ def _synthesize_elevenlabs_wav(
         if not permit.allowed:
             raise RuntimeError(f"TTS circuit breaker {permit.state.value}: {permit.reason}")
 
-    if auth_type == "bearer":
+    force_dialogue = (
+        str(os.environ.get("ERIS_ELEVENLABS_FORCE_DIALOGUE", "0") or "0").strip().lower() in {"1", "true", "yes"}
+        or str(model).strip() == "eleven_v3_dialogue"
+    )
+    if auth_type == "bearer" and force_dialogue:
         url = "https://api.us.elevenlabs.io/v1/text-to-dialogue/stream"
         # PCM 24 kHz đi thẳng vào pipeline hiện tại, tránh decode MP3 trung gian
         # và chuẩn bị sẵn đường cho playback streaming sau này.
@@ -947,8 +951,14 @@ def _synthesize_elevenlabs_wav(
         headers = {
             "Accept": "application/octet-stream",
             "Content-Type": "application/json",
-            "xi-api-key": token,
         }
+        if auth_type == "bearer":
+            headers["authorization"] = f"Bearer {token}"
+            headers["Origin"] = "https://elevenlabs.io"
+            headers["Referer"] = "https://elevenlabs.io/"
+            headers["User-Agent"] = "Mozilla/5.0"
+        else:
+            headers["xi-api-key"] = token
 
     try:
         import requests
@@ -976,7 +986,7 @@ def _synthesize_elevenlabs_wav(
                 estimated_input_tokens=estimate_tokens([{"role": "user", "content": rendered_text}]),
                 reserved_output_tokens=768,
                 timeout_seconds=timeout,
-                metadata={"voice_id": str(voice), "output_format": "pcm_24000" if auth_type != "bearer" else "mp3"},
+                metadata={"voice_id": str(voice), "output_format": "pcm_24000"},
             )
 
             def call_tts_provider(*, cancel_token=None):

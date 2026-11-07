@@ -1,0 +1,62 @@
+{
+  "mode": "offline_capture_only",
+  "runtime_matches_repo": {
+    "src/runtime/conversation/runtime_writer.py": true,
+    "src/runtime/utterance_spec.py": true,
+    "src/runtime/stage_transformers.py": true,
+    "src/runtime/public_surface_commit.py": true,
+    "src/runtime/speech_localizer.py": true
+  },
+  "cases": [
+    {
+      "case": "formula_missing_speech",
+      "localizer_inputs": [
+        "Điều kiện là $1 - 2\\cos x > 0$, nên $\\cos x < \\frac{1}{2}$."
+      ],
+      "speech_after_localize": "詳しい内容はパネルに書いてあるよ。",
+      "tts_filter_on_original": "Điều kiện là $1 - 2\\cos x > 0$, nên $\\cos x < \\frac{1}{2}$.",
+      "display_for_v6_panel": "Điều kiện là $1 - 2\\cos x > 0$, nên $\\cos x < \\frac{1}{2}$.",
+      "panel_block_types_after_display_clean": [
+        "paragraph",
+        "formula",
+        "paragraph",
+        "formula",
+        "paragraph"
+      ]
+    },
+    {
+      "case": "code_missing_speech",
+      "localizer_inputs": [
+        "Mã ví dụ:\n```python\nfor i in range(3):\nprint(i)\n```\nKết quả là ba dòng."
+      ],
+      "speech_after_localize": "詳しい内容はパネルに書いてあるよ。",
+      "tts_filter_on_original": "Mã ví dụ: Kết quả là ba dòng.",
+      "display_for_v6_panel": "Mã ví dụ: [code] Kết quả là ba dòng.",
+      "panel_block_types_after_display_clean": [
+        "paragraph"
+      ]
+    },
+    {
+      "case": "explicit_narration",
+      "localizer_inputs": [
+        "Chạy đoạn này sẽ in ra số hai."
+      ],
+      "speech_after_localize": "詳しい内容はパネルに書いてあるよ。",
+      "tts_filter_on_original": "Chạy đoạn này sẽ in ra số hai.",
+      "display_for_v6_panel": "Mã ví dụ: [code]",
+      "panel_block_types_after_display_clean": [
+        "paragraph"
+      ]
+    },
+    {
+      "case": "japanese_formula",
+      "localizer_inputs": [],
+      "speech_after_localize": "条件は cos x < 1/2、解は (π/3 + 2kπ, 5π/3 + 2kπ)。",
+      "tts_filter_on_original": "条件は cos x < 1/2、解は (π/3 + 2kπ, 5π/3 + 2kπ)。",
+      "display_for_v6_panel": "Điều kiện là cos x nhỏ hơn một phần hai.",
+      "panel_block_types_after_display_clean": [
+        "paragraph"
+      ]
+    }
+  ]
+}

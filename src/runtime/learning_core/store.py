@@ -144,11 +144,9 @@ class LearningStore(AssessmentStoreMixin, CatalogStoreMixin):
     """Thread-safe SQLite store for the learning kernel."""
 
     def __init__(self, path: Path | None = None) -> None:
-        if path is None:
-            from runtime.workspace_manager import default_eris_home
+        from runtime.workspace_manager import default_eris_home
 
-            path = default_eris_home() / "mentor" / "learning.sqlite3"
-        self._path = Path(path)
+        self._path = path or (default_eris_home() / "mentor" / "learning.sqlite3")
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
         self._conn: sqlite3.Connection | None = None

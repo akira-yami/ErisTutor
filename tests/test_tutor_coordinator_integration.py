@@ -10,6 +10,7 @@ import pytest
 sys.path.insert(0, os.path.abspath("src"))
 
 from domain import Decision
+from memory.memory_cognition import MemoryCognitionCore
 from runtime.coordinator import RuntimeCoordinator
 
 
@@ -75,14 +76,16 @@ def test_coordinator_tutor_and_kernel_wiring(tmp_path, monkeypatch):
         llm_service=llm_service,
         parser=parser,
         telemetry_service=MagicMock(),
-        memory_core=SimpleNamespace(living_user=None),
+        memory_core=MemoryCognitionCore(str(tmp_path / "memory_core")),
         body_running_fn=lambda: True,
     )
 
-    # 1. Verify Tutor Executive and Capabilities are bound
+    # 1. Verify Tutor Executive, Capabilities & Memory Presenters are bound
     assert coord.learning_service is not None
     assert coord.tutor_executive is not None
     assert coord.tutor_capability is not None
+    assert coord.memory_portrait_presenter is not None
+    assert coord.learner_portrait_service is not None
 
     # 2. Verify Conversation Kernel & Orchestrators are bound
     assert coord.conversation_kernel is not None
@@ -105,3 +108,26 @@ def test_coordinator_tutor_and_kernel_wiring(tmp_path, monkeypatch):
     assert coord.last_conversation_run["status"] in {"delivering", "delivered", "completed", "speculative_ready"}
     # Transport should have received the response for Godot
     assert len(transport.sent_messages) > 0
+
+    # 4. Test Inbound Dispatch for Learner Portrait Snapshot & Memory Panel
+    portrait_result = coord.incoming_dispatcher.dispatch({
+        "type": "capability_panel_request",
+        "action": "portrait_snapshot",
+        "request_id": "req:test_portrait_1",
+    })
+    assert portrait_result.handled is True
+    assert any(
+        msg.get("type") == "capability_panel_ack" and msg.get("status") == "ok"
+        for msg in transport.sent_messages
+    )
+
+    memory_result = coord.incoming_dispatcher.dispatch({
+        "type": "memory_panel_request",
+        "action": "snapshot",
+        "request_id": "req:test_memory_1",
+    })
+    assert memory_result.handled is True
+    assert any(
+        msg.get("type") == "memory_panel_ack" and msg.get("status") == "ok"
+        for msg in transport.sent_messages
+    )

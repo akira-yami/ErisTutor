@@ -1,12 +1,51 @@
-"""Memory subsystem (incremental rebuild).
+"""Public memory API for ERIS.
 
-Intentionally minimal during the layered rebuild: the package root does NOT
-re-export anything yet, so modules can be pulled in a few at a time and imported
-individually (e.g. `from memory.memory_record import ...`) without dragging in
-the whole 105-file subsystem before it exists.
+Use `MemoryKernel` from the package root for new integration.
 
-The full public API (MemoryKernel, MemoryRuntimeServices, LivingUser*, ...) will
-be restored here once the modules it re-exports have all landed.
+Legacy core/query/commit types are intentionally no longer re-exported here.
+Import them from `memory.memory_cognition` explicitly when compatibility is
+still needed.
 """
 
-__all__: list[str] = []
+from .memory_kernel import MemoryCoreKernel, MemoryKernel, MemoryKernelDebugSnapshot
+from .memory_services import MemoryRuntimeServices
+from .memory_kernel_contracts import (
+    MaintenanceBudget,
+    MemoryAnswerResult,
+    MemoryIngestMode,
+    MemoryIngestResult,
+    MemoryKernelConfig,
+    MemoryMaintenanceReport,
+)
+
+__all__ = [
+    "MemoryKernel",
+    "MemoryCoreKernel",
+    "MemoryKernelDebugSnapshot",
+    "MemoryKernelConfig",
+    "MemoryIngestMode",
+    "MemoryIngestResult",
+    "MemoryAnswerResult",
+    "MemoryMaintenanceReport",
+    "MaintenanceBudget",
+    "MemoryRuntimeServices",
+]
+
+# Living user memory là API tùy chọn nhưng stable cho integration mới.
+from .living_user import (
+    LivingUserMemoryService,
+    LivingUserMemoryConfig,
+    UserProfileStore,
+    ProfileOperation,
+    UserMemoryScope,
+    ProfileContextPacket,
+)
+
+__all__ += [
+    "LivingUserMemoryService",
+    "LivingUserMemoryConfig",
+    "UserProfileStore",
+    "ProfileOperation",
+    "UserMemoryScope",
+    "ProfileContextPacket",
+]

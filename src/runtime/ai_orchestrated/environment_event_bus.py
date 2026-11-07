@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import threading
 import time
-from collections import OrderedDict, deque
+from collections import deque
 from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -115,7 +115,7 @@ class EnvironmentEventBus:
         self._events: deque[NormalizedEnvironmentEvent] = deque(maxlen=max(64, int(max_events)))
         self._lock = threading.RLock()
         self._coalesce_ms = max(0, int(coalesce_ms))
-        self._last_signature: OrderedDict[str, float] = OrderedDict()
+        self._last_signature: dict[str, float] = {}
         self.policy = policy or EnvironmentPolicy()
 
     @staticmethod
@@ -176,20 +176,15 @@ class EnvironmentEventBus:
             event_id=event.event_id,
         )
 
-        if event.expired:
-            return None
         signature = self.signature(event)
         now_ms = event.timestamp * 1000.0
         with self._lock:
             last_ms = self._last_signature.get(signature, -1e18)
             if self._coalesce_ms and now_ms - last_ms < self._coalesce_ms:
                 return None
-            if self._coalesce_ms:
-                self._last_signature[signature] = now_ms
-                self._last_signature.move_to_end(signature)
-                if len(self._last_signature) > self._events.maxlen:
-                    self._last_signature.popitem(last=False)
+            self._last_signature[signature] = now_ms
             self._events.append(event)
+            self._prune_locked(time.time())
         return event
 
     def extend(self, events: Iterable[NormalizedEnvironmentEvent | Mapping[str, Any]]) -> tuple[NormalizedEnvironmentEvent, ...]:
@@ -202,16 +197,19 @@ class EnvironmentEventBus:
 
     def drain(self, *, since: float = 0.0, limit: int = 128) -> tuple[NormalizedEnvironmentEvent, ...]:
         with self._lock:
-            now = time.time()
-            self._events = deque(
-                (event for event in self._events
-                 if event.ttl_ms <= 0 or (now - event.timestamp) * 1000.0 <= event.ttl_ms),
-                maxlen=self._events.maxlen,
-            )
+            self._prune_locked(time.time())
             items = [item for item in self._events if item.timestamp >= float(since)]
         return tuple(items[-max(1, int(limit)):])
 
     def latest(self, limit: int = 32) -> tuple[NormalizedEnvironmentEvent, ...]:
         return self.drain(since=0.0, limit=limit)
+
+    def _prune_locked(self, now: float) -> None:
+        while self._events:
+            first = self._events[0]
+            if first.ttl_ms <= 0 or (now - first.timestamp) * 1000.0 <= first.ttl_ms:
+                break
+            self._events.popleft()
+
 
 __all__ = ["EnvironmentEventBus", "NormalizedEnvironmentEvent"]

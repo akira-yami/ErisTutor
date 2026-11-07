@@ -1,0 +1,257 @@
+Learning Canvas Tasks 7–10 — verification 2026-11-01
+Final scope: 32 Python files, FSRS 6.3.2 from scratch/canvas-test-deps.
+UDP loopback/artifact tests run outside filesystem/network sandbox.
+No production model, TTS provider, audio device or user learning profile exercised.
+
+Final regression:
+........................................................................ [ 21%]
+...sssss................................................................ [ 42%]
+........................................................................ [ 63%]
+........................................................................ [ 85%]
+..................................................                       [100%]
+=========================== short test summary info ===========================
+SKIPPED [5] src\tests\test_java_docker_canvas.py:85: Real Docker/JVM spike unavailable: docker_not_running
+333 passed, 5 skipped in 25.32s
+
+Exact pytest file scope (one final run; do not add earlier runs to this count):
+src/tests/test_learning_canvas.py
+src/tests/test_learning_canvas_exercises.py
+src/tests/test_java_docker_canvas.py
+src/tests/conversation/test_canvas_root_bridge.py
+src/tests/conversation/test_canvas_focus_lifecycle.py
+src/tests/conversation/test_canvas_audio_binding.py
+src/tests/conversation/test_learning_canvas_full_loop.py
+src/tests/conversation/test_kernel_v12.py
+src/tests/conversation/test_architecture_v12.py
+src/tests/conversation/test_single_speech_authority.py
+src/tests/conversation/test_delivery_adapter_v12.py
+src/tests/conversation/test_runtime_writer_v12.py
+src/tests/conversation/test_runtime_writer_localize_failsoft_v1.py
+src/tests/conversation/test_character_output_artifact_v1.py
+src/tests/conversation/test_p0_delivery_and_interrupt_regressions.py
+src/tests/conversation/test_20261015_tts_interrupt_repair.py
+src/tests/test_tts_manager_playback_lifecycle.py
+src/tests/test_tts_playback_lip_sync.py
+src/tests/test_tutor_learning_integration_v1.py
+src/tests/test_tutor_learning_p1_domains.py
+src/tests/test_tutor_p2_adaptive_insights.py
+src/tests/test_tutor_p0_regressions.py
+src/tests/test_tutor_model_reasoner_v1.py
+src/tests/test_root_orchestrated_learner_v1.py
+src/tests/test_adaptive_learning_kernel_adapter_v1.py
+src/tests/test_learning_kernel_boundary_v4.py
+src/tests/test_long_term_learner_v2.py
+src/tests/test_tutor_research_policy_v18.py
+src/tests/test_capability_panel_protocol_v86.py
+src/tests/test_memory_panel_protocol.py
+src/tests/workspace/test_parallel_work_reconstruction.py
+src/tests/workspace/test_live_workspace_v6.py
+
+Reproduce: set PYTHONPATH=scratch/canvas-test-deps; run .venv/Scripts/python.exe -m pytest <the 32 files above> --basetemp scratch/pytest-canvas-710-final -q -ra
+
+C# build (dotnet build Eris.csproj --no-restore):
+Eris -> C:\Users\ADMIN\OneDrive\Desktop\eris\.godot\mono\temp\bin\Debug\Eris.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:26.18
+
+Godot .NET 4.7.2 / OpenGL source preview --verify:
+The user:// log/cache permission diagnostics below are sandbox diagnostics; assertions and exit code passed.
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:345)
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Backend snapshot drives the native map / empty state
+PASS: Panel fits (1440, 900)
+PASS: Status contained at (1440, 900)
+PASS: Compact heading leaves room for content at (1440, 900)
+PASS: Map accessible at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Node has readable width at (1440, 900)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (1440, 900)
+PASS: Reading accessible at (1440, 900)
+PASS: Panel fits (1000, 760)
+PASS: Status contained at (1000, 760)
+PASS: Compact heading leaves room for content at (1000, 760)
+PASS: Map accessible at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Node has readable width at (1000, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (1000, 760)
+PASS: Reading accessible at (1000, 760)
+PASS: Panel fits (720, 760)
+PASS: Status contained at (720, 760)
+PASS: Compact heading leaves room for content at (720, 760)
+PASS: Map accessible at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Node has readable width at (720, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (720, 760)
+PASS: Reading accessible at (720, 760)
+PASS: Narrow view switches between map and reading
+PASS: Panel fits (480, 760)
+PASS: Status contained at (480, 760)
+PASS: Compact heading leaves room for content at (480, 760)
+PASS: Map accessible at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Node has readable width at (480, 760)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (480, 760)
+PASS: Reading accessible at (480, 760)
+PASS: Narrow view switches between map and reading
+PASS: Panel fits (360, 640)
+PASS: Status contained at (360, 640)
+PASS: Compact heading leaves room for content at (360, 640)
+PASS: Map accessible at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Node has readable width at (360, 640)
+PASS: Constructor content is fetched and selected
+PASS: Read-only Java code comes from the actual pack
+PASS: Literal Java remains selectable and contained at (360, 640)
+PASS: Reading accessible at (360, 640)
+PASS: Narrow view switches between map and reading
+PASS: Rapid clicks update focus before ack
+PASS: Only one navigate is in flight
+PASS: Earlier ack never pulls focus back
+PASS: Latest click is coalesced after ack
+PASS: Final navigation is acknowledged and pinned
+PASS: Conflict preserves intent and retries with current revision
+PASS: Eris state acknowledges cause without navigation echo
+PASS: Lost ack restores last confirmed focus and offers refresh
+PASS: Unavailable backend restores confirmed selection
+PASS: Closing and reopening reloads the durable backend cursor
+PASS: Native choices use server activity options and nonce
+PASS: Hint is shown with persisted assistance label
+PASS: Quiz result preserves assisted status
+PASS: Reveal cannot count as independent work
+PASS: Java uses a native editable CodeEdit
+PASS: Java submit immediately shows running status
+PASS: Queued Java preserves the submitted draft
+PASS: Per-test Java receipt renders partial result
+PASS: Java editor fits narrow reading pane
+PASS: Docker unavailable automatically switches to quiz with guidance
+PASS: Root state opens native Canvas without navigate echo
+ALL LEARNING CANVAS EXERCISE UI CHECKS PASSED (RAM fixture; not a Docker execution)
+PASS: Queued speech never highlights a block
+PASS: Actual segment start selects its authored block
+PASS: Active block is visibly highlighted
+PASS: Changing node keeps current speech in a return chip
+PASS: Audio highlight never pulls the reading focus back
+PASS: Return chip navigates only when clicked
+PASS: Terminal audio clears highlight and return chip
+PASS: An old turn/generation cannot replace current highlight
+PASS: Audio failure clears the highlight
+PASS: Pinned focus shows a suggestion badge without moving
+PASS: Clicking the proposed node accepts it and releases the pin
+PASS: Backend restart resets sequence and rejects packets from the retired stream
+ALL LEARNING CANVAS PLAYBACK/FOCUS UI CHECKS PASSED (synthetic lifecycle events)
+ALL LEARNING CANVAS CHECKS PASSED
+
+Godot preview --verify --empty:
+ERROR: Failed to open log file for writing: user://logs/godot.log
+   at: rotate_file (core/io/logger.cpp:169)
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:345)
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Backend snapshot drives the native map / empty state
+PASS: Panel fits (1440, 900)
+PASS: Status contained at (1440, 900)
+PASS: Compact heading leaves room for content at (1440, 900)
+PASS: Map accessible at (1440, 900)
+PASS: Panel fits (1000, 760)
+PASS: Status contained at (1000, 760)
+PASS: Compact heading leaves room for content at (1000, 760)
+PASS: Map accessible at (1000, 760)
+PASS: Panel fits (720, 760)
+PASS: Status contained at (720, 760)
+PASS: Compact heading leaves room for content at (720, 760)
+PASS: Map accessible at (720, 760)
+PASS: Panel fits (480, 760)
+PASS: Status contained at (480, 760)
+PASS: Compact heading leaves room for content at (480, 760)
+PASS: Map accessible at (480, 760)
+PASS: Panel fits (360, 640)
+PASS: Status contained at (360, 640)
+PASS: Compact heading leaves room for content at (360, 640)
+PASS: Map accessible at (360, 640)
+ALL EMPTY LEARNING CANVAS CHECKS PASSED
+
+MC / Java availability / SQLite restart demo:
+{
+  "mc": {
+    "result": "correct",
+    "before": "available",
+    "after": "practicing",
+    "assistance": "independent"
+  },
+  "java_spike": {
+    "status": "unavailable",
+    "reason": "docker_not_running",
+    "guidance": "Khởi động Docker Desktop rồi tải image: docker pull eclipse-temurin:21.0.8_9-jdk-jammy"
+  },
+  "attempt_count_after_restart": 1,
+  "focus_and_pin_restored": true,
+  "model_and_voice": "not_run",
+  "active_exercise_after_restart": "multiple_choice"
+}
+
+Ruff new Canvas modules/tests/demos: All checks passed!
+Tracked Python files vs HEAD, same current rule set:
+{"tracked_python_files": 22, "baseline": 229, "current": 229, "new": 0, "new_findings": []}
+
+Godot export-debug Windows Desktop: exit 0; no ERROR:/WARNING: diagnostics.
+Template archive pinned to official godotengine/godot-builds 4.7.2-stable mono.
+templates/windows_debug_x86_64.exe: compressed=34350190, expanded=103418880
+Wrote windows_debug_x86_64.exe (CRC verified)
+templates/windows_release_x86_64.exe: compressed=37995718, expanded=109513728
+Wrote windows_release_x86_64.exe (CRC verified)
+Export excludes dist/build/scratch. Native output: scratch/canvas-task10-export.
+Eris.dll SHA256 (fresh ExportDebug and exported assembly match):
+108B63F2EAB24F7401D01C0E6C56AA6C6F2EA2B3932B006454828C4EAE78F33C
+
+build_dev_fast.bat --output <workspace>/scratch/canvas-task10-build --godot-export-dir <workspace>/scratch/canvas-task10-export: exit 0
+[OK] Profile: dev  ->  C:\Users\ADMIN\OneDrive\Desktop\eris\scratch\canvas-task10-build
+  [OK] Eris.pck freshness check
+  [OK] Tutor FSRS 6.3.2 ready in portable Python
+  [OK ] Eris.exe
+  [OK ] Godot .NET assemblies: data_Eris_windows_x86_64
+  BUILD THANH CONG
+  Profile: dev
+  Output : C:\Users\ADMIN\OneDrive\Desktop\eris\scratch\canvas-task10-build
+
+Smoke under the built portable interpreter:
+{"portable_python": "3.12.10", "fsrs": "6.3.2", "runtime_loaded_from_build": true, "pack_nodes": 5, "new_conversation_modules_importable": true, "native_export_hashes_match": ["Eris.exe", "Eris.pck", "data_Eris_windows_x86_64/Eris.dll"], "user_profile_accessed": false}
+
+git diff --check: passed. No installer or deployment to the installed runtime.
+Earlier broad run: 3 failed, 328 passed, 5 skipped; fixed public-writer re-entry and missing requirements FSRS pin. The third failure was the pre-existing queued/running workspace race; workspace code/test unchanged, final run passed.
+An intermediate targeted run inside sandbox: 2 failed, 29 passed (Tutor artifact creation); final full run outside sandbox passed.
+Initial packaging failed on FSRS download inside sandbox and missing Godot templates; both resolved before the verified export/build above.
+Limits: five real Docker/JVM tests skipped (docker_not_running); no real provider/device playback; no measured learning efficacy. E2E Java/model/delivery and native audio event previews are fixtures.

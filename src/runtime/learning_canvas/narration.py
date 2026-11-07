@@ -40,6 +40,18 @@ class CanvasPlayback:
                             "node_id": scope["node_id"], "focus_revision": scope["focus_revision"], "blocks": blocks}
             return self._packet("queued", min(blocks), "", final=False)
 
+    def register_lesson_narration(self, turn_id, generation, group_id, node_id, blocks, *, session_id="foreground:primary"):
+        with self._lock:
+            if not node_id or generation < self._generations.get(session_id, 0):
+                return None
+            clean = {int(k): str(v) for k, v in blocks.items() if str(v).strip()}
+            if not clean:
+                return None
+            self._generations[session_id] = generation
+            self._active = {"turn_id": turn_id, "generation": generation, "session_id": session_id,
+                            "group_id": group_id, "node_id": node_id, "focus_revision": 0, "blocks": clean}
+            return self._packet("queued", min(clean), "", final=False)
+
     def _packet(self, event_type, segment, block, *, final):
         self._seq += 1
         result = {"type": "canvas_highlight" if event_type != "queued" else "canvas_playback",

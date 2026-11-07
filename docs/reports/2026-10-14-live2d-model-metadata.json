@@ -1,0 +1,234 @@
+{
+  "parameters": [
+    {
+      "id": "ParamAngleX",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamAngleZ",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamEyeLOpen",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 1.0,
+      "value": 1.0
+    },
+    {
+      "id": "ParamEyeROpen",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 1.0,
+      "value": 1.0
+    },
+    {
+      "id": "ParamErisMouthCornerL",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamErisMouthCornerR",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamErisLipPress",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "eyeballxl",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "eyebally",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "eyeballxr",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "eyeballyr",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamBrowLAngle",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamBrowRAngle",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamMouthForm",
+      "min": -1.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamMouthOpenY",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamErisTongue",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "ParamBreath",
+      "min": 0.0,
+      "max": 1.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation2",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation3",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation4",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation5",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation6",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation7",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation8",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    },
+    {
+      "id": "Param_Angle_Rotation9",
+      "min": -30.0,
+      "max": 30.0,
+      "default": 0.0,
+      "value": 0.0
+    }
+  ],
+  "drawables": [
+    "rangduoi",
+    "luoi",
+    "ArtMesh22",
+    "ArtMesh23",
+    "hong",
+    "ArtMesh19",
+    "ArtMesh20",
+    "MAHONG",
+    "ArtMesh18",
+    "ArtMesh24",
+    "ArtMesh25",
+    "ArtMesh26",
+    "ArtMesh27",
+    "ArtMesh28",
+    "ArtMesh29",
+    "ArtMesh30",
+    "ArtMesh31",
+    "ArtMesh9",
+    "ArtMesh15",
+    "ArtMesh32",
+    "ArtMesh33",
+    "ArtMesh34",
+    "ArtMesh35",
+    "rangtren",
+    "ArtMesh10",
+    "ArtMesh11",
+    "ArtMesh12",
+    "ArtMesh13",
+    "ArtMesh14",
+    "ArtMesh16",
+    "ArtMesh17",
+    "trongtrang1",
+    "Trongtrang2",
+    "ArtMesh8",
+    "ArtMesh7",
+    "ArtMesh6",
+    "ArtMesh5",
+    "ArtMesh4",
+    "ArtMesh3",
+    "ArtMesh2",
+    "ArtMesh1",
+    "ArtMesh21"
+  ],
+  "parts": [
+    "Part",
+    "Part2",
+    "hand",
+    "ArtMesh_Skinning",
+    "ArtMesh0_Skinning",
+    "Part4",
+    "Part3",
+    "Part5",
+    "trong"
+  ]
+}

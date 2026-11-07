@@ -29,7 +29,10 @@ def build_snapshot(learning, pack: KnowledgePack, focus: dict, *, now=None, deta
                       "prerequisite_warnings": [p for p in point.prerequisites if states.get(p) != "mastered"]})
     result = {"schema": "eris.learning.canvas.v1", "group_id": pack.group_id,
               "title": pack.path.title, "path_id": pack.path.path_id, "focus": focus,
-              "nodes": nodes, "assessment": insights.get("assessment", "observational_not_calibrated")}
+              "nodes": nodes, "assessment": insights.get("assessment", "observational_not_calibrated"),
+              "due_review": insights.get("due_review", []),
+              "retention": insights.get("retention", {}),
+              "recommendations": insights.get("recommendations", [])}
     if detail_node_id:
         result["detail"] = pack.detail(detail_node_id)
     return result

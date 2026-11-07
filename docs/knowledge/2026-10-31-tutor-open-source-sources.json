@@ -1,0 +1,372 @@
+{
+  "observed_date": "2026-10-31",
+  "timezone": "Asia/Saigon",
+  "scope": "Read-only upstream research and local source/test inspection. Not a dependency installation, runtime integration, vendor security audit, or educational efficacy validation.",
+  "eris_head": "a6d7526db35e20366e677db2823872f3d1c18321",
+  "eris_worktree": "Had pre-existing and concurrent unrelated modifications; only research documents were written for this task.",
+  "local_validation": {
+    "command": "python -m pytest src/tests/test_root_orchestrated_learner_v1.py src/tests/test_long_term_learner_v2.py src/tests/test_learning_kernel_boundary_v4.py -q",
+    "result": "19 passed in 1.88s",
+    "limitation": "Existing offline behavior only; does not validate any proposed new integration."
+  },
+  "repositories": [
+    {
+      "repository": "HKUDS/DeepTutor",
+      "url": "https://github.com/HKUDS/DeepTutor",
+      "observed_default_branch": "main",
+      "observed_head_commit": "1ea7df155447f4caf0e3abc86b3ff5395479cd4a",
+      "archived": false,
+      "reported_license": "Apache-2.0",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/HKUDS/DeepTutor/blob/1ea7df155447f4caf0e3abc86b3ff5395479cd4a/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "deeptutor/learning/assessment.py",
+          "url": "https://github.com/HKUDS/DeepTutor/blob/1ea7df155447f4caf0e3abc86b3ff5395479cd4a/deeptutor/learning/assessment.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "deeptutor/learning/outline_revision.py",
+          "url": "https://github.com/HKUDS/DeepTutor/blob/1ea7df155447f4caf0e3abc86b3ff5395479cd4a/deeptutor/learning/outline_revision.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "deeptutor/learning/objective_relations.py",
+          "url": "https://github.com/HKUDS/DeepTutor/blob/1ea7df155447f4caf0e3abc86b3ff5395479cd4a/deeptutor/learning/objective_relations.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "deeptutor/learning/lesson_evidence.py",
+          "url": "https://github.com/HKUDS/DeepTutor/blob/1ea7df155447f4caf0e3abc86b3ff5395479cd4a/deeptutor/learning/lesson_evidence.py",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "open-spaced-repetition/py-fsrs",
+      "url": "https://github.com/open-spaced-repetition/py-fsrs",
+      "observed_default_branch": "main",
+      "observed_head_commit": "9446cb06605c597a063aeee49f7d188d42e34dc2",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/open-spaced-repetition/py-fsrs/blob/9446cb06605c597a063aeee49f7d188d42e34dc2/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "fsrs/scheduler.py",
+          "url": "https://github.com/open-spaced-repetition/py-fsrs/blob/9446cb06605c597a063aeee49f7d188d42e34dc2/fsrs/scheduler.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "pyproject.toml",
+          "url": "https://github.com/open-spaced-repetition/py-fsrs/blob/9446cb06605c597a063aeee49f7d188d42e34dc2/pyproject.toml",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "CAHLR/pyBKT",
+      "url": "https://github.com/CAHLR/pyBKT",
+      "observed_default_branch": "master",
+      "observed_head_commit": "dddb7be5702bd749f73a3dcbc9db2f5640f8345e",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/CAHLR/pyBKT/blob/dddb7be5702bd749f73a3dcbc9db2f5640f8345e/README.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "pykt-team/pykt-toolkit",
+      "url": "https://github.com/pykt-team/pykt-toolkit",
+      "observed_default_branch": "main",
+      "observed_head_commit": "ccbaf37b07e3e7ff7b2415475b2faacb967d54ea",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/pykt-team/pykt-toolkit/blob/ccbaf37b07e3e7ff7b2415475b2faacb967d54ea/README.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "CAHLR/OATutor",
+      "url": "https://github.com/CAHLR/OATutor",
+      "observed_default_branch": "main",
+      "observed_head_commit": "e24c8456e5f75c07b6048159ea9e128b036f673d",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/CAHLR/OATutor/blob/e24c8456e5f75c07b6048159ea9e128b036f673d/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "src/components/problem-layout/HintSystem.js",
+          "url": "https://github.com/CAHLR/OATutor/blob/e24c8456e5f75c07b6048159ea9e128b036f673d/src/components/problem-layout/HintSystem.js",
+          "inspection": "text read"
+        },
+        {
+          "path": "src/models/BKT/BKT-brain.js",
+          "url": "https://github.com/CAHLR/OATutor/blob/e24c8456e5f75c07b6048159ea9e128b036f673d/src/models/BKT/BKT-brain.js",
+          "inspection": "text read"
+        },
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/CAHLR/OATutor/blob/e24c8456e5f75c07b6048159ea9e128b036f673d/LICENSE",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "oppia/oppia",
+      "url": "https://github.com/oppia/oppia",
+      "observed_default_branch": "develop",
+      "observed_head_commit": "6b9292ddd2979cb5d3133bab98695e391fd9fd7c",
+      "archived": false,
+      "reported_license": "Apache-2.0",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "core/domain/skill_domain.py",
+          "url": "https://github.com/oppia/oppia/blob/6b9292ddd2979cb5d3133bab98695e391fd9fd7c/core/domain/skill_domain.py",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "h4ksclaw/learnharness",
+      "url": "https://github.com/h4ksclaw/learnharness",
+      "observed_default_branch": "main",
+      "observed_head_commit": "be4c8dc10eea752a9dc25795869cf40a6aaca6f7",
+      "archived": false,
+      "reported_license": null,
+      "license_observation": "GitHub returned no detected license; recursive tree reviewed contained no LICENSE/COPYING/NOTICE path.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/h4ksclaw/learnharness/blob/be4c8dc10eea752a9dc25795869cf40a6aaca6f7/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "app/engine/fsrs_sched.py",
+          "url": "https://github.com/h4ksclaw/learnharness/blob/be4c8dc10eea752a9dc25795869cf40a6aaca6f7/app/engine/fsrs_sched.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "app/engine/knowledge_tracing.py",
+          "url": "https://github.com/h4ksclaw/learnharness/blob/be4c8dc10eea752a9dc25795869cf40a6aaca6f7/app/engine/knowledge_tracing.py",
+          "inspection": "text read"
+        },
+        {
+          "path": "docs/ARCHITECTURE.md",
+          "url": "https://github.com/h4ksclaw/learnharness/blob/be4c8dc10eea752a9dc25795869cf40a6aaca6f7/docs/ARCHITECTURE.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "docling-project/docling",
+      "url": "https://github.com/docling-project/docling",
+      "observed_default_branch": "main",
+      "observed_head_commit": "764b5d4dc22b03ea87afd4c2207f510300b27a5b",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": "Code MIT; upstream README says model licenses must be checked separately.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/docling-project/docling/blob/764b5d4dc22b03ea87afd4c2207f510300b27a5b/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "pyproject.toml",
+          "url": "https://github.com/docling-project/docling/blob/764b5d4dc22b03ea87afd4c2207f510300b27a5b/pyproject.toml",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "lfnovo/open-notebook",
+      "url": "https://github.com/lfnovo/open-notebook",
+      "observed_default_branch": "main",
+      "observed_head_commit": "a0f6f3081ae06328f0a451b3a3ef2959ca25721d",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/lfnovo/open-notebook/blob/a0f6f3081ae06328f0a451b3a3ef2959ca25721d/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "docs/7-DEVELOPMENT/decisions/ADR-008-notebook-scoped-search.md",
+          "url": "https://github.com/lfnovo/open-notebook/blob/a0f6f3081ae06328f0a451b3a3ef2959ca25721d/docs/7-DEVELOPMENT/decisions/ADR-008-notebook-scoped-search.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "docs/3-USER-GUIDE/citations.md",
+          "url": "https://github.com/lfnovo/open-notebook/blob/a0f6f3081ae06328f0a451b3a3ef2959ca25721d/docs/3-USER-GUIDE/citations.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "TerraByte-Dev/OpenEdu",
+      "url": "https://github.com/TerraByte-Dev/OpenEdu",
+      "observed_default_branch": "master",
+      "observed_head_commit": "0236df4c31b0091fbcd58c429e244d894139c085",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": "Code MIT; library content declares CC0 with third-party exceptions and per-pack/source conditions.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/TerraByte-Dev/OpenEdu/blob/0236df4c31b0091fbcd58c429e244d894139c085/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "src/lib/curriculum.ts",
+          "url": "https://github.com/TerraByte-Dev/OpenEdu/blob/0236df4c31b0091fbcd58c429e244d894139c085/src/lib/curriculum.ts",
+          "inspection": "text read"
+        },
+        {
+          "path": "public/library/LICENSE-CONTENT",
+          "url": "https://github.com/TerraByte-Dev/OpenEdu/blob/0236df4c31b0091fbcd58c429e244d894139c085/public/library/LICENSE-CONTENT",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "arnog/mathlive",
+      "url": "https://github.com/arnog/mathlive",
+      "observed_default_branch": "master",
+      "observed_head_commit": "8d148b4227ca057fa1aefe89c2149cdcf0591443",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/arnog/mathlive/blob/8d148b4227ca057fa1aefe89c2149cdcf0591443/README.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "jsxgraph/jsxgraph",
+      "url": "https://github.com/jsxgraph/jsxgraph",
+      "observed_default_branch": "main",
+      "observed_head_commit": "72eba83d4d2d73e54440808dfaa3bd1a2c126810",
+      "archived": false,
+      "reported_license": "LGPL-3.0",
+      "license_observation": "GitHub metadata identifies LGPL-3.0; repository also contains LICENSE.MIT, which was read.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/jsxgraph/jsxgraph/blob/72eba83d4d2d73e54440808dfaa3bd1a2c126810/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "LICENSE.MIT",
+          "url": "https://github.com/jsxgraph/jsxgraph/blob/72eba83d4d2d73e54440808dfaa3bd1a2c126810/LICENSE.MIT",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "pyodide/pyodide",
+      "url": "https://github.com/pyodide/pyodide",
+      "observed_default_branch": "main",
+      "observed_head_commit": "da07082034752726b3a21252b7177cf11d10b726",
+      "archived": false,
+      "reported_license": "MPL-2.0",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/pyodide/pyodide/blob/da07082034752726b3a21252b7177cf11d10b726/README.md",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "codesandbox/sandpack",
+      "url": "https://github.com/codesandbox/sandpack",
+      "observed_default_branch": "main",
+      "observed_head_commit": "7d60a4334980eef304d53b1c3df371ed6dbcf491",
+      "archived": false,
+      "reported_license": "Apache-2.0",
+      "license_observation": "Toolkit Apache-2.0 does not cover Nodebox runtime terms described in FAQ.",
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/codesandbox/sandpack/blob/7d60a4334980eef304d53b1c3df371ed6dbcf491/README.md",
+          "inspection": "text read"
+        },
+        {
+          "path": "website/docs/src/pages/resources/faq.mdx",
+          "url": "https://github.com/codesandbox/sandpack/blob/7d60a4334980eef304d53b1c3df371ed6dbcf491/website/docs/src/pages/resources/faq.mdx",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "H5P/h5p-php-library",
+      "url": "https://github.com/H5P/h5p-php-library",
+      "observed_default_branch": "master",
+      "observed_head_commit": "1e21b7a2da4ae9c4f1f9e61f7ae1038f8850fb82",
+      "archived": false,
+      "reported_license": "GPL-3.0",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.txt",
+          "url": "https://github.com/H5P/h5p-php-library/blob/1e21b7a2da4ae9c4f1f9e61f7ae1038f8850fb82/README.txt",
+          "inspection": "text read"
+        }
+      ]
+    },
+    {
+      "repository": "stanfordnlp/dspy",
+      "url": "https://github.com/stanfordnlp/dspy",
+      "observed_default_branch": "main",
+      "observed_head_commit": "25162c4fc05c2d2d019b0ffb5b6b2a9f315ec007",
+      "archived": false,
+      "reported_license": "MIT",
+      "license_observation": null,
+      "reviewed_files": [
+        {
+          "path": "README.md",
+          "url": "https://github.com/stanfordnlp/dspy/blob/25162c4fc05c2d2d019b0ffb5b6b2a9f315ec007/README.md",
+          "inspection": "text read"
+        }
+      ]
+    }
+  ],
+  "additional_primary_sources": [
+    {
+      "url": "https://docling-project.github.io/docling/reference/docling_document/",
+      "subject": "ProvenanceItem fields: page_no, bbox, charspan"
+    }
+  ]
+}
+

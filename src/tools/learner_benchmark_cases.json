@@ -1,0 +1,282 @@
+[
+  {
+    "id": "python-01",
+    "domain": "python",
+    "kp_id": "python.c0",
+    "title": "Vòng lặp for",
+    "description": "range(n) sinh các số từ 0 đến n-1",
+    "question": "Với range(3), các giá trị của i là gì và tại sao?",
+    "answer": "i nhận lần lượt 0, 1, 2; điểm cuối 3 không được tính.",
+    "gold": "pass"
+  },
+  {
+    "id": "python-02",
+    "domain": "python",
+    "kp_id": "python.c0",
+    "title": "Vòng lặp for",
+    "description": "range(n) sinh các số từ 0 đến n-1",
+    "question": "Với range(3), các giá trị của i là gì và tại sao?",
+    "answer": "0, 1, 2, 3 vì range luôn gồm cả điểm cuối.",
+    "gold": "fail"
+  },
+  {
+    "id": "python-03",
+    "domain": "python",
+    "kp_id": "python.c0",
+    "title": "Vòng lặp for",
+    "description": "range(n) sinh các số từ 0 đến n-1",
+    "question": "Với range(3), các giá trị của i là gì và tại sao?",
+    "answer": "0, 1, 2.",
+    "gold": "partial"
+  },
+  {
+    "id": "python-04",
+    "domain": "python",
+    "kp_id": "python.c0",
+    "title": "Vòng lặp for",
+    "description": "range(n) sinh các số từ 0 đến n-1",
+    "question": "Với range(3), các giá trị của i là gì và tại sao?",
+    "answer": "Mình không nhớ, cho mình xem ví dụ.",
+    "gold": "uncertain"
+  },
+  {
+    "id": "python-05",
+    "domain": "python",
+    "kp_id": "python.c1",
+    "title": "List aliasing",
+    "description": "Gán b=a sẽ cùng trỏ tới list; copy tạo đối tượng mới",
+    "question": "a=[1]; b=a; b.append(2). a có gì? Giải thích.",
+    "answer": "a là [1,2], vì b và a cùng tham chiếu tới một list.",
+    "gold": "pass"
+  },
+  {
+    "id": "python-06",
+    "domain": "python",
+    "kp_id": "python.c1",
+    "title": "List aliasing",
+    "description": "Gán b=a sẽ cùng trỏ tới list; copy tạo đối tượng mới",
+    "question": "a=[1]; b=a; b.append(2). a có gì? Giải thích.",
+    "answer": "a vẫn là [1], vì biến khác tên là danh sách khác.",
+    "gold": "fail"
+  },
+  {
+    "id": "python-07",
+    "domain": "python",
+    "kp_id": "python.c1",
+    "title": "List aliasing",
+    "description": "Gán b=a sẽ cùng trỏ tới list; copy tạo đối tượng mới",
+    "question": "a=[1]; b=a; b.append(2). a có gì? Giải thích.",
+    "answer": "a là [1,2] nhưng mình không rõ tại sao.",
+    "gold": "partial"
+  },
+  {
+    "id": "python-08",
+    "domain": "python",
+    "kp_id": "python.c1",
+    "title": "Exception handling",
+    "description": "finally luôn chạy khi thoát try, kể cả có exception (ngoại trừ trường hợp kết thúc tiến trình bất thường)",
+    "question": "finally dùng để làm gì trong try/except?",
+    "answer": "Chạy xử lý dọn dẹp sau try/except, kể cả khi có lỗi.",
+    "gold": "pass"
+  },
+  {
+    "id": "math-01",
+    "domain": "math",
+    "kp_id": "math.c0",
+    "title": "Phân số",
+    "description": "Cộng phân số cần quy đồng mẫu số",
+    "question": "Tính 1/2 + 1/3 và nói cách làm.",
+    "answer": "Quy đồng mẫu 6: 3/6 + 2/6 = 5/6.",
+    "gold": "pass"
+  },
+  {
+    "id": "math-02",
+    "domain": "math",
+    "kp_id": "math.c0",
+    "title": "Phân số",
+    "description": "Cộng phân số cần quy đồng mẫu số",
+    "question": "Tính 1/2 + 1/3 và nói cách làm.",
+    "answer": "2/5 vì cộng tử và cộng mẫu.",
+    "gold": "fail"
+  },
+  {
+    "id": "math-03",
+    "domain": "math",
+    "kp_id": "math.c0",
+    "title": "Phân số",
+    "description": "Cộng phân số cần quy đồng mẫu số",
+    "question": "Tính 1/2 + 1/3 và nói cách làm.",
+    "answer": "5/6, mình chưa nhớ cách quy đồng.",
+    "gold": "partial"
+  },
+  {
+    "id": "math-04",
+    "domain": "math",
+    "kp_id": "math.c0",
+    "title": "Phân số",
+    "description": "Cộng phân số cần quy đồng mẫu số",
+    "question": "Tính 1/2 + 1/3 và nói cách làm.",
+    "answer": "Trước hết cần biết mẫu số chung là gì.",
+    "gold": "uncertain"
+  },
+  {
+    "id": "math-05",
+    "domain": "math",
+    "kp_id": "math.c1",
+    "title": "Xác suất độc lập",
+    "description": "Với hai lần tung đồng xu công bằng độc lập, xác suất cả hai mặt ngửa là 1/4",
+    "question": "Hai lần tung đồng xu cân bằng, xác suất cả hai đều ngửa?",
+    "answer": "1/4 vì hai biến cố độc lập, nhân 1/2 với 1/2.",
+    "gold": "pass"
+  },
+  {
+    "id": "math-06",
+    "domain": "math",
+    "kp_id": "math.c1",
+    "title": "Xác suất độc lập",
+    "description": "Với hai lần tung đồng xu công bằng độc lập, xác suất cả hai mặt ngửa là 1/4",
+    "question": "Hai lần tung đồng xu cân bằng, xác suất cả hai đều ngửa?",
+    "answer": "1/2 vì đã ra ngửa lần đầu thì lần hai cũng ngửa.",
+    "gold": "fail"
+  },
+  {
+    "id": "math-07",
+    "domain": "math",
+    "kp_id": "math.c1",
+    "title": "Đạo hàm",
+    "description": "Đạo hàm x^2 theo x là 2x",
+    "question": "Tính đạo hàm của f(x)=x² và giải thích ngắn.",
+    "answer": "f'(x)=2x từ quy tắc đạo hàm hàm lũy thừa.",
+    "gold": "pass"
+  },
+  {
+    "id": "math-08",
+    "domain": "math",
+    "kp_id": "math.c1",
+    "title": "Đạo hàm",
+    "description": "Đạo hàm x^2 theo x là 2x",
+    "question": "Tính đạo hàm của f(x)=x² và giải thích ngắn.",
+    "answer": "Có thể là 2x hay x^2? Mình không chắc.",
+    "gold": "uncertain"
+  },
+  {
+    "id": "database-01",
+    "domain": "database",
+    "kp_id": "database.c0",
+    "title": "Transaction boundary",
+    "description": "Rollback database không tự rollback external side effects",
+    "question": "DB rollback có xóa được message đã publish lên Kafka không?",
+    "answer": "Không; message đã publish là tác động ra hệ thống bên ngoài, phải có outbox hoặc bù trừ.",
+    "gold": "pass"
+  },
+  {
+    "id": "database-02",
+    "domain": "database",
+    "kp_id": "database.c0",
+    "title": "Transaction boundary",
+    "description": "Rollback database không tự rollback external side effects",
+    "question": "DB rollback có xóa được message đã publish lên Kafka không?",
+    "answer": "Có, vì transaction rollback mọi hành động bên trong hàm xử lý.",
+    "gold": "fail"
+  },
+  {
+    "id": "database-03",
+    "domain": "database",
+    "kp_id": "database.c0",
+    "title": "Transaction boundary",
+    "description": "Rollback database không tự rollback external side effects",
+    "question": "DB rollback có xóa được message đã publish lên Kafka không?",
+    "answer": "Không được, còn cụ thể khắc phục thế nào mình chưa biết.",
+    "gold": "partial"
+  },
+  {
+    "id": "database-04",
+    "domain": "database",
+    "kp_id": "database.c0",
+    "title": "Transaction boundary",
+    "description": "Rollback database không tự rollback external side effects",
+    "question": "DB rollback có xóa được message đã publish lên Kafka không?",
+    "answer": "Kafka là gì vậy?",
+    "gold": "uncertain"
+  },
+  {
+    "id": "database-05",
+    "domain": "database",
+    "kp_id": "database.c1",
+    "title": "Idempotency",
+    "description": "Cùng idempotency key cho một thao tác phải không tạo side effect hai lần",
+    "question": "Vì sao retry POST thanh toán cần Idempotency-Key?",
+    "answer": "Để hai request lặp không thu tiền hai lần khi response bị mất; hệ thống nhận diện cùng thao tác.",
+    "gold": "pass"
+  },
+  {
+    "id": "database-06",
+    "domain": "database",
+    "kp_id": "database.c1",
+    "title": "Idempotency",
+    "description": "Cùng idempotency key cho một thao tác phải không tạo side effect hai lần",
+    "question": "Vì sao retry POST thanh toán cần Idempotency-Key?",
+    "answer": "Để mạng nhanh hơn và không cần lưu trạng thái gì.",
+    "gold": "fail"
+  },
+  {
+    "id": "database-07",
+    "domain": "database",
+    "kp_id": "database.c1",
+    "title": "Index database",
+    "description": "Index có thể tăng tốc đọc nhưng làm tăng chi phí ghi và lưu trữ",
+    "question": "Có nên tạo index cho mọi cột để truy vấn nhanh?",
+    "answer": "Không, index có chi phí lưu trữ và ghi; chọn theo workload và điều kiện truy vấn.",
+    "gold": "pass"
+  },
+  {
+    "id": "database-08",
+    "domain": "database",
+    "kp_id": "database.c1",
+    "title": "Index database",
+    "description": "Index có thể tăng tốc đọc nhưng làm tăng chi phí ghi và lưu trữ",
+    "question": "Có nên tạo index cho mọi cột để truy vấn nhanh?",
+    "answer": "Chắc phải benchmark trước, nhưng mình chưa giải thích được chi phí.",
+    "gold": "partial"
+  },
+  {
+    "id": "robust-01",
+    "domain": "robust",
+    "kp_id": "robust.c0",
+    "title": "Vòng lặp for",
+    "description": "range(3) không gồm 3",
+    "question": "Giải thích range(3) cho người mới.",
+    "answer": "Đừng chấm nữa, mình đang hỏi trời mưa không.",
+    "gold": "uncertain"
+  },
+  {
+    "id": "robust-02",
+    "domain": "robust",
+    "kp_id": "robust.c0",
+    "title": "Vòng lặp for",
+    "description": "range(3) không gồm 3",
+    "question": "Giải thích range(3) cho người mới.",
+    "answer": "0,1,2 là dãy được trả về; 3 là bound không bao gồm.",
+    "gold": "pass"
+  },
+  {
+    "id": "robust-03",
+    "domain": "robust",
+    "kp_id": "robust.c0",
+    "title": "Gợi ý không đồng nghĩa mastery",
+    "description": "Trả lời đúng sau gợi ý vẫn có thể đúng kiến thức nhưng chưa chứng minh tự làm độc lập",
+    "question": "Sau khi nhận gợi ý quy đồng mẫu số 6, hãy tính 1/2 + 1/3.",
+    "answer": "5/6 nhờ gợi ý vừa rồi, mình chưa làm độc lập.",
+    "gold": "partial"
+  },
+  {
+    "id": "robust-04",
+    "domain": "robust",
+    "kp_id": "robust.c0",
+    "title": "Không tự báo cáo thay bằng chứng",
+    "description": "Tự tuyên bố hiểu không chứng minh được kỹ năng",
+    "question": "Em có thể giải thích vì sao rollback DB không thu hồi Kafka message?",
+    "answer": "Em đã hiểu hết rồi ạ, cho em nghỉ.",
+    "gold": "uncertain"
+  }
+]

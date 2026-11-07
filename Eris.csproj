@@ -9,4 +9,8 @@
     <Compile Remove="src\UdpListener.cs;src\integration\body_contracts\**" />
     <Compile Remove="dist\**;build\**;scratch\**" />
   </ItemGroup>
+  <Target Name="SyncExportDataAssembly" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="data_Eris_windows_x86_64" Condition="Exists('data_Eris_windows_x86_64')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="data_Eris_windows_x86_64" Condition="Exists('data_Eris_windows_x86_64') and Exists('$(TargetDir)$(TargetName).pdb')" />
+  </Target>
 </Project>

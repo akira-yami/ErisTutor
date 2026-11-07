@@ -8,15 +8,17 @@ import time
 
 from runtime.learning_core.records import AssessmentAttempt, digest
 from runtime.workspace.java_docker import DockerJavaWorkspace, MAX_CODE_BYTES
+from runtime.workspace.python_docker import DockerPythonExerciseWorkspace
 
 
 class CanvasExercises:
-    def __init__(self, learning, store, pack, *, workspace=None, on_completed=None):
+    def __init__(self, learning, store, pack, *, workspace=None, python_workspace=None, on_completed=None):
         self.learning, self.store, self.pack = learning, store, pack
         self.workspace = workspace or DockerJavaWorkspace(store._path.parent / "canvas-java")
+        self.python_workspace = python_workspace or DockerPythonExerciseWorkspace(store._path.parent / "canvas-python")
         self.on_completed = on_completed
         self._lock = threading.RLock()
-        self._pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="eris-java-grader")
+        self._pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="eris-code-grader")
         self._future = None
 
     def close(self):
@@ -42,8 +44,8 @@ class CanvasExercises:
                         "assistance_id": "canvas:help-scope:" + digest([node_id, exercise_id, digest(definition)])[:40],
                         "nonce": secrets.token_hex(16), "submissions": {}, "latest_submission": "",
                         "created_at": time.time(), "help": ""}
-                if definition["type"] == "java":
-                    previous_id = self.store.get_meta("canvas:java:" + node_id, "")
+                if definition["type"] in {"java", "python"}:
+                    previous_id = self.store.get_meta("canvas:" + definition["type"] + ":" + node_id, "")
                     previous = self.store.load_activity(previous_id) if previous_id else None
                     if previous and previous["definition_hash"] == item["definition_hash"] and previous.get("code"):
                         item["code"] = previous["code"]
@@ -55,14 +57,14 @@ class CanvasExercises:
                     self.store.record_assistance(activity_id, event_id="canvas:inherit:" + digest(item["assistance_id"])[:40],
                         assistance=inherited["assistance"], hint_count=inherited.get("hint_count", 0))
             self.store.set_meta("canvas:activity:" + node_id, activity_id)
-            if definition["type"] == "java":
-                self.store.set_meta("canvas:java:" + node_id, activity_id)
+            if definition["type"] in {"java", "python"}:
+                self.store.set_meta("canvas:" + definition["type"] + ":" + node_id, activity_id)
             return self.public(item)
 
     def fallback(self, activity):
-        """Unavailable Java switches to the authored quiz, preserving code/notice."""
+        """Unavailable Java/Python switches to the authored quiz, preserving code/notice."""
         with self._lock:
-            if activity.get("status") != "unavailable" or activity.get("type") != "java":
+            if activity.get("status") != "unavailable" or activity.get("type") not in {"java", "python"}:
                 return activity
             current = self.store.get_meta("canvas:activity:" + activity["node_id"], "")
             if current != activity["activity_id"]:
@@ -73,7 +75,7 @@ class CanvasExercises:
             public = self.open(activity["node_id"], choice["id"],
                 "fallback:" + digest([activity["activity_id"], activity.get("submission_id", "")])[:40])
             item = self.store.load_activity(public["activity_id"])
-            item["unavailable_notice"] = activity.get("guidance", "Kiểm tra Docker Desktop và image JDK.")
+            item["unavailable_notice"] = activity.get("guidance", "Kiểm tra Docker Desktop và container runner.")
             self.store.save_activity(item)
             return self.public(item)
 
@@ -162,8 +164,8 @@ class CanvasExercises:
                 raise ValueError("unknown_canvas_exercise_action")
             if len(item["submissions"]) >= 32:
                 raise ValueError("canvas_submission_budget_exceeded")
-            if definition["type"] == "java" and self._future is not None and not self._future.done():
-                raise ValueError("java_worker_busy")
+            if definition["type"] in {"java", "python"} and self._future is not None and not self._future.done():
+                raise ValueError(f"{definition['type']}_worker_busy")
             submission = {"answer_hash": digest(answer), "recorded_at": time.time(),
                           "focus_revision": (self.store.get_meta("learning_canvas_v1", {}).get("focus_revision", item["focus_revision"])
                               if self.store.get_meta("learning_canvas_v1", {}).get("node_id") == item["node_id"] else item["focus_revision"]),
@@ -172,10 +174,11 @@ class CanvasExercises:
                           "receipt": {"status": "running"}, "notified": False}
             item["submissions"][key] = submission
             item["latest_submission"] = key
-            if definition["type"] == "java":
+            if definition["type"] in {"java", "python"}:
                 item["code"] = answer
                 self.store.save_activity(item)
-                self._future = self._pool.submit(self._grade_java, item["activity_id"], key, answer, definition)
+                target_grader = self._grade_java if definition["type"] == "java" else self._grade_python
+                self._future = self._pool.submit(target_grader, item["activity_id"], key, answer, definition)
                 return self.public(item)
             receipt = {"status": "completed", "result": "correct" if answer == definition["answer"] else "incorrect"}
             self._prepare_attempt(item, submission, receipt)
@@ -188,6 +191,7 @@ class CanvasExercises:
         return self.store.assistance_for(item.get("assistance_id", item["activity_id"]))
 
     def _prepare_attempt(self, item, submission, receipt):
+        definition = self.definition(item["node_id"], item["exercise_id"])
         submission["completed_receipt"] = receipt
         assistance = submission["assistance"]
         tests = receipt.get("tests", [])
@@ -198,7 +202,8 @@ class CanvasExercises:
             strength=strength, path_id=self.pack.path.path_id, interaction_id=item["activity_id"],
             activity_id=item["activity_id"], item_id=item["exercise_id"], item_family_id=item["exercise_id"],
             assistance=assistance["assistance"], hint_count=assistance.get("hint_count", 0),
-            answer_revealed=assistance["assistance"] == "answer_revealed", rubric_version="javadi:v1",
+            answer_revealed=assistance["assistance"] == "answer_revealed",
+            rubric_version=f"{definition['type']}:v1" if definition["type"] in {"java", "python"} else "deterministic-v1",
             assessor_version="canvas-deterministic-v1", recorded_at=submission["recorded_at"],
             error_code=receipt.get("reason", "") if receipt["result"] != "correct" else "",
         )
@@ -232,6 +237,25 @@ class CanvasExercises:
             receipt = self.workspace.execute(code, definition)
         except Exception as exc:
             receipt = {"status": "unavailable", "reason": "java_grader_" + type(exc).__name__,
+                       "guidance": "Kiểm tra Docker rồi chạy lại; bạn vẫn có thể làm bài trắc nghiệm."}
+        with self._lock:
+            item = self.store.load_activity(activity_id)
+            submission = item["submissions"][key]
+            if receipt.get("status") == "completed":
+                self._prepare_attempt(item, submission, receipt)
+                self._commit(item, submission)
+            else:
+                submission["receipt"] = receipt
+                self.store.save_activity(item)
+            public = self.public(item)
+        if callable(self.on_completed):
+            self.on_completed(public)
+
+    def _grade_python(self, activity_id, key, code, definition):
+        try:
+            receipt = self.python_workspace.execute(code, definition)
+        except Exception as exc:
+            receipt = {"status": "unavailable", "reason": "python_grader_" + type(exc).__name__,
                        "guidance": "Kiểm tra Docker rồi chạy lại; bạn vẫn có thể làm bài trắc nghiệm."}
         with self._lock:
             item = self.store.load_activity(activity_id)

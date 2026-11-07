@@ -389,7 +389,7 @@ public partial class UdpListener
 		// Live2D không lật cả sprite như body pixel. Giữ bubble và chữ không bị
 		// mirror theo trạng thái facing còn sót lại của MotionController.
 		if (_avatar != null)
-			_avatar.Scale = Vector2.One;
+			_avatar.Scale = new Vector2(_characterScale, _characterScale);
 		liveBubble.Scale = Vector2.One;
 		if (_hasLive2DWindowRect)
 			PositionLive2DBubbleBesideModel(liveBubble);
@@ -494,6 +494,29 @@ public partial class UdpListener
 		catch (Exception ex)
 		{
 			RunLogger.LogErr($"[Live2D] Window geometry UDP lỗi: {ex.Message}");
+		}
+	}
+
+	private void SendLive2DScaleDelta(float delta)
+	{
+		if (!(_live2DManager?.IsRunning ?? false))
+			return;
+		try
+		{
+			var payload = new
+			{
+				protocol = "eris.live2d.control",
+				version = 1,
+				type = "adjust_scale",
+				timestamp = Time.GetUnixTimeFromSystem(),
+				delta,
+			};
+			string raw = JsonSerializer.Serialize(payload);
+			_live2DForward.PutPacket(Encoding.UTF8.GetBytes(raw));
+		}
+		catch (Exception ex)
+		{
+			RunLogger.LogErr($"[Live2D] Scale UDP lỗi: {ex.Message}");
 		}
 	}
 

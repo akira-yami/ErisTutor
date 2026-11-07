@@ -14,7 +14,7 @@ from typing import Iterable, Mapping, Sequence
 
 
 def auroc(labels: Iterable[int], scores: Iterable[float]) -> float:
-    pairs = sorted(zip(scores, labels, strict=False), key=lambda item: item[0])
+    pairs = sorted(zip(scores, labels), key=lambda item: item[0])
     positives = sum(label == 1 for _, label in pairs)
     negatives = sum(label == 0 for _, label in pairs)
     if positives == 0 or negatives == 0:
@@ -32,14 +32,14 @@ def auroc(labels: Iterable[int], scores: Iterable[float]) -> float:
 
 
 def brier(labels: Iterable[float], probabilities: Iterable[float]) -> float:
-    pairs = list(zip(labels, probabilities, strict=False))
+    pairs = list(zip(labels, probabilities))
     if not pairs:
         return 0.0
     return mean((float(probability) - float(label)) ** 2 for label, probability in pairs)
 
 
 def log_loss(labels: Iterable[float], probabilities: Iterable[float]) -> float:
-    pairs = list(zip(labels, probabilities, strict=False))
+    pairs = list(zip(labels, probabilities))
     if not pairs:
         return 0.0
     epsilon = 1e-9
@@ -87,7 +87,7 @@ def intraclass_correlation(
     ms_between = k * sum((item - grand) ** 2 for item in group_means) / max(n - 1, 1)
     ms_within = sum(
         sum((value - group_mean) ** 2 for value in values)
-        for values, group_mean in zip(balanced, group_means, strict=False)
+        for values, group_mean in zip(balanced, group_means)
     ) / max(n * (k - 1), 1)
     denominator = ms_between + (k - 1) * ms_within
     if denominator <= 1e-12:

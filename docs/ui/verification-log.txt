@@ -1,0 +1,66 @@
+﻿Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Workspace fits (1440, 900)
+PASS: Readable conversation at (1440, 900)
+PASS: Composer contained at (1440, 900)
+PASS: Workspace fits (1000, 760)
+PASS: Readable conversation at (1000, 760)
+PASS: Composer contained at (1000, 760)
+PASS: Planner accessible at (1000, 760)
+PASS: Planner contained at (1000, 760)
+PASS: Workspace fits (720, 760)
+PASS: Readable conversation at (720, 760)
+PASS: Composer contained at (720, 760)
+PASS: Planner accessible at (720, 760)
+PASS: Planner contained at (720, 760)
+PASS: Workspace fits (480, 760)
+PASS: Readable conversation at (480, 760)
+PASS: Composer contained at (480, 760)
+PASS: Planner accessible at (480, 760)
+PASS: Planner contained at (480, 760)
+PASS: History accessible on narrow viewport
+PASS: History selects the requested day
+PASS: Search filters actual message content
+PASS: Nonempty draft enables send
+PASS: Sending keeps the unified conversation open
+PASS: Sending returns to today and clears search
+PASS: Sending records exactly the submitted text
+PASS: Goal form creates an item
+PASS: Goal checkbox changes completion
+PASS: Goal form edits the existing item
+PASS: Reminder form rejects invalid date/time
+PASS: Reminder form accepts a future time (17/10/2026 19:52; Đã lưu trên thiết bị này.)
+PASS: Reminder form deletes only the selected item
+PASS: Due reminder surfaces an in-app notice
+PASS: Due reminder does not fire repeatedly
+PASS: Goal completion survives reopening, scoped to its day
+PASS: Missed reminders survive reopening; future and done items stay quiet
+PASS: Notification acknowledgment survives reopening
+PASS: Next day starts its own goal checklist
+PASS: Scheduling rejects impossible dates and past times
+PASS: Invalid saved data is preserved, never silently replaced
+PASS: Closing preserves an unsent draft
+ALL COMPANION UI CHECKS PASSED
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 610.78 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+PASS: Workspace fits (1440, 900)
+PASS: Readable conversation at (1440, 900)
+PASS: Composer contained at (1440, 900)
+PASS: Workspace fits (1000, 760)
+PASS: Readable conversation at (1000, 760)
+PASS: Composer contained at (1000, 760)
+PASS: Planner accessible at (1000, 760)
+PASS: Planner contained at (1000, 760)
+PASS: Workspace fits (720, 760)
+PASS: Readable conversation at (720, 760)
+PASS: Composer contained at (720, 760)
+PASS: Planner accessible at (720, 760)
+PASS: Planner contained at (720, 760)
+PASS: Workspace fits (480, 760)
+PASS: Readable conversation at (480, 760)
+PASS: Composer contained at (480, 760)
+PASS: Planner accessible at (480, 760)
+PASS: Planner contained at (480, 760)
+ALL EMPTY UI CHECKS PASSED

@@ -105,6 +105,12 @@ class RuntimeCoordinator(
             health_registry=self.subsystem_health_registry,
             logger=self.logger,
         )
+        try:
+            from runtime.stage_event_bus import StageEventBus
+
+            self.stage_event_bus = StageEventBus(transport=transport, logger=self.logger)
+        except Exception:
+            self.stage_event_bus = None
         self.incoming_dispatcher = IncomingMessageDispatcher(
             self,
             settings=self.runtime_policy_settings.protocol,
@@ -169,6 +175,8 @@ class RuntimeCoordinator(
         try:
             from runtime.ai_orchestrated.bootstrap import install_ai_orchestrated_runtime
             install_ai_orchestrated_runtime(self, self.llm_service)
+            from runtime.conversation.bootstrap import ensure_conversation_kernel
+            ensure_conversation_kernel(self)
         except Exception as exc:
             self.logger.warning("[RuntimeCoordinator] Failed to install AI orchestrated runtime: %s", exc)
 
@@ -191,6 +199,40 @@ class RuntimeCoordinator(
             self.tutor_capability = None
             if self.logger is not None:
                 self.logger.debug("[RuntimeCoordinator] Tutor runtime init degraded: %s", exc)
+
+        # Living User Memory & Gemini Portrait Presenter
+        self.memory_portrait_presenter = None
+        self.memory_gc_service = None
+        self.learner_portrait_service = None
+        try:
+            living_user = getattr(self.memory_core, "living_user", None)
+            if living_user is not None:
+                from memory.living_user import GeminiWebUserProfileAdapter, SavedGeminiMemoryPortrait
+
+                gemini_curator = getattr(self.llm_service, "curator_client", None)
+                if not isinstance(gemini_curator, GeminiWebUserProfileAdapter):
+                    gemini_curator = GeminiWebUserProfileAdapter.create_if_available()
+                living_user.bind_model_adapter(gemini_curator)
+                self.memory_portrait_presenter = SavedGeminiMemoryPortrait(
+                    living_user.base_dir, client=gemini_curator
+                )
+
+            from runtime.memory_gc_service import build_memory_gc_service
+
+            self.memory_gc_service = build_memory_gc_service(
+                memory_core=self.memory_core,
+                llm_service=self.llm_service,
+                idle_probe=getattr(self, "_background_memory_digest_idle_probe", None),
+            )
+            if self.memory_gc_service is not None and self.memory_portrait_presenter is not None:
+                self.memory_gc_service.portrait_presenter = self.memory_portrait_presenter
+
+            from runtime.learner_portrait import LearnerPortraitService
+
+            self.learner_portrait_service = LearnerPortraitService()
+        except Exception as exc:
+            if self.logger is not None:
+                self.logger.debug("[RuntimeCoordinator] Memory portrait / GC init degraded: %s", exc)
 
         self.logger.info("[RuntimeCoordinator] Initialized cleanly.")
 

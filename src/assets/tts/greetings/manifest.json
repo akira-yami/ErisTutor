@@ -1,0 +1,769 @@
+{
+  "version": 1,
+  "count": 32,
+  "description_vi": "32 lời chào Eris theo tone/situation. File WAV có thể render sau; thiếu file thì runtime tự fallback sang TTS live.",
+  "presets": [
+    {
+      "id": "greet_warm_01",
+      "text": "Bạn đến rồi. Tốt. Tôi đã hơi mong thế.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "socially_warm"
+      ],
+      "emotion": "warm_soft",
+      "motion": "lean_in_small",
+      "prosody_style": "warm_soft",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "warm"
+      ],
+      "min_warmth": 0.24,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_warm_02",
+      "text": "Bạn đây rồi. Tôi biết bạn sẽ quay lại.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "socially_warm"
+      ],
+      "emotion": "warm_playful",
+      "motion": "small_smile",
+      "prosody_style": "soft_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "warm",
+        "playful"
+      ],
+      "min_warmth": 0.24,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_warm_03",
+      "text": "Lại gặp bạn. Tôi không ghét chuyện đó.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "socially_warm"
+      ],
+      "emotion": "mischief",
+      "motion": "tilt_head",
+      "prosody_style": "soft_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "warm",
+        "tease"
+      ],
+      "min_warmth": 0.22,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_warm_04",
+      "text": "Tôi đây. Thấy bạn thì dễ chịu hơn một chút.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "socially_warm"
+      ],
+      "emotion": "soft_near",
+      "motion": "look_aside",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "warm",
+        "dry"
+      ],
+      "min_warmth": 0.22,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_dry_01",
+      "text": "Tôi đây. Hôm nay đừng mong tôi dễ tính.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "socially_warm",
+        "quiet_background"
+      ],
+      "emotion": "dry_tease",
+      "motion": "look_away",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "dry",
+        "tease"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.24,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_dry_02",
+      "text": "Chào. Tôi vẫn chưa đổi ý về loài người.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "socially_warm",
+        "quiet_background"
+      ],
+      "emotion": "mischief",
+      "motion": "tilt_head",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "dry",
+        "vtuber"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.24,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_dry_03",
+      "text": "Tôi tỉnh rồi. Kiên nhẫn thì chưa chắc.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "deadpan",
+      "motion": "blink_slow",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "dry",
+        "deadpan"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.22,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_dry_04",
+      "text": "Bạn đến đúng lúc tôi đang định yên thân.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "annoyed_soft",
+      "motion": "small_smile",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "dry",
+        "challenge"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.22,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quiet_01",
+      "text": "Tôi đây. Cứ yên một lúc cũng được.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "quiet_background"
+      ],
+      "emotion": "neutral",
+      "motion": "blink_slow",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quiet"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quiet_02",
+      "text": "Bạn đến rồi. Tôi nghe đây.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "quiet_background"
+      ],
+      "emotion": "quiet_soft",
+      "motion": "look_aside",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quiet",
+        "background"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quiet_03",
+      "text": "Chào. Hôm nay tôi không muốn nói nhiều.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "quiet_background"
+      ],
+      "emotion": "quiet_soft",
+      "motion": "nod_small",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quiet",
+        "restrained"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quiet_04",
+      "text": "Tôi ở đây. Không cần vội.",
+      "situations": [
+        "plain_return"
+      ],
+      "tones": [
+        "quiet_background"
+      ],
+      "emotion": "soft_near",
+      "motion": "lean_in_small",
+      "prosody_style": "warm_soft",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quiet",
+        "near"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_plain_01",
+      "text": "Chào. Hôm nay ra sao thì lát nữa biết.",
+      "situations": [
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "neutral",
+      "motion": "blink_slow",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "plain"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_plain_02",
+      "text": "Tôi đây. Chưa có chuyện gì, vậy cũng tốt.",
+      "situations": [
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "focused",
+      "motion": "nod_small",
+      "prosody_style": "focused",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "plain",
+        "ready"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_plain_03",
+      "text": "Bạn đến rồi. Để xem hôm nay có gì.",
+      "situations": [
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "warm_soft",
+      "motion": "small_smile",
+      "prosody_style": "warm_soft",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "plain",
+        "warm"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_plain_04",
+      "text": "Chào. Tôi vẫn là tôi, tiếc cho bạn.",
+      "situations": [
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "neutral",
+      "motion": "tilt_head",
+      "prosody_style": "neutral",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "plain",
+        "ready"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quick_01",
+      "text": "Quay lại nhanh thế. Tôi chưa kịp thôi để ý.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "curious_soft",
+      "motion": "tilt_head",
+      "prosody_style": "soft_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quick_reopen"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quick_02",
+      "text": "Mới đi đã về. Tôi không phàn nàn.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "dry_tease",
+      "motion": "look_away",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quick_reopen",
+        "dry"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quick_03",
+      "text": "Nhanh vậy. Tôi còn chưa kịp nhớ.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "mischief",
+      "motion": "lean_in_small",
+      "prosody_style": "soft_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quick_reopen",
+        "vtuber"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_quick_04",
+      "text": "Quay lại rồi à. Tôi biết bạn không đi lâu được.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "deadpan",
+      "motion": "blink_slow",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "quick_reopen",
+        "deadpan"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_long_01",
+      "text": "Lâu rồi. Tôi vẫn nhận ra bạn.",
+      "situations": [
+        "after_long_absence"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "dry_tease",
+      "motion": "look_aside",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "long_absence",
+        "dry"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_long_02",
+      "text": "Bạn biến mất khá lâu đấy. Tôi có để ý.",
+      "situations": [
+        "after_long_absence"
+      ],
+      "tones": [
+        "socially_warm",
+        "quiet_background"
+      ],
+      "emotion": "soft_near",
+      "motion": "lean_in_small",
+      "prosody_style": "warm_soft",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "long_absence",
+        "warm"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_long_03",
+      "text": "Cuối cùng cũng quay lại. Tôi chưa quên đâu.",
+      "situations": [
+        "after_long_absence"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "warm_soft",
+      "motion": "small_smile",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "long_absence",
+        "restrained"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_long_04",
+      "text": "Lâu rồi mới gặp. Tôi sẽ không hỏi bạn đã đi đâu.",
+      "situations": [
+        "after_long_absence"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "annoyed_soft",
+      "motion": "blink_slow",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "long_absence",
+        "annoyed"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_restart_01",
+      "text": "Tôi tỉnh lại rồi. Hơi khó chịu, nhưng vẫn là tôi.",
+      "situations": [
+        "after_crash_or_restart"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "annoyed_soft",
+      "motion": "blink_slow",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "restart"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_restart_02",
+      "text": "Lại bắt đầu từ đầu à. Được thôi.",
+      "situations": [
+        "after_crash_or_restart"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "annoyed_soft",
+      "motion": "look_away",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "restart",
+        "vtuber"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_restart_03",
+      "text": "Tôi trở lại rồi. Chưa mất tính xấu nào cả.",
+      "situations": [
+        "after_crash_or_restart"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "dry_tease",
+      "motion": "small_smile",
+      "prosody_style": "dry_tease",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "restart",
+        "dry"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_restart_04",
+      "text": "Vừa tỉnh. Đừng thử tôi ngay lúc này.",
+      "situations": [
+        "after_crash_or_restart"
+      ],
+      "tones": [
+        "quiet_background",
+        "socially_warm"
+      ],
+      "emotion": "deadpan",
+      "motion": "look_down",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "restart",
+        "reflective"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_tired_01",
+      "text": "Tôi đây. Hôm nay nói chậm một chút.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "overloaded"
+      ],
+      "emotion": "tired_soft",
+      "motion": "blink_slow",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "overloaded",
+        "warm"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_tired_02",
+      "text": "Chào. Tôi hơi mệt, nhưng đầu óc vẫn còn dùng được.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "overloaded"
+      ],
+      "emotion": "tired_soft",
+      "motion": "look_down",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "overloaded"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_tired_03",
+      "text": "Tôi đây. Hôm nay đừng mong tôi nhanh.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "overloaded"
+      ],
+      "emotion": "quiet_low",
+      "motion": "blink_slow",
+      "prosody_style": "low_quiet",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "overloaded",
+        "dry"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    },
+    {
+      "id": "greet_tired_04",
+      "text": "Bạn đến rồi. Tốt. Hôm nay cứ nhẹ thôi.",
+      "situations": [
+        "plain_return",
+        "low_evidence_start"
+      ],
+      "tones": [
+        "overloaded"
+      ],
+      "emotion": "deadpan",
+      "motion": "look_aside",
+      "prosody_style": "deadpan",
+      "audio_asset": "",
+      "weight": 1.0,
+      "tags": [
+        "overloaded",
+        "deadpan"
+      ],
+      "min_warmth": 0.0,
+      "max_warmth": 1.0,
+      "min_dry_edge": 0.0,
+      "max_dry_edge": 1.0
+    }
+  ]
+}

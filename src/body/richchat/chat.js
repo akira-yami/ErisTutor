@@ -258,7 +258,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
   const prefix=/^https?:/.test(window.location.href) ? new URL('.',window.location.href).pathname : '/';
   const endpoint=path=>prefix+path;
   let messages=[], artifacts=[], currentDay='all', currentSearch='', signature='', pending=false, lastKey='', workspaceMode=false;
-  let liveSpeech={phase:'idle',turnId:''}, polling=null;
+  let liveSpeech={phase:'idle',turnId:''}, polling=null, lastRevision=0;
   const statusEl=document.getElementById('status');
   const workspaceBtn=document.getElementById('workspaceBtn');
   // Keep conversation polling alive even if optional UI controls are absent.
@@ -293,7 +293,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       currentDay==='all' && !currentSearch;
     if(needsActivity && !activity){activity=document.createElement('div');
       activity.className='live-activity';activity.setAttribute('role','status');
-      activity.textContent='✦ Eris đang chuẩn bị câu trả lời…';root.appendChild(activity);}
+      activity.innerHTML='<span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><div><strong>Eris đang suy nghĩ…</strong><small>Tiến trình thật được hiển thị trong bảng hoạt động.</small></div>';root.appendChild(activity);}
     else if(!needsActivity && activity)activity.remove();
   }
   const acknowledged=new Set(), ackInFlight=new Set(), retries=new Map();
@@ -308,7 +308,18 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
   const shown=()=>messages.filter(m=>(currentDay==='all'||m.date===currentDay)&&(!currentSearch||m.text.toLocaleLowerCase('vi').includes(currentSearch)));
   function renderDates(){const counts={};messages.forEach(m=>{const k=m.date||'Khác';counts[k]=(counts[k]||0)+1});
     dates.replaceChildren();const items=[['all','Tất cả hội thoại',messages.length],...Object.entries(counts).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,n])=>[d,dateHeading(d),n])];
-    for(const [date,label,count] of items){const btn=document.createElement('button');btn.className='date-button'+(date===currentDay?' active':'');btn.innerHTML=`<span>${html(label)}</span><small>${count} tin nhắn</small>`;btn.addEventListener('click',()=>{currentDay=date;renderDates();renderMessages();document.getElementById('sidebar').classList.remove('open')});dates.appendChild(btn)}
+    for(const [date,label,count] of items){
+      const row=document.createElement('div');row.className='date-row';
+      const btn=document.createElement('button');btn.className='date-button'+(date===currentDay?' active':'');
+      btn.innerHTML=`<span>${html(label)}</span><small>${count} tin nhắn</small>`;
+      btn.addEventListener('click',()=>{currentDay=date;renderDates();renderMessages();document.getElementById('sidebar').classList.remove('open')});row.append(btn);
+      if(date!=='all'){
+        const del=document.createElement('button');del.type='button';del.className='date-delete';
+        del.dataset.deleteDay=date;del.setAttribute('aria-label','Xóa hội thoại '+label);
+        del.title='Xóa lịch sử ngày '+label;del.textContent='×';row.append(del);
+      }
+      dates.append(row);
+    }
   }
   // ACK means actual DOM render, not "JavaScript returned HTML".
   const imageSettled = img => new Promise(resolve => {
@@ -371,7 +382,13 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
   }
   function renderMessages(){renderGeneration++; const thisGeneration=renderGeneration; const atBottom=scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<190;const current=workspaceMode?[]:shown();
     const unbound=(currentDay==='all'&&!currentSearch)?artifacts.filter(a=>a.provisional):[];
-    if(!workspaceMode&&!current.length&&!unbound.length){root.innerHTML='<div class="empty">Chưa có tin nhắn phù hợp. Hãy bắt đầu một cuộc trò chuyện với Eris ✦</div>';updateSpeechDecorations();return;}
+    if(!workspaceMode&&!current.length&&!unbound.length){
+      const welcome=document.createElement('div');welcome.className='empty';welcome.dataset.renderKey='welcome:'+currentDay+':'+currentSearch;
+      if(currentSearch||currentDay!=='all')welcome.textContent='Không tìm thấy tin nhắn phù hợp. Hãy đổi bộ lọc để xem lại hội thoại.';
+      else welcome.innerHTML='<div class="welcome"><div class="welcome-mark">✦</div><div class="eyebrow">CÙNG ERIS, MỌI THỨ ĐỀU CÓ THỂ BẮT ĐẦU NHỎ</div><h2>Hôm nay mình làm gì cùng nhau?</h2><p>Một ý tưởng, một bài học, hay chỉ vài câu chuyện. Eris luôn ở đây.</p><div class="welcome-choices"><button type="button" data-welcome-prompt="Dạy tôi Spring Boot từ những khái niệm đầu tiên.">◇ Học một điều mới</button><button type="button" data-welcome-prompt="Eris, cùng tôi phân tích một ý tưởng nhé: ">✧ Bàn về một ý tưởng</button><button type="button" data-welcome-prompt="Giúp tôi lập kế hoạch cho: ">▤ Lập kế hoạch</button><button type="button" data-welcome-prompt="Eris, hôm nay bạn đang nghĩ gì?">✦ Trò chuyện với Eris</button></div></div>';
+      if(root.firstElementChild?.dataset.renderKey!==welcome.dataset.renderKey)root.replaceChildren(welcome);
+      updateSpeechDecorations();return;
+    }
     const frag=document.createDocumentFragment(), pendingArtifacts=[];
     const mountedTurns=new Set();
     const addArtifacts=(parent,selected)=>{
@@ -391,11 +408,17 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       section.append(heading,note);
       if(artifacts.length) addArtifacts(section,artifacts);
       else {const none=document.createElement('p');none.textContent='Chưa có artifact trong các lượt chat gần đây.';section.append(none);}
+      section.dataset.renderKey='workspace:'+artifacts.map(a=>a.artifact.artifact_id+':'+a.artifact.revision).join('|');
       frag.appendChild(section);
     }
     for(const msg of current){const item=document.createElement('article');item.className='entry '+(msg.role==='user'?'user':'assistant');
+      const key=typeof ErisStudioUtils!=='undefined'?ErisStudioUtils.fingerprint(msg):String(msg.id);
+      item.dataset.msgKey=key;
+      item.dataset.renderKey='entry:'+String(msg.id)+':'+key+':'+artifacts.filter(a=>!a.provisional&&a.turn_id===msg.turnId&&msg.role==='assistant').map(a=>a.artifact.artifact_id+':'+a.artifact.revision).join('|');
       if(msg.role==='assistant' && msg.turnId)item.dataset.turnId=msg.turnId;
-      const meta=document.createElement('div');meta.className='meta';meta.textContent=`${msg.role==='user'?'Bạn':'Eris'} · ${msg.time||''}`;
+      const meta=document.createElement('div');meta.className='meta';
+      const authorSpan=document.createElement('span');authorSpan.textContent=msg.role==='user'?'Bạn':'Eris';meta.appendChild(authorSpan);
+      if(msg.time){const timeSpan=document.createElement('span');timeSpan.className='meta-timestamp';timeSpan.textContent=' · '+msg.time;meta.appendChild(timeSpan);}
       let displayedText=msg.text;
       const learningEvent=/^ERIS_LEARN (answer|hint|reveal) (activity:[a-f0-9]{32}) [a-f0-9]{32}(?: ([0-5]|t:[A-Za-z0-9_-]{1,4096}))?$/.exec(msg.text);
       if(msg.role==='user' && learningEvent){
@@ -406,6 +429,11 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       }
       const content=document.createElement('div');content.className='content';content.innerHTML=ErisRender.render(displayedText);
       const actions=document.createElement('div');actions.className='message-actions';const copy=document.createElement('button');copy.className='copy-button';copy.textContent='Sao chép ↗';copy.addEventListener('click',()=>navigator.clipboard.writeText(msg.text).then(()=>toast('Đã sao chép'),()=>toast('Không thể sao chép')));actions.appendChild(copy);
+      const studioActions=msg.role==='user'?[['bookmark','✧ Lưu'],['quote','↳ Trích dẫn'],['resend','✎ Sửa & gửi lại']]:[['bookmark','✧ Lưu'],['quote','↳ Trích dẫn'],['retry','↻ Yêu cầu trả lời khác']];
+      for(const [action,label] of studioActions){
+        if(msg.role==='user' && learningEvent && action==='resend')continue;
+        const button=document.createElement('button');button.type='button';button.dataset.studioAction=action;button.textContent=label;button.setAttribute('aria-label',label);actions.appendChild(button);
+      }
       item.append(meta,content,actions);
       if(msg.role==='assistant' && msg.turnId && !mountedTurns.has(msg.turnId)){
         mountedTurns.add(msg.turnId);
@@ -416,8 +444,16 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     if(!workspaceMode && unbound.length){const gallery=document.createElement('section');gallery.className='artifact-gallery';
       const heading=document.createElement('h3');heading.textContent='Bàn làm việc · kết quả công cụ';
       const note=document.createElement('p');note.textContent='Các kết quả chưa có ID lượt chat, được giữ riêng để tránh gắn nhầm vào lời thoại.';
-      gallery.append(heading,note);addArtifacts(gallery,unbound);frag.appendChild(gallery);}
-    root.replaceChildren(frag);
+      gallery.append(heading,note);addArtifacts(gallery,unbound);gallery.dataset.renderKey='unbound:'+unbound.map(a=>a.artifact.artifact_id+':'+a.artifact.revision).join('|');frag.appendChild(gallery);}
+    // Reconcile theo khóa ổn định: tin nhắn không đổi giữ nguyên DOM/MathJax,
+    // tránh mất focus ở câu hỏi tương tác khi một lượt mới được thêm vào.
+    const target=Array.from(frag.children), old=new Map();
+    for(const node of Array.from(root.children))if(node.dataset.renderKey)old.set(node.dataset.renderKey,node);
+    for(let i=0;i<target.length;i++){
+      const candidate=target[i], node=old.get(candidate.dataset.renderKey)||candidate;
+      if(root.children[i]!==node)root.insertBefore(node,root.children[i]||null);
+    }
+    while(root.children.length>target.length)root.lastElementChild.remove();
     updateSpeechDecorations();
     currentArtifacts=pendingArtifacts;
     reportArtifacts(currentArtifacts,thisGeneration);
@@ -432,12 +468,12 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
         const draftField=card.querySelector('.learning-text-answer');
         if(draftField){
           draftField.value=learningDrafts.get(activity.activity_id)||'';
-          draftField.addEventListener('input',()=>{
+          if(!draftField.dataset.draftBound){draftField.dataset.draftBound='1';draftField.addEventListener('input',()=>{
             if(learningDrafts.size>80) learningDrafts.delete(learningDrafts.keys().next().value);
             learningDrafts.set(activity.activity_id,draftField.value);
-          });
+          });}
         }
-        card.querySelectorAll('[data-learning-action]').forEach(button=>button.addEventListener('click',async()=>{
+        card.querySelectorAll('[data-learning-action]').forEach(button=>{if(button.dataset.bound)return;button.dataset.bound='1';button.addEventListener('click',async()=>{
           const action=button.dataset.learningAction;
           if(!['answer','hint','reveal'].includes(action))return;
           const key='eris-learning:'+activity.activity_id;
@@ -474,7 +510,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
             if(status)status.textContent=action==='answer'?'Đã nộp bài. Eris sẽ phản hồi trong hội thoại.':'Đã nhờ Eris hỗ trợ trong hội thoại.';
           }catch(_){if(status)status.textContent='Chưa gửi được. Bạn có thể thử lại.';}
           finally{if(action!=='answer' || !sessionStorage.getItem(key))button.disabled=false;}
-        }));
+        });});
         if(sessionStorage.getItem('eris-learning:'+activity.activity_id)){
           card.querySelectorAll('[data-learning-action]').forEach(b=>{b.disabled=true;});
           const status=card.querySelector('.learning-status');
@@ -482,6 +518,8 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
         }
         continue;
       }
+      if(card.dataset.studioActionsBound)continue;
+      card.dataset.studioActionsBound='1';
       const ask=document.createElement('button');ask.type='button';ask.className='artifact-edit';ask.textContent='✦ Nhờ Eris sửa';
       card.querySelector('header')?.append(ask);
       ask.addEventListener('click',()=>{
@@ -501,15 +539,45 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
         });
       }
     }
-    root.querySelectorAll('.copy-code').forEach(button=>button.addEventListener('click',()=>{
+    root.querySelectorAll('.copy-code').forEach(button=>{if(button.dataset.bound)return;button.dataset.bound='1';button.addEventListener('click',()=>{
       const text=button.closest('.code-card').querySelector('code').textContent;
       navigator.clipboard.writeText(text).then(()=>{button.textContent='Đã sao chép ✓';setTimeout(()=>button.textContent='Sao chép',1500)},()=>toast('Không thể sao chép'));
-    }));
+    });});
     if(window.Prism) Prism.highlightAllUnder(root);
     if(!pendingArtifacts.length)syncMath();
     if(atBottom || lastKey==='') requestAnimationFrame(()=>{scroll.scrollTop=scroll.scrollHeight});
     lastKey=current.length?String(current[current.length-1].id):'gallery';
   }
+  function acceptState(state){
+    try{
+      const revision=Number(state?.revision||0);
+      // Polling chậm không được ghi đè snapshot SSE mới hơn.
+      if(Number.isFinite(revision)&&revision>0){if(revision<lastRevision)return;lastRevision=revision;}
+      showConnection(true,state.status||'Sẵn sàng');
+      const incoming=Array.isArray(state.messages)?state.messages:[];
+      const bundleList=Array.isArray(state.bundles)?state.bundles:[];
+      const nextSpeech=ErisLive.speech(state);
+      const changedSpeech=nextSpeech.phase!==liveSpeech.phase||nextSpeech.turnId!==liveSpeech.turnId;
+      liveSpeech=nextSpeech;
+      const key=JSON.stringify([incoming.map(m=>[m.id,m.role,m.text,m.date,m.time,m.turnId]),
+        bundleList.map(b=>[b.intent_id,b.turn_id,b.artifacts?.map(a=>[a.artifact_id,a.revision])])]);
+      if(key!==signature){
+        signature=key;
+        messages=incoming.map(m=>({id:m.id,role:m.role,text:String(m.text||''),
+          date:String(m.date||''),time:String(m.time||''),turnId:String(m.turnId||'')}));
+        artifacts=ErisArtifacts.flatten(bundleList);renderDates();renderMessages();
+      }else{
+        if(changedSpeech)updateSpeechDecorations();
+        if(currentArtifacts.length)reportArtifacts(currentArtifacts,renderGeneration);
+      }
+      window.__ERIS_LAST_STATE__=state;
+      window.dispatchEvent(new CustomEvent('eris:state',{detail:state}));
+    }catch(error){
+      console.error('[Eris Rich Chat] renderer:',error);
+      showConnection(true,'Lỗi hiển thị · Kiểm tra console');
+    }
+  }
+  window.addEventListener('eris:stream-state',event=>acceptState(event.detail));
   async function poll(){
     if(polling)return polling;
     polling=(async()=>{
@@ -525,29 +593,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
         try{state=await response.json();}
         catch(error){showConnection(true,'Lỗi dữ liệu từ Eris');return;}
       }
-      try{
-        showConnection(true,state.status||'Sẵn sàng');
-        const incoming=Array.isArray(state.messages)?state.messages:[];
-        const bundleList=Array.isArray(state.bundles)?state.bundles:[];
-        const nextSpeech=ErisLive.speech(state);
-        const changedSpeech=nextSpeech.phase!==liveSpeech.phase||nextSpeech.turnId!==liveSpeech.turnId;
-        liveSpeech=nextSpeech;
-        const key=JSON.stringify([incoming.map(m=>[m.id,m.role,m.text,m.date,m.time,m.turnId]),
-          bundleList.map(b=>[b.intent_id,b.turn_id,b.artifacts?.map(a=>[a.artifact_id,a.revision])])]);
-        if(key!==signature){
-          signature=key;
-          messages=incoming.map(m=>({id:m.id,role:m.role,text:String(m.text||''),
-            date:String(m.date||''),time:String(m.time||''),turnId:String(m.turnId||'')}));
-          artifacts=ErisArtifacts.flatten(bundleList);renderDates();renderMessages();
-        } else {
-          if(changedSpeech)updateSpeechDecorations();
-          if(currentArtifacts.length)reportArtifacts(currentArtifacts,renderGeneration);
-        }
-      }catch(error){
-        // JS/MathJax/DOM failure is NOT a network disconnect.
-        console.error('[Eris Rich Chat] renderer:',error);
-        showConnection(true,'Lỗi hiển thị · Kiểm tra console');
-      }
+      acceptState(state);
     })();
     try{return await polling;}finally{polling=null;}
   }
@@ -568,7 +614,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
   });
   document.getElementById('themeBtn').addEventListener('click',()=>document.body.classList.toggle('dark'));
   document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
-  poll();setInterval(()=>{if(!document.hidden)poll();},1100);
+  poll();setInterval(()=>{if(!document.hidden&&!window.ErisStudio?.isStreaming?.())poll();},1100);
   window.addEventListener('load',()=>{ if(window.MathJax?.startup?.promise) MathJax.startup.promise.then(()=>{syncMath();renderMessages();}).catch(()=>{}); });
 });
 // MathJax lives entirely inside the local portal; source strings are never executed.

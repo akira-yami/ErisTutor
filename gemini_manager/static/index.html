@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eris Manager Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon"></div>
+                <h1>ERIS</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-target="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="setup">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    System Setup
+                </a>
+                <a href="#" class="nav-item" data-target="build">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    Deploy & Build
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view-section active">
+                <header>
+                    <h2>Live Service Health</h2>
+                    <p>Monitor your background AI services in real-time.</p>
+                </header>
+                
+                <div class="metrics-grid" id="health-grid">
+                    <!-- Cards injected via JS -->
+                </div>
+            </section>
+
+            <!-- Setup View -->
+            <section id="setup" class="view-section">
+                <header>
+                    <h2>System Setup</h2>
+                    <p>Initialize your environment and dependencies.</p>
+                </header>
+                
+                <div class="card-list">
+                    <div class="setup-card">
+                        <div class="setup-info">
+                            <h3>Check Requirements</h3>
+                            <p>Verify Python, Node.js, and npm installations.</p>
+                            <div class="req-results" id="req-results"></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="checkRequirements()">Run Check</button>
+                    </div>
+
+                    <div class="setup-card">
+                        <div class="setup-info">
+                            <h3>Install Dependencies</h3>
+                            <p>Run pip install and npm ci for cline-bridge.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="installDependencies()">Install Now</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Build View -->
+            <section id="build" class="view-section">
+                <header>
+                    <h2>Deploy & Build</h2>
+                    <p>Compile the codebase for deployment.</p>
+                </header>
+                <div class="build-container">
+                    <div class="build-card glass">
+                        <div class="icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        </div>
+                        <h3>Full Production Build</h3>
+                        <p>Compiles all assets, sets up virtual environments, and outputs to your documents directory.</p>
+                        <button class="btn btn-primary btn-large" onclick="triggerBuild()">Start Build Process</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -12,6 +12,12 @@ set "PYTHONIOENCODING=utf-8"
 set "PYTHONUNBUFFERED=1"
 set "PYTHONPATH=%~dp0src;%PYTHONPATH%"
 set "ERIS_PROJECT_ROOT=%~dp0"
+set "HF_HOME=%~dp0.cache\huggingface"
+set "HF_HUB_DISABLE_SYMLINKS_WARNING=1"
+set "XDG_CACHE_HOME=%~dp0.cache"
+set "ERIS_AGENT_SERVICE_DISCOVERY=%~dp0.eris_state\agent_service.json"
+set "ERIS_HOME=%~dp0.eris_home"
+set "ERIS_STATE_DIR=%~dp0.eris_state"
 
 if not exist "%~dp0config\secrets.json" (
     if exist "%~dp0config\secrets.example.json" (
