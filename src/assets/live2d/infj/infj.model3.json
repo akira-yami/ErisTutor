@@ -1,0 +1,166 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "infj.moc3",
+    "Textures": [
+      "infj.2048/texture_00.png"
+    ],
+    "Physics": "infj.physics3.json",
+    "DisplayInfo": "infj.cdi3.json",
+    "Expressions": [
+      {
+        "Name": "calm",
+        "File": "expressions/calm.exp3.json"
+      },
+      {
+        "Name": "warm",
+        "File": "expressions/warm.exp3.json"
+      },
+      {
+        "Name": "dry",
+        "File": "expressions/dry.exp3.json"
+      },
+      {
+        "Name": "curious",
+        "File": "expressions/curious.exp3.json"
+      },
+      {
+        "Name": "focused",
+        "File": "expressions/focused.exp3.json"
+      },
+      {
+        "Name": "low",
+        "File": "expressions/low.exp3.json"
+      },
+      {
+        "Name": "skeptical",
+        "File": "expressions/skeptical.exp3.json"
+      },
+      {
+        "Name": "amused",
+        "File": "expressions/amused.exp3.json"
+      },
+      {
+        "Name": "concerned",
+        "File": "expressions/concerned.exp3.json"
+      },
+      {
+        "Name": "annoyed_soft",
+        "File": "expressions/annoyed_soft.exp3.json"
+      },
+      {
+        "Name": "surprised_soft",
+        "File": "expressions/surprised_soft.exp3.json"
+      },
+      {
+        "Name": "teasing",
+        "File": "expressions/teasing.exp3.json"
+      },
+      {
+        "Name": "smirk_minor",
+        "File": "expressions/smirk_minor.exp3.json"
+      },
+      {
+        "Name": "smirk_disdain",
+        "File": "expressions/smirk_disdain.exp3.json"
+      },
+      {
+        "Name": "blush_affection",
+        "File": "expressions/blush_affection.exp3.json"
+      },
+      {
+        "Name": "cat_mouth",
+        "File": "expressions/cat_mouth.exp3.json"
+      },
+      {
+        "Name": "sad_empathy",
+        "File": "expressions/sad_empathy.exp3.json"
+      },
+      {
+        "Name": "wink_correct",
+        "File": "expressions/wink_correct.exp3.json"
+      },
+      {
+        "Name": "teehee",
+        "File": "expressions/teehee.exp3.json"
+      },
+      {
+        "Name": "yan_warning",
+        "File": "expressions/yan_warning.exp3.json"
+      },
+      {
+        "Name": "lazy_deadpan",
+        "File": "expressions/lazy_deadpan.exp3.json"
+      },
+      {
+        "Name": "wink_correct_right",
+        "File": "expressions/wink_correct_right.exp3.json"
+      },
+      {
+        "Name": "teehee_right",
+        "File": "expressions/teehee_right.exp3.json"
+      }
+    ],
+    "Motions": {
+      "ErisAttention": [
+        {
+          "File": "motions/glance_left.motion3.json"
+        },
+        {
+          "File": "motions/glance_right.motion3.json"
+        },
+        {
+          "File": "motions/look_down_soft.motion3.json"
+        },
+        {
+          "File": "motions/look_up_soft.motion3.json"
+        },
+        {
+          "File": "motions/scan_short.motion3.json"
+        }
+      ],
+      "ErisThinking": [
+        {
+          "File": "motions/ponder_left.motion3.json"
+        },
+        {
+          "File": "motions/ponder_right.motion3.json"
+        }
+      ],
+      "ErisGesture": [
+        {
+          "File": "motions/tilt_left.motion3.json"
+        },
+        {
+          "File": "motions/tilt_right.motion3.json"
+        },
+        {
+          "File": "motions/shake_small.motion3.json"
+        }
+      ],
+      "ErisSettle": [
+        {
+          "File": "motions/settle.motion3.json"
+        }
+      ]
+    }
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": [
+        "ParamEyeLOpen",
+        "ParamEyeROpen"
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": [
+        "ParamMouthOpenY"
+      ]
+    }
+  ],
+  "ErisMouthRig": "V13.2"
+}

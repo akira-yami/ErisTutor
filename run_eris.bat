@@ -26,3 +26,4 @@ if exist "%~dp0Eris.exe" (
     echo [THÔNG BÁO] Chưa tìm thấy Eris.exe (Godot GUI), khởi động Python Runtime trực tiếp...
     call "%~dp0run_runtime.bat"
 )
+

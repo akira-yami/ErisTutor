@@ -29,3 +29,4 @@ if errorlevel 1 (
 
 echo [OK] Toàn bộ kiểm thử và kiểm tra mã nguồn đều thành công!
 pause
+

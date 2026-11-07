@@ -1,0 +1,214 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "ParamAngleX",
+			"GroupId": "",
+			"Name": "Angle X"
+		},
+		{
+			"Id": "ParamAngleZ",
+			"GroupId": "",
+			"Name": "Angle Z"
+		},
+		{
+			"Id": "ParamEyeLOpen",
+			"GroupId": "",
+			"Name": "EyeL Open"
+		},
+		{
+			"Id": "ParamEyeROpen",
+			"GroupId": "",
+			"Name": "EyeR Open"
+		},
+		{
+			"Id": "ParamErisMouthCornerL",
+			"GroupId": "",
+			"Name": "ParamErisMouthCornerL"
+		},
+		{
+			"Id": "ParamErisMouthCornerR",
+			"GroupId": "",
+			"Name": "ParamErisMouthCornerR"
+		},
+		{
+			"Id": "ParamErisLipPress",
+			"GroupId": "",
+			"Name": "ParamErisLipPress"
+		},
+		{
+			"Id": "ParamCheek",
+			"GroupId": "",
+			"Name": "Cheek"
+		},
+		{
+			"Id": "ParamEyeHighlight",
+			"GroupId": "",
+			"Name": "Eye Highlight"
+		},
+		{
+			"Id": "eyeballxl",
+			"GroupId": "",
+			"Name": "ParamEyeBallXL"
+		},
+		{
+			"Id": "eyebally",
+			"GroupId": "",
+			"Name": "ParamEyeBallY"
+		},
+		{
+			"Id": "eyeballxr",
+			"GroupId": "",
+			"Name": "ParamEyeBallXR"
+		},
+		{
+			"Id": "eyeballyr",
+			"GroupId": "",
+			"Name": "ParamEyeBallYR"
+		},
+		{
+			"Id": "ParamBrowLAngle",
+			"GroupId": "",
+			"Name": "BrowL Angle"
+		},
+		{
+			"Id": "ParamBrowRAngle",
+			"GroupId": "",
+			"Name": "BrowR Angle"
+		},
+		{
+			"Id": "ParamMouthForm",
+			"GroupId": "",
+			"Name": "Mouth Form"
+		},
+		{
+			"Id": "ParamMouthOpenY",
+			"GroupId": "",
+			"Name": "Mouth Open"
+		},
+		{
+			"Id": "ParamErisTongue",
+			"GroupId": "",
+			"Name": "ParamErisTongue"
+		},
+		{
+			"Id": "ParamBreath",
+			"GroupId": "",
+			"Name": "Breath"
+		},
+		{
+			"Id": "Param_Angle_Rotation2",
+			"GroupId": "ParamGroup",
+			"Name": "[0]Rotation Deformer of tóc trước"
+		},
+		{
+			"Id": "Param_Angle_Rotation3",
+			"GroupId": "ParamGroup",
+			"Name": "[1]Rotation Deformer of tóc trước"
+		},
+		{
+			"Id": "Param_Angle_Rotation4",
+			"GroupId": "ParamGroup",
+			"Name": "[2]Rotation Deformer of tóc trước"
+		},
+		{
+			"Id": "Param_Angle_Rotation5",
+			"GroupId": "ParamGroup2",
+			"Name": "[0]Rotation Deformer of tóc trước5"
+		},
+		{
+			"Id": "Param_Angle_Rotation6",
+			"GroupId": "ParamGroup2",
+			"Name": "[1]Rotation Deformer of tóc trước5"
+		},
+		{
+			"Id": "Param_Angle_Rotation7",
+			"GroupId": "ParamGroup2",
+			"Name": "[2]Rotation Deformer of tóc trước5"
+		},
+		{
+			"Id": "Param_Angle_Rotation8",
+			"GroupId": "ParamGroup3",
+			"Name": "[0]Rotation Deformer of tóc trước8"
+		},
+		{
+			"Id": "Param_Angle_Rotation9",
+			"GroupId": "ParamGroup3",
+			"Name": "[1]Rotation Deformer of tóc trước8"
+		}
+	],
+	"ParameterGroups": [
+		{
+			"Id": "ParamGroup",
+			"GroupId": "",
+			"Name": "Rotation Deformer of tóc trước"
+		},
+		{
+			"Id": "ParamGroup2",
+			"GroupId": "",
+			"Name": "Rotation Deformer of tóc trước5"
+		},
+		{
+			"Id": "ParamGroup3",
+			"GroupId": "",
+			"Name": "Rotation Deformer of tóc trước8"
+		},
+		{
+			"Id": "ParamGroup4",
+			"GroupId": "",
+			"Name": "Rotation Deformer of mắt"
+		}
+	],
+	"Parts": [
+		{
+			"Id": "Part",
+			"Name": "tóc trước"
+		},
+		{
+			"Id": "Part2",
+			"Name": "bộ phận mặt"
+		},
+		{
+			"Id": "hand",
+			"Name": "hand"
+		},
+		{
+			"Id": "ArtMesh_Skinning",
+			"Name": "1(Skinning)"
+		},
+		{
+			"Id": "ArtMesh0_Skinning",
+			"Name": "2(Skinning)"
+		},
+		{
+			"Id": "Part4",
+			"Name": "mắt 1"
+		},
+		{
+			"Id": "Part3",
+			"Name": "mắt 2"
+		},
+		{
+			"Id": "Part5",
+			"Name": "miệng"
+		},
+		{
+			"Id": "trong",
+			"Name": "trong"
+		}
+	],
+	"CombinedParameters": [
+		[
+			"eyeballxl",
+			"eyebally"
+		],
+		[
+			"eyeballxr",
+			"eyeballyr"
+		],
+		[
+			"ParamMouthForm",
+			"ParamMouthOpenY"
+		]
+	]
+}

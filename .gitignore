@@ -26,6 +26,10 @@ node_modules/
 *.egg-info/
 /ErisManager.exe
 /ErisSetup.exe
+/Eris.exe
+/Eris.console.exe
+/Eris.pck
+/data_Eris_windows_x86_64/
 *.vsix
 
 # Local configuration and secrets

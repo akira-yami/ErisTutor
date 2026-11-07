@@ -27,3 +27,4 @@ if errorlevel 1 (
     echo [LỖI] Tiến trình ErisTutor kết thúc với mã lỗi %errorlevel%.
     pause
 )
+

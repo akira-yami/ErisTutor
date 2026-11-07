@@ -1,0 +1,121 @@
+{
+  "Version": 3,
+  "Meta": {
+    "Duration": 2.18,
+    "Fps": 30.0,
+    "Loop": false,
+    "AreBeziersRestricted": true,
+    "FadeInTime": 0.3,
+    "FadeOutTime": 0.36,
+    "CurveCount": 6,
+    "TotalSegmentCount": 18,
+    "TotalPointCount": 24,
+    "UserDataCount": 0,
+    "TotalUserDataSize": 0
+  },
+  "Curves": [
+    {
+      "Target": "Parameter",
+      "Id": "eyeballxl",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.16,
+        -0.26,
+        0,
+        1.42,
+        -0.24,
+        0,
+        2.18,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "eyeballxr",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.16,
+        0.26,
+        0,
+        1.42,
+        0.24,
+        0,
+        2.18,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "eyebally",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.22,
+        0.1,
+        0,
+        1.42,
+        0.11,
+        0,
+        2.18,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "eyeballyr",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.22,
+        0.1,
+        0,
+        1.42,
+        0.11,
+        0,
+        2.18,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "ParamAngleX",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.52,
+        -3.0,
+        0,
+        1.48,
+        -4.0,
+        0,
+        2.18,
+        0
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Id": "ParamAngleZ",
+      "Segments": [
+        0,
+        0,
+        0,
+        0.62,
+        -2.2,
+        0,
+        1.52,
+        -2.88,
+        0,
+        2.18,
+        0
+      ]
+    }
+  ],
+  "UserData": []
+}
