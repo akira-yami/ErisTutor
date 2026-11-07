@@ -60,3 +60,14 @@ def test_web_session_guard() -> None:
     assert lease.session_id.startswith("sess_1")
     guard.commit(lease, "Hi there!")
 
+
+def test_raw_trace_store(tmp_path) -> None:
+    from llm.raw_trace_store import store_payload, restore_payload, json_bytes
+    import json
+    data = json_bytes({"test": "data", "status": 200})
+    manifest = store_payload(tmp_path, data, kind="request")
+    assert manifest["encoding"] == "request"
+    restored = restore_payload(tmp_path, manifest)
+    assert json.loads(restored.decode("utf-8")) == {"test": "data", "status": 200}
+
+

@@ -19,6 +19,9 @@ MODULES = [
     "llm.token_pressure",
     "llm.dds",
     "llm.web_session_guard",
+    # Step 3
+    "llm.raw_trace_store",
+    "llm.raw_trace",
     # Runtime support
     "runtime.diagnostic_logging",
     "runtime.observability",
