@@ -192,10 +192,11 @@ def decode_text_answer(raw: str) -> str:
 
 
 class LearningActivities:
-    def __init__(self, learning, *, workspace=None):
+    def __init__(self, learning, *, workspace=None, assessor=None):
         self.learning = learning
         self.store = learning._store
         self.workspace = workspace
+        self.assessor = assessor
 
     def readiness(self):
         # These are tracing questions, not arbitrary Python execution.
@@ -204,7 +205,8 @@ class LearningActivities:
             "short_answer": True,
             "python_exec": False,
             "math_input": True,  # Chỉ câu trả lời số nguyên, chấm deterministic.
-            "reflection_ungraded": True,
+            "reflection_ungraded": self.assessor is None,
+            "reflection_graded": self.assessor is not None,
             "graph_manipulation": False,
         }
 
@@ -368,6 +370,7 @@ class LearningActivities:
                 "instruction": item["explanation"] if action == "reveal" else hints[index],
             }
         mode = item.get("response_mode", "choice")
+        semantic_detail = None
         if mode == "choice":
             if answer is None or not answer.isdigit() or not 0 <= int(answer) < len(item["options"]):
                 raise ValueError("invalid_activity_answer")
@@ -383,17 +386,90 @@ class LearningActivities:
                 result = "correct" if correct else "incorrect"
             else:
                 correct = False
-                result = "ungraded"  # Chưa có rubric đáng tin để chấm tự luận.
+                result = "ungraded"
+                if self.assessor is not None:
+                    try:
+                        if callable(getattr(self.assessor, "assess_response", None)):
+                            from runtime.tutor.contracts import TutorObservation, TutorState, TeachingMove
+                            from runtime.learning_core.contracts import LearnerProfile
+                            from runtime.learning_core.policy import TutorStep
+                            path = self.store.load_path(item["path_id"])
+                            kp = next((p for p in path.knowledge_points if p.kp_id == item["kp_id"]), None) if path else None
+                            mastery = self.store.load_mastery(item["kp_id"])
+                            obs = TutorObservation(
+                                turn_id=event.event_id,
+                                user_text=value,
+                                path_id=item["path_id"],
+                                path_goal=path.goal if path else "",
+                                kp_id=item["kp_id"],
+                                kp_title=kp.title if kp else item["title"],
+                                kp_description=kp.description if kp else "",
+                                kp_type=kp.kp_type if kp else "concept",
+                                policy_step=TutorStep(kind="assess", kp_id=item["kp_id"], reason="reflection_probe"),
+                                mastery=mastery,
+                                learner=LearnerProfile(),
+                            )
+                            state = TutorState(session_id=item["session_id"], path_id=item["path_id"], kp_id=item["kp_id"])
+                            move = TeachingMove(
+                                move_id=item["activity_id"],
+                                kind="assessment",
+                                kp_id=item["kp_id"],
+                                objective=item["title"],
+                                instruction_vi=item["question"],
+                                requires_user_response=True,
+                            )
+                            assessment = self.assessor.assess_response(obs, state, move)
+                        elif callable(self.assessor):
+                            assessment = self.assessor(item, value)
+                        else:
+                            assessment = None
+
+                        if assessment is not None and getattr(assessment, "confidence", 0.0) >= 0.70:
+                            verdict = getattr(assessment, "verdict", "uncertain")
+                            if verdict == "pass":
+                                correct = True
+                                result = "correct"
+                                evidence_type = getattr(assessment, "evidence_type", "feynman_pass") or "feynman_pass"
+                            elif verdict == "partial":
+                                correct = False
+                                result = "partial"
+                                evidence_type = getattr(assessment, "evidence_type", "paraphrase") or "paraphrase"
+                            elif verdict == "fail":
+                                correct = False
+                                result = "incorrect"
+                                evidence_type = getattr(assessment, "evidence_type", "feynman_fail") or "feynman_fail"
+                            semantic_detail = {
+                                "verdict": verdict,
+                                "confidence": assessment.confidence,
+                                "summary": getattr(assessment, "summary", ""),
+                                "misconception": getattr(assessment, "misconception", ""),
+                            }
+                    except Exception as exc:
+                        import logging
+                        logging.getLogger(__name__).warning("Semantic assessment failed: %s", exc, exc_info=exc)
+                        correct = False
+                        result = "ungraded"
             answer_ref = "sha256:" + digest(value)
         else:
             raise ValueError("unsupported_activity_mode")
         help_state = self.store.assistance_for(activity_id)
+        if mode == "reflection" and result in {"correct", "partial", "incorrect"}:
+            rubric_version = "feynman-rubric-v1"
+            assessor_version = "semantic-rubric-v1"
+            strength = getattr(assessment, "strength", 1.0 if correct else 0.5 if result == "partial" else 0.0)
+            error_code = getattr(assessment, "error_code", "") if not correct else ""
+        else:
+            evidence_type = "exposure" if result == "ungraded" else "quiz_correct" if correct else "quiz_incorrect"
+            strength = 1.0 if correct else 0.0
+            rubric_version = ("reflection-ungraded-v1" if mode == "reflection" else "deterministic-v1")
+            assessor_version = ("no-grade-v1" if mode == "reflection" else "choice-key-v1" if mode == "choice" else "integer-key-v1")
+            error_code = "" if correct else "trace-step"
         attempt = AssessmentAttempt(
             attempt_id,
             item["kp_id"],
             result,
-            "exposure" if result == "ungraded" else "quiz_correct" if correct else "quiz_incorrect",
-            strength=1.0 if correct else 0.0,
+            evidence_type,
+            strength=strength,
             interaction_id=activity_id,
             turn_id=event.event_id,
             path_id=item["path_id"],
@@ -403,25 +479,31 @@ class LearningActivities:
             assistance=help_state["assistance"],
             hint_count=help_state.get("hint_count", 0),
             answer_revealed=help_state["assistance"] == "answer_revealed",
-            rubric_version=("reflection-ungraded-v1" if mode == "reflection" else "deterministic-v1"),
-            assessor_version=("no-grade-v1" if mode == "reflection" else "choice-key-v1" if mode == "choice" else "integer-key-v1"),
+            rubric_version=rubric_version,
+            assessor_version=assessor_version,
             source_refs=tuple(item["source_refs"]),
             recorded_at=now,
             answer_ref=answer_ref,
-            error_code="" if correct else "trace-step",
+            error_code=error_code,
         )
         committed = self.learning.record_attempt(attempt)
         item["closed"] = True
         self.store.save_activity(item)
-        return {
+        feedback = item["explanation"]
+        if semantic_detail and semantic_detail.get("summary"):
+            feedback = semantic_detail["summary"] + "\n\n" + item["explanation"]
+        ret = {
             "status": "completed",
             "committed": committed,
             "attempt": attempt.to_dict(),
-            "feedback": item["explanation"],
-            "grading_status": "ungraded" if result == "ungraded" else "deterministic",
+            "feedback": feedback,
+            "grading_status": ("semantic_rubric" if (semantic_detail and result != "ungraded") else "ungraded" if result == "ungraded" else "deterministic"),
             "next_step": "independent_variant" if help_state["assistance"] != "independent" else "continue",
             "retention": self.learning.retention_snapshot(item["kp_id"]),
         }
+        if semantic_detail:
+            ret["semantic_assessment"] = semantic_detail
+        return ret
 
     def commit_help(self, data):
         item = self.store.load_activity(data["activity_id"])

@@ -26,6 +26,10 @@ node_modules/
 *.egg-info/
 /ErisManager.exe
 /ErisSetup.exe
+/Eris.exe
+/Eris.console.exe
+/Eris.pck
+/data_Eris_windows_x86_64/
 *.vsix
 
 # Local configuration and secrets
@@ -98,8 +102,6 @@ tools/whale2api/data/
 
 # cline-bridge build artifacts (node_modules + compiled dist)
 cline-bridge/node_modules/
-cline-bridge/dist/
-src/vscode-extension/node_modules/
 
 # Vendored/generated tool copies
 src/tools/whale2api/

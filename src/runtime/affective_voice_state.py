@@ -32,7 +32,28 @@ import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Mapping
 
-from cortex.affective_dynamics import effective_affect_values
+try:
+    from cortex.affective_dynamics import effective_affect_values
+except ImportError:
+    def effective_affect_values(state: Any) -> dict[str, float]:
+        raw_val = getattr(state, "valence", 0.02) if state is not None else 0.02
+        return {
+            "valence": float(raw_val),
+            "arousal": float(getattr(state, "arousal", 0.16) if state is not None else 0.16),
+            "curiosity": float(getattr(state, "curiosity", 0.38) if state is not None else 0.38),
+            "social_energy": float(getattr(state, "social_energy", 0.38) if state is not None else 0.38),
+            "attachment": float(getattr(state, "attachment", 0.30) if state is not None else 0.30),
+            "irritation": float(getattr(state, "irritation", 0.10) if state is not None else 0.10),
+            "fatigue": float(getattr(state, "fatigue", 0.12) if state is not None else 0.12),
+            "tenderness": float(getattr(state, "tenderness", 0.16) if state is not None else 0.16),
+            "delight": 0.19,
+            "sadness": 0.22,
+            "anxiety": 0.27,
+            "playfulness": 0.10,
+            "yearning": 0.36,
+            "embarrassment": 0.18,
+            "impulse_strength": 0.0,
+        }
 
 
 AFFECTIVE_VOICE_VERSION = "eris.affective_voice.v43.event_driven_mood"

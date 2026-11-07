@@ -79,10 +79,13 @@ class NextConversationMove:
     # Internal executor receipts only. Never sourced from model-provided IDs.
     tool_artifact_bundles: tuple[str, ...] = ()
     canvas_segments: tuple[dict[str, str], ...] = ()
+    # Decision summary used only for attribution after successful delivery.
+    interaction_choice: Mapping[str, str] = field(default_factory=dict)
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, Any] | None) -> "NextConversationMove":
         data = raw if isinstance(raw, Mapping) else {}
+        from .interaction_choice import normalize_interaction_choice
         try:
             after = ConversationAfter(str(data.get("after", "wait_user") or "wait_user").strip().lower())
         except ValueError:
@@ -100,6 +103,7 @@ class NextConversationMove:
             after=after,
             move_id=_text(data.get("move_id"), 180) or f"move:{uuid.uuid4().hex}",
             literal_dialogue=data.get("_runtime_literal_dialogue") is True,
+            interaction_choice=normalize_interaction_choice(data.get("interaction_choice")),
             document_source=str(data.get("document_source", "") or "")[:12000],
             presentation_blocks=_parse_presentation_blocks(data.get("presentation_blocks")),
             canvas_segments=tuple({"block_id": str(p.get("block_id", ""))[:120], "say": str(p.get("say", ""))[:1200]}
@@ -116,6 +120,7 @@ class NextConversationMove:
             "say": self.say,
             "delivery": self.delivery,
             "after": self.after.value,
+            **({"interaction_choice": dict(self.interaction_choice)} if self.interaction_choice else {}),
             **({"document_source": self.document_source} if self.document_source else {}),
             **({"presentation_blocks": list(self.presentation_blocks)} if self.presentation_blocks else {}),
             **({"canvas_segments": list(self.canvas_segments)} if self.canvas_segments else {}),

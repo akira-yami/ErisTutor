@@ -246,7 +246,9 @@ class TutorCapability:
         from runtime.tutor.activities import LearningActivities
 
         if self._activity_workspace is None:
-            self._activity_workspace = LearningActivities(learning)
+            self._activity_workspace = LearningActivities(
+                learning, assessor=getattr(self.executive, "reasoner", None)
+            )
         workspace = self._activity_workspace
         pending = {"event_id": event.event_id, "session_id": event.session_id,
                    "generation": event.generation}

@@ -15,7 +15,7 @@ from runtime.pedagogical_plan_builder import TeachingPlanBuilder
 
 
 def _explicit_pedagogical_activation(user_text: str) -> bool:
-    text = normalize_vi(user_text)
+    text = normalize_vi(str(user_text or ""))
     markers = (
         "chi toi", "chi minh", "day toi", "day minh", "teach me", "tutor me",
         "help me learn", "help me study", "i want to learn", "i need to learn",

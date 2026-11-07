@@ -87,6 +87,8 @@ class RuntimeCoordinator(
         self.incoming_dispatcher = IncomingMessageDispatcher(
             self,
             settings=self.runtime_policy_settings.protocol,
+            health_registry=self.subsystem_health_registry,
+            logger=self.logger,
         )
 
         # World state & open loop store
@@ -139,6 +141,13 @@ class RuntimeCoordinator(
             self.subject_ingress = None
             if self.logger is not None:
                 self.logger.debug("[RuntimeCoordinator] Subject bootstrap degraded: %s", exc)
+
+        # AI Orchestrated Runtime (Architecture C)
+        try:
+            from runtime.ai_orchestrated.bootstrap import install_ai_orchestrated_runtime
+            install_ai_orchestrated_runtime(self, self.llm_service)
+        except Exception as exc:
+            self.logger.warning("[RuntimeCoordinator] Failed to install AI orchestrated runtime: %s", exc)
 
         # Socratic Tutor & Learning Runtime
         try:

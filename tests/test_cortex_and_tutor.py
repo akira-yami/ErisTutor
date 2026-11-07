@@ -645,4 +645,3 @@ async def test_cortex_and_tutor_edge_cases_and_error_paths(tmp_path: Path) -> No
         assert exec_empty.suspend_pending_move() is False
     finally:
         empty_store.close()
-
