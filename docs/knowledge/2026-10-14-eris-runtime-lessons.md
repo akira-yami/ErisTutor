@@ -1,11 +1,5 @@
 # Tri thức Eris: bài học từ điều tra runtime và gói rescue
 
-Cập nhật Live2D ngày 07/11: [rig miệng V13.2 và lip-sync TTS](2026-11-07-live2d-v13-2-tts.md).
-Bản repo và portable đã dùng rig mới cùng hai atlas từ gói full. Quy tắc thu
-lưỡi theo rig cũ bên dưới không áp dụng cho V13.2: lưỡi trong miệng đi theo
-hàm, ArtMesh lè lưỡi cũ được ẩn trong MOC3 chạy. Đã kiểm phát TTS cục bộ qua
-thiết bị âm thanh và Cubism Native; chưa kiểm hội thoại qua provider từ xa.
-
 Cập nhật Live2D ngày 06/11: [atlas 2048 từ file Cubism gốc](2026-11-05-live2d-expression-audit.md#atlas-2048-từ-file-cubism-gốc--06112026).
 Gói hiện tại dùng hình vẽ gốc, xếp lại atlas ở kích thước ảnh nguồn. MOC3
 chỉ đổi UV để khớp atlas mới. Rig và các biểu cảm hiện có được giữ lại.
