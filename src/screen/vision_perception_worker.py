@@ -20,12 +20,9 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
-try:
-    import mss
-except Exception:
-    mss = None
-
 from PIL import Image
+from native.screen_capture import capture_screen
+from runtime.privacy.environment_policy import EnvironmentPolicy, PrivacyScope
 
 from .active_window_provider import ActiveWindowProvider
 from .change_detector import ScreenChangeDetector
@@ -188,16 +185,13 @@ class VisionPerceptionWorker:
             self._thread = None
 
     def _capture_screen(self, window: ActiveWindowInfo) -> Image.Image | None:
-        if mss is None:
+        if not window.bounds or min(window.bounds[2:]) <= 50:
+            return None
+        privacy = EnvironmentPolicy().scope_for(process_name=window.process_name, window_title=window.title)
+        if privacy.scope < PrivacyScope.SEMANTIC:
             return None
         try:
-            with mss.mss() as sct:
-                if window.bounds and window.bounds[2] > 50 and window.bounds[3] > 50:
-                    left, top, width, height = window.bounds
-                    raw = sct.grab({"left": left, "top": top, "width": width, "height": height})
-                else:
-                    raw = sct.grab(sct.monitors[0])
-            return Image.frombytes("RGB", raw.size, raw.rgb)
+            return capture_screen(window.bounds)
         except Exception as exc:
             _LOG.debug("Vision capture failed: %s", exc)
             return None
