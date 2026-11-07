@@ -256,6 +256,55 @@ public partial class UdpListener
         RefreshConversationEmptyState();
     }
 
+    // Web chỉ được thao tác trên transcript tại máy; không xóa Memory/Learning.
+    // Giữ cùng nguồn dữ liệu với nút "Xóa lịch sử trên máy" của panel Godot.
+    private string DeleteRichChatHistoryOnMainThread(string scope, string date)
+    {
+        if (_companionPreview) return "error";
+        // Không cho kết quả của lượt đang chạy tái xuất hiện sau khi người dùng xóa.
+        if (_conversationState is "thinking" or "preparing" or "buffering" ||
+            _runtimePresence.Thinking || _runtimePresence.Speaking || _ttsAudioIsPlaying ||
+            _richChatOutbox.Count > 0)
+            return "busy";
+        if (_conversationEntries.Count == 0) return "empty";
+        var before = _conversationEntries.ToList();
+        if (scope == "all")
+        {
+            ClearConversationHistory();
+            // Không báo thành công khi hệ thống không thể xóa file bền vững.
+            bool persists = System.IO.File.Exists(ProjectSettings.GlobalizePath(ConversationHistoryStatePath)) ||
+                System.IO.File.Exists(ProjectSettings.GlobalizePath(ConversationLegacyTodayStatePath));
+            if (persists)
+            {
+                _conversationEntries.AddRange(before);
+                SaveConversationHistory();
+                RebuildConversationMessages();
+                RefreshConversationHeaderDate();
+                RefreshConversationEmptyState();
+                return "error";
+            }
+            return "ok";
+        }
+        if (scope != "day") return "error";
+        int removed = _conversationEntries.RemoveAll(e => string.Equals(e.Date, date, StringComparison.Ordinal));
+        if (removed == 0) return "empty";
+        // Ghi file rỗng nếu đã xóa ngày cuối cùng để không tái nhập lịch sử legacy.
+        if (!SaveConversationHistory())
+        {
+            _conversationEntries.Clear();
+            _conversationEntries.AddRange(before);
+            return "error";
+        }
+        _lastAssistantConversationText = _conversationEntries.LastOrDefault(e => e.Role == "assistant")?.Text ?? "";
+        _lastAssistantConversationAtMs = 0;
+        _conversationSelectedDate = "";
+        _conversationDateSelectionInitialized = false;
+        RebuildConversationMessages();
+        RefreshConversationHeaderDate();
+        RefreshConversationEmptyState();
+        return "ok";
+    }
+
     private static void DeleteConversationStoreFile(string resourcePath)
     {
         try
@@ -1402,9 +1451,9 @@ public partial class UdpListener
         }
     }
 
-    private void SaveConversationHistory()
+    private bool SaveConversationHistory()
     {
-        if (_companionPreview) return;
+        if (_companionPreview) return false;
         string path = ProjectSettings.GlobalizePath(ConversationHistoryStatePath);
         try
         {
@@ -1421,10 +1470,12 @@ public partial class UdpListener
             string tempPath = path + ".tmp";
             System.IO.File.WriteAllText(tempPath, json);
             System.IO.File.Move(tempPath, path, true);
+            return true;
         }
         catch (Exception ex)
         {
             GD.PrintErr($"[ConversationUi] Không lưu được lịch sử hội thoại: {ex.Message}");
+            return false;
         }
     }
 

@@ -21,12 +21,23 @@ public partial class UdpListener
     private TcpListener _richChatServer;
     private CancellationTokenSource _richChatCancellation;
     private readonly ConcurrentQueue<string> _richChatOutbox = new();
+    // Yêu cầu xóa transcript được xử lý trên Godot main thread, cùng nơi ghi lịch sử.
+    private sealed class RichChatDeleteRequest
+    {
+        public string Scope { get; init; } = "";
+        public string Date { get; init; } = "";
+        public TaskCompletionSource<string> Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        // 0 = queued, 1 = main thread xử lý, 2 = hủy vì quá hạn trước khi chạy.
+        public int Lifecycle;
+    }
+    private readonly ConcurrentQueue<RichChatDeleteRequest> _richChatDeleteOutbox = new();
     private readonly ConcurrentQueue<(string PathId, int Page)> _learnerPortraitOutbox = new();
     private string _learnerPortraitSnapshot = "{\"status\":\"loading\"}";
     private readonly Dictionary<string, (byte[] Bytes, string Mime)> _richChatAssets = new();
     private string _richChatToken = "";
     private string _richChatUrl = "";
     private string _richChatSnapshot = "{\"messages\":[],\"status\":\"Đang kết nối\"}";
+    private int _richChatEventClients;
     private ulong _richChatLastSnapshotMs;
     // The same loopback-only, token-protected browser server is shared by
     // Rich Chat and Learner Portrait. No second HTTP listener or public port.
@@ -90,7 +101,7 @@ public partial class UdpListener
         Assembly assembly = typeof(UdpListener).Assembly;
         var resources = assembly.GetManifestResourceNames();
         string[] files = {
-            "index.html", "chat.css", "chat.js", "artifacts.js", "canvas.html", "canvas.css", "canvas.js", "vendor/mathjax.js", "vendor/prism.css",
+            "index.html", "chat.css", "chat.js", "studio.css", "studio.js", "artifacts.js", "canvas.html", "canvas.css", "canvas.js", "vendor/mathjax.js", "vendor/prism.css",
             "vendor/prism.js", "vendor/prism-clike.js", "vendor/prism-python.js",
             "vendor/prism-javascript.js", "vendor/prism-typescript.js", "vendor/prism-csharp.js",
             "vendor/prism-c.js", "vendor/prism-cpp.js", "vendor/prism-java.js", "vendor/prism-css.js",
@@ -179,6 +190,21 @@ public partial class UdpListener
                     Reply(net, 200, "application/json; charset=utf-8", Encoding.UTF8.GetBytes(snapshot));
                     return;
                 }
+                if (method == "GET" && relative == "api/events")
+                {
+                    // SSE phản ánh snapshot đã được main thread xác nhận.
+                    // Không tự bịa token-stream hoặc tạo agent thứ hai.
+                    // Giới hạn kết nối để tab đóng/mở không giữ thread vô hạn.
+                    if (Interlocked.Increment(ref _richChatEventClients) > 8)
+                    {
+                        Interlocked.Decrement(ref _richChatEventClients);
+                        Reply(net, 409, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false}"));
+                        return;
+                    }
+                    try { StreamRichChatEvents(net); }
+                    finally { Interlocked.Decrement(ref _richChatEventClients); }
+                    return;
+                }
                 if (method == "GET" && relative == "api/portrait/state")
                 {
                     Reply(net, 200, "application/json; charset=utf-8",
@@ -225,6 +251,64 @@ public partial class UdpListener
                     { Reply(net, 409, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false}")); return; }
                     _learnerPortraitOutbox.Enqueue((pathId, pageIndex));
                     Reply(net, 202, "application/json", Encoding.UTF8.GetBytes("{\"ok\":true}"));
+                    return;
+                }
+                if (method == "POST" && relative == "api/history/delete")
+                {
+                    // Chỉ trang Rich Chat cùng origin được quyền yêu cầu hành động phá hủy.
+                    string expectedOrigin = "Origin: http://" + expectedHost;
+                    if (!lines.Any(line => line.Equals(expectedOrigin, StringComparison.OrdinalIgnoreCase)))
+                    { Reply(net, 403, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false,\"reason\":\"origin\"}")); return; }
+                    int length = -1;
+                    foreach (string line in lines.Skip(1))
+                        if (line.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase) &&
+                            int.TryParse(line.Substring(15).Trim(), out int size)) length = size;
+                    if (length < 2 || length > 384)
+                    { Reply(net, 413, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false,\"reason\":\"payload\"}")); return; }
+                    int offset = headerEnd + 4;
+                    while (data.Length - offset < length && data.Length < 1024)
+                    {
+                        int read = net.Read(chunk, 0, Math.Min(chunk.Length, length - (int)data.Length + offset));
+                        if (read <= 0) return;
+                        data.Write(chunk, 0, read);
+                    }
+                    using JsonDocument deletionJson = JsonDocument.Parse(data.ToArray().AsMemory(offset, length));
+                    JsonElement deletion = deletionJson.RootElement;
+                    string scope = deletion.ValueKind == JsonValueKind.Object && deletion.TryGetProperty("scope", out var scopeElement) && scopeElement.ValueKind == JsonValueKind.String
+                        ? scopeElement.GetString() ?? "" : "";
+                    string date = deletion.ValueKind == JsonValueKind.Object && deletion.TryGetProperty("date", out var dateElement) && dateElement.ValueKind == JsonValueKind.String
+                        ? dateElement.GetString() ?? "" : "";
+                    string confirmation = deletion.ValueKind == JsonValueKind.Object && deletion.TryGetProperty("confirmation", out var confirmElement) && confirmElement.ValueKind == JsonValueKind.String
+                        ? confirmElement.GetString() ?? "" : "";
+                    bool valid = confirmation == "DELETE_ERIS_HISTORY" && (scope == "all" && date.Length == 0 ||
+                        scope == "day" && DateTime.TryParseExact(date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out _) && date.Length == 10);
+                    if (!valid)
+                    { Reply(net, 400, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false,\"reason\":\"invalid_request\"}")); return; }
+                    if (_richChatDeleteOutbox.Count >= 2)
+                    { Reply(net, 409, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false,\"reason\":\"queued\"}")); return; }
+                    var requestDelete = new RichChatDeleteRequest { Scope = scope, Date = date };
+                    _richChatDeleteOutbox.Enqueue(requestDelete);
+                    // Không báo xóa thành công khi main thread chưa xác nhận đã lưu.
+                    string outcome;
+                    try
+                    {
+                        if (!requestDelete.Completion.Task.Wait(TimeSpan.FromSeconds(3)))
+                        {
+                            // Không để yêu cầu hết hạn bất ngờ xóa lịch sử sau khi web báo lỗi.
+                            bool cancelled = Interlocked.CompareExchange(ref requestDelete.Lifecycle, 2, 0) == 0;
+                            Reply(net, 503, "application/json", Encoding.UTF8.GetBytes(cancelled
+                                ? "{\"ok\":false,\"reason\":\"timeout\"}"
+                                : "{\"ok\":false,\"reason\":\"timeout_processing\"}"));
+                            return;
+                        }
+                        outcome = requestDelete.Completion.Task.Result;
+                    }
+                    catch (Exception)
+                    { Reply(net, 503, "application/json", Encoding.UTF8.GetBytes("{\"ok\":false,\"reason\":\"error\"}")); return; }
+                    int status = outcome == "ok" ? 200 : outcome is "busy" or "empty" ? 409 : 500;
+                    Reply(net, status, "application/json; charset=utf-8",
+                        Encoding.UTF8.GetBytes("{\"ok\":" + (outcome == "ok" ? "true" : "false") + ",\"reason\":\"" + outcome + "\"}"));
                     return;
                 }
                 if (method == "GET" && relative.StartsWith("api/image/", StringComparison.Ordinal))
@@ -303,6 +387,43 @@ public partial class UdpListener
         }
     }
 
+    // Snapshot streaming qua HTTP trên localhost (text/event-stream).
+    // Trình duyệt có fallback GET /api/state nếu SSE không khả dụng.
+    private void StreamRichChatEvents(NetworkStream net)
+    {
+        byte[] header = Encoding.ASCII.GetBytes(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream; charset=utf-8\r\n" +
+            "Cache-Control: no-cache, no-store\r\nConnection: close\r\n" +
+            "X-Content-Type-Options: nosniff\r\nReferrer-Policy: no-referrer\r\n" +
+            "X-Frame-Options: DENY\r\n\r\n");
+        net.WriteTimeout = 4000;
+        net.Write(header, 0, header.Length);
+        string previous = null;
+        DateTime started = DateTime.UtcNow;
+        DateTime heartbeat = started;
+        while (_richChatServer != null && _richChatCancellation?.IsCancellationRequested == false
+               && (DateTime.UtcNow - started).TotalSeconds < 45)
+        {
+            string current = Volatile.Read(ref _richChatSnapshot);
+            if (!string.Equals(current, previous, StringComparison.Ordinal))
+            {
+                // JsonSerializer là một dòng; escape CR/LF dự phòng nếu format đổi.
+                string compact = current.Replace("\r", "").Replace("\n", "");
+                byte[] frame = Encoding.UTF8.GetBytes("event: state\ndata: " + compact + "\n\n");
+                net.Write(frame, 0, frame.Length);
+                previous = current;
+                heartbeat = DateTime.UtcNow;
+            }
+            else if ((DateTime.UtcNow - heartbeat).TotalSeconds > 11)
+            {
+                byte[] ping = Encoding.ASCII.GetBytes(": ping\n\n");
+                net.Write(ping, 0, ping.Length);
+                heartbeat = DateTime.UtcNow;
+            }
+            Thread.Sleep(250);
+        }
+    }
+
     private static int FindHttpSeparator(byte[] bytes, int length)
     {
         for (int i = 0; i < length - 3; i++)
@@ -315,7 +436,7 @@ public partial class UdpListener
     {
         string label = status switch { 200 => "OK", 202 => "Accepted", 409 => "Conflict", 400 => "Bad Request",
             403 => "Forbidden", 404 => "Not Found", 405 => "Method Not Allowed", 413 => "Payload Too Large",
-            501 => "Not Implemented", _ => "Error" };
+            501 => "Not Implemented", 503 => "Service Unavailable", _ => "Error" };
         string headers = $"HTTP/1.1 {status} {label}\r\nContent-Type: {mime}\r\nContent-Length: {payload.Length}\r\n" +
             "Connection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\n" +
             "Referrer-Policy: no-referrer\r\nX-Frame-Options: DENY\r\n" +
@@ -346,17 +467,50 @@ public partial class UdpListener
         string speechTurnId = !string.IsNullOrWhiteSpace(_ttsBodyAudioTurnId)
             ? _ttsBodyAudioTurnId : _runtimePresence.TurnId;
         string phase = speaking ? "speaking" : thinking ? "thinking" : "idle";
+        // Chỉ công bố metadata quan sát được, không lộ chuỗi suy luận nội bộ.
+        string activity = _runtimePresence.RuntimeActivityActive
+            ? _runtimePresence.RuntimeActivityLabel : "";
+        string stageLabel = !string.IsNullOrWhiteSpace(_runtimePresence.StatusLabel)
+            ? _runtimePresence.StatusLabel : _conversationStateLabel;
+        // Revision đơn điệu: snapshot xóa không thể bị polling/SSE cũ ghi đè trong cùng mili-giây.
+        ulong snapshotRevision = Math.Max(Time.GetTicksMsec(), _richChatLastSnapshotMs + 1);
         string next = JsonSerializer.Serialize(new {
+            revision = snapshotRevision,
             messages = visible, bundles, status = _conversationStateLabel, online = true,
             speech = new { phase, turnId = speaking ? speechTurnId : "" },
+            presence = new {
+                stage = _runtimePresence.Stage, label = stageLabel,
+                activity, emotion = _runtimePresence.Emotion,
+                motion = _runtimePresence.Motion,
+                isActive = _runtimePresence.RuntimeActivityActive,
+                warning = _runtimePresence.ProgressWarningLevel > 0,
+                turnId = _runtimePresence.TurnId,
+            },
         });
         Volatile.Write(ref _richChatSnapshot, next);
-        _richChatLastSnapshotMs = Time.GetTicksMsec();
+        _richChatLastSnapshotMs = snapshotRevision;
     }
 
     private void TickRichChatPortal()
     {
         if (_richChatServer == null) return;
+        // Tác vụ xóa lịch sử đứng trước enqueue tin mới để tránh đua với transcript.
+        while (_richChatDeleteOutbox.TryDequeue(out RichChatDeleteRequest deletion))
+        {
+            if (Interlocked.CompareExchange(ref deletion.Lifecycle, 1, 0) != 0) continue;
+            string outcome;
+            try
+            {
+                outcome = DeleteRichChatHistoryOnMainThread(deletion.Scope, deletion.Date);
+                if (outcome == "ok") UpdateRichChatSnapshot();
+            }
+            catch (Exception exc)
+            {
+                GD.PrintErr("[RichChat] Delete transcript failed: " + exc.Message);
+                outcome = "error";
+            }
+            deletion.Completion.TrySetResult(outcome);
+        }
         int processed = 0;
         while (processed++ < 5 && _richChatOutbox.TryDequeue(out string message))
             SendUserChatMessage(message);
@@ -369,7 +523,7 @@ public partial class UdpListener
             Volatile.Write(ref _learnerPortraitSnapshot,
                 "{\"status\":\"error\",\"message\":\"Eris chưa phản hồi sau 20 giây. Hãy thử Làm mới.\"}");
         }
-        if (Time.GetTicksMsec() - _richChatLastSnapshotMs >= 500)
+        if (Time.GetTicksMsec() >= _richChatLastSnapshotMs + 500)
             UpdateRichChatSnapshot();
     }
 

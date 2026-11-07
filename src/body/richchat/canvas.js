@@ -111,7 +111,7 @@
           activity.submission_id === prev.submission_id && prev.status !== 'running' && activity.status === 'running') return;
     }
     state.activities.set(activity.node_id, activity);
-    if (activity.type === 'java' && !state.drafts.has(activity.activity_id))
+    if ((activity.type === 'java' || activity.type === 'python') && !state.drafts.has(activity.activity_id))
       state.drafts.set(activity.activity_id, activity.code || '');
   }
   function observePlayback(packet) {
@@ -226,6 +226,7 @@
     byId('newTopicButton').disabled = !!state.pending;
     document.querySelectorAll('[data-action]').forEach(node => {node.disabled = !!state.pending || node.dataset.disabled === 'true';});
   }
+  let navDebounce = null;
   function chooseNode(id) {
     if (!nodeById(id)) return;
     state.selected = id;
@@ -238,14 +239,18 @@
     }
     state.desiredNode = '';
     render();
-    if (graphMode()) {
-      if (id !== graph()?.selected_node_id)
-        send('graph_select',{group_id:graph().group_id,node_id:id});
-      return;
-    }
-    const focus = state.snapshot?.focus?.node_id;
-    if (id !== focus) send('navigate', {node_id:id});
-    else if (!state.details.has(id)) send('open', {node_id:id});
+    if (navDebounce) clearTimeout(navDebounce);
+    navDebounce = setTimeout(() => {
+      navDebounce = null;
+      if (graphMode()) {
+        if (id !== graph()?.selected_node_id)
+          send('graph_select',{group_id:graph().group_id,node_id:id});
+        return;
+      }
+      const focus = state.snapshot?.focus?.node_id;
+      if (id !== focus) send('navigate', {node_id:id});
+      else if (!state.details.has(id)) send('open', {node_id:id});
+    }, 120);
   }
   function renderMap() {
     const map = byId('map');
@@ -261,7 +266,8 @@
       for (const n of nodes.filter(n => (n.level || 0) === level)) {
         const selected = n.id === state.selected;
         const btn = el('button','node' + (selected ? ' selected' : '') +
-          (state.playback?.node_id === n.id ? ' speaking-node' : ''));
+          (state.playback?.node_id === n.id ? ' speaking-node' : '') +
+          (n.due ? ' due-node' : ''));
         btn.type = 'button';btn.dataset.node = n.id;btn.setAttribute('aria-pressed',String(selected));
         btn.append(el('span','node-top',n.title));
         const foot = el('div','node-foot');
@@ -326,19 +332,20 @@
     addText(container,'h4','section-title','Luyện tập');
     const choices = el('div','exercise-choices');container.append(choices);
     for (const exercise of detail.exercises || []) {
-      const button = actionButton(choices,exercise.type === 'java'?'⌘ Viết Java':'◉ Trắc nghiệm','exercise');
+      const button = actionButton(choices,exercise.type === 'java'?'⌘ Viết Java':exercise.type === 'python'?'⌘ Viết Python':'◉ Trắc nghiệm','exercise');
       button.addEventListener('click',()=>send('exercise',{node_id:state.selected,exercise_id:exercise.id}));
     }
     const activity = currentActivity();
     if (!activity) {addText(container,'p','summary','Chọn dạng bài để bắt đầu. Kết quả được lưu sau khi chấm.');return;}
     const card = el('section','exercise-card');container.append(card);
-    if (activity.unavailable_notice) addText(card,'p','warning','Java chưa khả dụng; đã chuyển sang trắc nghiệm. '+activity.unavailable_notice);
+    if (activity.unavailable_notice) addText(card,'p','warning',(activity.type === 'python'?'Python':'Java')+' chưa khả dụng; đã chuyển sang trắc nghiệm. '+activity.unavailable_notice);
     addText(card,'p','',activity.prompt || '');
     const running = activity.status === 'running';
     let answer = '';
-    if (activity.type === 'java') {
+    if (activity.type === 'java' || activity.type === 'python') {
+      const isPy = activity.type === 'python';
       const editor = el('textarea','code-editor');editor.id = 'codeEditor';
-      editor.setAttribute('aria-label','Soạn mã Java');editor.spellcheck = false;
+      editor.setAttribute('aria-label',isPy?'Soạn mã Python':'Soạn mã Java');editor.spellcheck = false;
       editor.value = state.drafts.get(activity.activity_id) ?? activity.code ?? '';
       editor.disabled = running || !!state.pending;
       editor.addEventListener('input',()=>state.drafts.set(activity.activity_id,editor.value));
@@ -350,11 +357,12 @@
       });
       card.append(editor);
       const row = el('div','exercise-actions');card.append(row);
-      const submit = actionButton(row,running?'Đang chạy trong Docker...':'▶ Chạy Java','submit',running,true);
+      const submitLabel = running?'Đang chạy trong Docker...':(isPy?'▶ Chạy Python':'▶ Chạy Java');
+      const submit = actionButton(row,submitLabel,'submit',running,true);
       submit.addEventListener('click',()=>{
         const code = editor.value;
         if (!code.trim() || new TextEncoder().encode(code).length > 12000) {
-          setStatus('Nhập code Java tối đa 12 KB.');return;
+          setStatus('Nhập code '+(isPy?'Python':'Java')+' tối đa 12 KB.');return;
         }
         send('submit',{activity_id:activity.activity_id,nonce:activity.nonce,code});
       });
@@ -387,7 +395,7 @@
       }
       if (activity.diagnostic) addText(card,'p','help',activity.diagnostic);
     }
-    if (activity.status === 'unavailable') addText(card,'p','warning','Không thể chạy Java. '+(activity.guidance || 'Kiểm tra Docker Desktop và môi trường JDK.'));
+    if (activity.status === 'unavailable') addText(card,'p','warning','Không thể chạy '+(activity.type === 'python'?'Python':'Java')+'. '+(activity.guidance || 'Kiểm tra Docker Desktop và môi trường container.'));
   }
   // P4: MathJax tải từ bundle cục bộ và chỉ khi gặp block công thức.
   // Không nhúng HTML từ Gemini; công thức cũng được đặt bằng textContent.
@@ -420,9 +428,19 @@
     addText(heading,'h4','','Bài học theo nhánh');
     addText(heading,'span','lesson-draft-label','Bản nháp · không chấm mastery');
     if (packet.content?.group_id === graph()?.group_id && packet.content?.node_id === node.id && status === 'ready') {
+      const narrateBtn = actionButton(heading,'🎙 Eris giảng bài này','lesson_narrate');
+      narrateBtn.addEventListener('click',()=>send('lesson_narrate',{group_id:graph()?.group_id || packet.content?.group_id,node_id:node.id}));
       let hasMath = false;
-      for (const block of packet.content.blocks || []) {
-        const card = el('section','lesson-block lesson-'+block.kind);section.append(card);
+      const blocks = packet.content.blocks || [];
+      for (let bi = 0; bi < blocks.length; bi++) {
+        const block = blocks[bi];
+        const blockId = block.id || ('b-' + bi);
+        const isSpeaking = state.playback?.node_id === node.id &&
+          (state.playback?.block_id === blockId || state.playback?.block_id === ('b-' + bi)) &&
+          state.playback?.event_type === 'audio_start';
+        const card = el('section','lesson-block lesson-'+block.kind+(isSpeaking?' speaking-block':''));
+        card.dataset.blockId = blockId;
+        section.append(card);
         addText(card,'h5','lesson-block-title',block.title);
         if (block.kind === 'text') addText(card,'p','lesson-copy',block.text);
         else if (block.kind === 'steps') {
@@ -441,14 +459,68 @@
         } else if (block.kind === 'check') {
           addText(card,'p','lesson-copy',block.question);
           const key=packet.content.group_id+'/'+packet.content.node_id+'/'+String((packet.content.blocks||[]).indexOf(block));
-          const revealed=state.lessonRevealed.has(key);
-          const show=actionButton(card,revealed?'Ẩn đáp án':'Xem lời giải','lesson_reveal');
-          show.addEventListener('click',()=>{
-            if (revealed) state.lessonRevealed.delete(key);else state.lessonRevealed.add(key);
-            renderDetail();
-          });
-          if (revealed) addText(card,'p','lesson-answer',block.answer);
-          addText(card,'p','lesson-caption','Tự kiểm tra · xem lời giải không được tính là đã thành thạo.');
+          let options = block.options;
+          if (!Array.isArray(options) || !options.length) {
+            const lines = (block.question || '').split('\n').map(l => l.trim()).filter(Boolean);
+            const optLines = lines.filter(l => /^[A-D][\.\:\)]\s+/i.test(l));
+            if (optLines.length >= 2) options = optLines;
+          }
+          const isRevealed = state.lessonRevealed.has(key);
+          if (Array.isArray(options) && options.length >= 2) {
+            const list = el('div','choice-list');card.append(list);
+            const userPick = state.answers.get(key) || '';
+            const checkAnswer = (pick) => {
+              const ans = (block.answer || '').trim().toLowerCase();
+              const p = String(pick || '').trim().toLowerCase();
+              const ansLetter = ans.match(/^([a-d])[\.\:\)]?/i)?.[1]?.toLowerCase() || ans;
+              const pickLetter = p.match(/^([a-d])[\.\:\)]?/i)?.[1]?.toLowerCase() || p;
+              if (ansLetter && pickLetter && ansLetter === pickLetter) return true;
+              return p === ans || (ans.length > 2 && p.includes(ans)) || (p.length > 2 && ans.includes(p));
+            };
+            for (const opt of options) {
+              const optId = typeof opt === 'object' ? opt.id : opt;
+              const optLabel = typeof opt === 'object' ? `${String(opt.id).toUpperCase()}. ${opt.text}` : opt;
+              const isSelected = userPick === optId;
+              let choiceClass = 'choice' + (isSelected ? ' selected' : '');
+              if (isSelected) {
+                choiceClass += checkAnswer(optId) ? ' correct' : ' incorrect';
+              }
+              const btn = el('button', choiceClass, optLabel);
+              btn.type = 'button';
+              btn.addEventListener('click', () => {
+                state.answers.set(key, optId);
+                renderDetail();
+              });
+              list.append(btn);
+            }
+            if (userPick) {
+              const isCorrect = checkAnswer(userPick);
+              const feedback = el('div', 'result ' + (isCorrect ? 'correct' : 'incorrect'));
+              feedback.textContent = isCorrect ? '✓ Chính xác!' : '✗ Chưa đúng rồi. Thử chọn lại nhé!';
+              if (isCorrect && block.explanation) {
+                const exp = el('p', 'lesson-caption', block.explanation);
+                feedback.append(exp);
+              }
+              card.append(feedback);
+            }
+            const actions = el('div','exercise-actions');card.append(actions);
+            const show = actionButton(actions, isRevealed ? 'Ẩn giải thích' : 'Xem giải thích', 'lesson_reveal');
+            show.addEventListener('click', () => {
+              if (isRevealed) state.lessonRevealed.delete(key); else state.lessonRevealed.add(key);
+              renderDetail();
+            });
+            if (isRevealed) {
+              addText(card, 'p', 'lesson-answer', 'Đáp án: ' + block.answer + (block.explanation ? (' — ' + block.explanation) : ''));
+            }
+          } else {
+            const show = actionButton(card, isRevealed ? 'Ẩn đáp án' : 'Xem lời giải', 'lesson_reveal');
+            show.addEventListener('click', () => {
+              if (isRevealed) state.lessonRevealed.delete(key); else state.lessonRevealed.add(key);
+              renderDetail();
+            });
+            if (isRevealed) addText(card, 'p', 'lesson-answer', block.answer + (block.explanation ? (' — ' + block.explanation) : ''));
+          }
+          addText(card,'p','lesson-caption','Tự kiểm tra · thực hành trực tiếp giúp ghi nhớ sâu.');
         }
       }
       if (hasMath) typesetLesson(section);
@@ -591,6 +663,26 @@
     byId('speakingJump').onclick = () => chooseNode(playback.node_id);
   }
   function renderContinuity() {
+    const fsrs = byId('fsrsReviewQueue');
+    if (fsrs) {
+      const due = state.snapshot?.due_review || [];
+      const mode = state.snapshot?.retention?.active_mode || 'fsrs';
+      if (due.length > 0) {
+        fsrs.hidden = false;
+        fsrs.replaceChildren();
+        fsrs.append(el('span','review-tag',`⏰ Ôn tập (${mode}): ${due.length} đến hạn`));
+        for (const item of due.slice(0, 6)) {
+          const title = nodeById(item.kp_id)?.title || item.kp_id.split(':').pop() || item.kp_id;
+          const pill = el('button','review-pill',title);
+          pill.type = 'button';
+          pill.title = `Chuyển đến ôn tập: ${title}`;
+          pill.addEventListener('click',()=>chooseNode(item.kp_id));
+          fsrs.append(pill);
+        }
+      } else {
+        fsrs.hidden = true;
+      }
+    }
     const c=state.snapshot?.learning_continuity || {};
     const subjects=byId('recentSubjects'),history=byId('learningHistory'),jobs=byId('learningJobs');
     subjects.replaceChildren();history.replaceChildren();jobs.replaceChildren();

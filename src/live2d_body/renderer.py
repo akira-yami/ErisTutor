@@ -691,10 +691,8 @@ class Live2DRenderer:
         window_height: int | float | None = None,
     ) -> bool:
         """Prefer precise drawable hit testing; degrade safely on older live2d-py."""
-        saw_hit_parts = False
         try:
             parts = model.HitPart(float(x), float(y))
-            saw_hit_parts = bool(parts)
             if Live2DRenderer._hit_parts_block_mouse(parts):
                 return True
         except Exception:
@@ -708,8 +706,7 @@ class Live2DRenderer:
                     return True
             except Exception:
                 continue
-        if saw_hit_parts:
-            return False
+
         return Live2DRenderer._fallback_model_body_hit_test(
             x,
             y,
@@ -793,12 +790,15 @@ class Live2DRenderer:
             not self._cursor_over_godot_ui(cursor)
             and 0.0 <= local_x < geometry.width
             and 0.0 <= local_y < geometry.height
-            and self._model_hit_test(
-                model,
-                local_x,
-                local_y,
-                window_width=geometry.width,
-                window_height=geometry.height,
+            and (
+                button == glfw.MOUSE_BUTTON_RIGHT
+                or self._model_hit_test(
+                    model,
+                    local_x,
+                    local_y,
+                    window_width=geometry.width,
+                    window_height=geometry.height,
+                )
             )
         ):
             return False
@@ -866,6 +866,7 @@ class Live2DRenderer:
                     cursor_x, cursor_y = glfw.get_cursor_pos(window)
                     window_x, window_y = glfw.get_window_pos(window)
                     cursor = (window_x + cursor_x, window_y + cursor_y)
+                print(f"[Live2D] Chuột phải tại ({int(cursor[0])}, {int(cursor[1])}), đang mở context menu...", flush=True)
                 self.receiver.send_context_menu_request(
                     screen_x=int(cursor[0]),
                     screen_y=int(cursor[1]),
