@@ -19,7 +19,7 @@ from runtime.stage_contracts import StageFrame
 from runtime.voice_director import vocalization_text
 
 
-_SENTENCE_BOUNDARY_RE = re.compile(r"(?<=[.!?。！？])\s+")
+_SENTENCE_BOUNDARY_RE = re.compile(r"(?<=[。！？])\s*(?=\S)|(?<=[.!?])\s+")
 
 
 def _enabled() -> bool:
