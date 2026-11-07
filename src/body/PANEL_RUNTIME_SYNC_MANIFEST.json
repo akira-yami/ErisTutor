@@ -1,0 +1,49 @@
+{
+  "schema": "eris.body.panel_runtime_sync.v1",
+  "target_runtime": "ai_orchestrated.v7.semantic_cutover",
+  "generated_at": "2026-07-29T18:25:00+07:00",
+  "source_archive": {
+    "name": "body(2).zip",
+    "sha256": "580cc59e6d58958af1d5fec1322166d1a6421ef8dd70cb265afafe69c304c194"
+  },
+  "reference_runtime_archive": {
+    "name": "src14_live2d_affect_idle.zip",
+    "sha256": "5c3d9adbe511af1644bda788da1d2d9e3641eedcbc3e65ae7fc57658b10c2435"
+  },
+  "primary_contracts": [
+    "eris.stage v2",
+    "affect_state",
+    "identity_runtime"
+  ],
+  "compatibility_contracts": [
+    "emotion_debug",
+    "depth_v2"
+  ],
+  "changed_files": [
+    "UdpListener.cs",
+    "UdpDecisionParser.cs",
+    "UdpListener.DepthPanel.cs",
+    "UdpListener.IdentityPrivateMind.cs",
+    "UdpListener.MaintenanceUiSync.cs",
+    "UdpListener.RuntimePresence.cs",
+    "UdpListener.TutorPanel.cs",
+    "PANEL_RUNTIME_SYNC_VI.md"
+  ],
+  "behavior_changes": [
+    "live affect and stage presence are merged before rendering",
+    "valence axis follows -1 negative / +1 positive",
+    "identity_runtime is the primary identity panel contract",
+    "identity cache migrates from legacy depth_v2 path",
+    "maintenance reset clears live runtime presence cache",
+    "readable mode uses current affect axes instead of legacy romantic heuristics",
+    "raw diary and chain-of-thought are not displayed"
+  ],
+  "validation": {
+    "csharp_lexical_balance": true,
+    "backend_affect_key_parity": true,
+    "representative_json_contracts": true,
+    "zip_integrity": true,
+    "compiled": false,
+    "compile_note": "No dotnet/csc/mcs/Godot executable is installed in the sandbox."
+  }
+}

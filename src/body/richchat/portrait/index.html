@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Eris — Learner Portrait</title>
+  <link rel="stylesheet" href="portrait.css">
+  <script defer src="portrait.js"></script>
+</head>
+<body>
+<div class="ambient a1" aria-hidden="true"></div><div class="ambient a2" aria-hidden="true"></div>
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="../index.html" title="Trở về Rich Chat" aria-label="Eris · Rich Chat"><span class="brand-symbol">✳</span><span>ERIS<span class="brand-period">.</span></span></a>
+    <div class="rail-section">KHÔNG GIAN</div>
+    <nav id="nav" aria-label="Điều hướng hồ sơ">
+      <button data-view="portrait" class="nav-button active"><span class="nav-icon">✦</span><span>Chân dung</span></button>
+      <button data-view="knowledge" class="nav-button"><span class="nav-icon">⌘</span><span>Kiến thức</span></button>
+      <button data-view="evidence" class="nav-button"><span class="nav-icon">◎</span><span>Bằng chứng</span></button>
+      <button data-view="growth" class="nav-button"><span class="nav-icon">↗</span><span>Phát triển</span></button>
+    </nav>
+    <div class="rail-foot"><span class="status-dot" id="connectionDot"></span><span id="connectionText">Đang kết nối…</span><small>Chỉ trên máy của bạn</small></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span class="breadcrumb">ERIS / NGƯỜI ĐỒNG HÀNH / <span id="crumb">CHÂN DUNG</span></span><div class="top-actions"><span id="syncState" class="sync-state">Đang tải…</span><button id="refresh" class="quiet-btn" title="Làm mới từ Learning Core">⟳ <span>Làm mới</span></button><a class="quiet-btn" href="../index.html">↗ <span>Rich Chat</span></a></div></header>
+    <main>
+      <section class="headline"><div><p class="eyebrow">A portrait, still in progress <span class="eyebrow-line"></span></p><h1>Eris hiểu bạn<br><em>đến đâu?</em></h1><p class="lead">Một bức chân dung đang được vẽ dần — từ những điều đã học, bằng chứng thật và cả những khoảng tôi chưa biết.</p></div><div class="portrait-glyph" aria-hidden="true"><div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div><div class="glyph-center">✳</div></div></section>
+      <div id="loading" class="notice" role="status">Đang lấy bản ghi học tập từ Eris…</div>
+      <div id="error" class="notice error" hidden></div>
+      <div id="content" hidden>
+        <section id="view-portrait" class="view">
+          <div class="section-heading"><div><span class="index">01 /</span><h2>Điều tôi đang nhận ra</h2></div><span class="section-note">Diễn giải có nguồn · Không chấm điểm con người</span></div>
+          <article class="reflection"><div class="reflection-top"><div class="ai-avatar">E</div><div><strong>MỘT GHI CHÚ TỪ ERIS</strong><span id="geminiCaption">Dữ liệu đã kiểm chứng</span></div><span class="reflection-mark">“</span></div><p id="summaryText"></p><div id="geminiObservations" class="observations"></div></article>
+          <div class="section-heading inset"><div><span class="index">02 /</span><h2>Những gì chúng ta đã khám phá</h2></div><button class="text-button" id="exploreAll">Khám phá bản đồ <span>↗</span></button></div>
+          <div id="spaceCards" class="spaces-grid"></div>
+          <div class="boundary"><div class="boundary-symbol">?</div><div><strong>Điều tôi chưa thể kết luận</strong><p>Hỏi nhiều về một chủ đề không chứng minh rằng bạn thành thạo nó. Những phần chưa được quan sát cũng không có nghĩa là bạn không biết.</p></div></div>
+          <div class="section-heading inset"><div><span class="index">03 /</span><h2>Cách bạn làm việc với kỹ thuật</h2></div><span class="section-note">Một nguồn quan sát riêng từ Mentor</span></div>
+          <div id="capabilityCards" class="caps-grid"></div>
+        </section>
+        <section id="view-knowledge" class="view" hidden>
+          <div class="section-heading"><div><span class="index">02 /</span><h2>Bản đồ hiểu biết</h2></div><span class="section-note">Đồ thị từ Learning Core · Không suy diễn từ trò chuyện</span></div>
+          <div class="map-toolbar"><div class="selector-wrap"><label for="pathSelect">LỘ TRÌNH</label><select id="pathSelect"></select></div><span id="mapCount" class="map-count"></span><div class="page-nav"><button id="pagePrev" class="quiet-btn" title="Trang trước">‹</button><span id="pageCount">1 / 1</span><button id="pageNext" class="quiet-btn" title="Trang sau">›</button></div><button id="mapReset" class="quiet-btn">⤢ <span>Khớp bản đồ</span></button></div>
+          <div class="map-layout"><div class="map-panel"><div class="map-topline"><span class="legend"><i class="dot green"></i>Có bằng chứng</span><span class="legend"><i class="dot amber"></i>Cần kiểm tra</span><span class="legend"><i class="dot grey"></i>Chưa đánh giá</span></div><div id="graphHost" class="graph-host" role="group" aria-label="Bản đồ kiến thức và các quan hệ tiên quyết"></div><div class="map-bottom">Chọn một nút để xem nguồn và kết quả. Liên kết thể hiện kiến thức tiên quyết trong lộ trình.</div></div><aside id="nodeDetail" class="node-detail"><span class="detail-eyebrow">CHI TIẾT KIẾN THỨC</span><h3>Chọn một nút</h3><p>Các nút trong bản đồ là những điểm kiến thức được tạo và lưu bởi Tutor.</p></aside></div>
+          <p id="truncatedNotice" class="muted" hidden>Bản xem đang giới hạn số nút hoặc lộ trình để bảo đảm hiệu năng. Dữ liệu gốc vẫn được giữ đầy đủ.</p>
+        </section>
+        <section id="view-evidence" class="view" hidden>
+          <div class="section-heading"><div><span class="index">03 /</span><h2>Tại sao tôi nghĩ vậy?</h2></div><span class="section-note">Nhìn thấy căn cứ, không chỉ lời kết luận</span></div>
+          <div class="evidence-intro"><h3>Không phải tất cả tương tác đều là một lần học được chứng minh.</h3><p>Learning Core phân biệt bài tự làm với bài có hỗ trợ, không lấy số câu hỏi làm điểm thành thạo. Dưới đây là các tín hiệu ở lộ trình đang chọn.</p></div><div id="evidenceRows" class="evidence-list"></div>
+        </section>
+        <section id="view-growth" class="view" hidden>
+          <div class="section-heading"><div><span class="index">04 /</span><h2>Những bước đang thành hình</h2></div><span class="section-note">Ảnh chụp hiện tại, không phải biểu đồ thời gian giả</span></div>
+          <div id="growthStats" class="growth-stats"></div><div class="growth-note"><span class="growth-star">✧</span><div><h3>Chưa có biểu đồ tiến bộ theo thời gian</h3><p>Muốn vẽ một đường tiến bộ đáng tin, Eris phải ghi các lần kiểm tra cùng tiêu chí, thời điểm và mức hỗ trợ. Phiên bản này không vẽ ra số liệu quá khứ chưa tồn tại.</p></div></div>
+        </section>
+      </div>
+    </main>
+    <footer class="footer"><span>ERIS / LEARNER PORTRAIT <span id="version">V1</span></span><span>Dữ liệu cục bộ • Gemini chỉ được phép diễn giải từ bằng chứng đã lọc</span></footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+[gd_scene format=3 uid="uid://0cxwsbtda5e7"]
+
+[ext_resource type="Script" uid="uid://ckcm0fyajxapn" path="res://src/body/UdpListener.cs" id="1_bkceq"]
+[ext_resource type="Texture2D" path="res://src/body/assets/avatar.svg" id="2_avatar"]
+[ext_resource type="Texture2D" uid="uid://db044mp2ndp0" path="res://asset/Resource/khung.png" id="3_ymilm"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_avatar"]
+animations = [
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"affection", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air_swing_l", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air_swing_r", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"climb", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"climb_top", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"clone", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": false, "name": &"divine", "speed": 1.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"food", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"hop", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"jump", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"piano", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"read", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sad", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": false, "name": &"sit", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sit_down", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sit_up", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sleep", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"stand", "speed": 0.5},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"stand_walk", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"idle", "speed": 1.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"shime", "speed": 1.0}
+]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qwgmb"]
+size = Vector2(128, 132)
+
+[node name="UdpListener" type="Node2D" unique_id=2105563881]
+script = ExtResource("1_bkceq")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1650100237]
+
+[node name="Control" type="Control" parent="CanvasLayer" unique_id=1626532548]
+layout_mode = 3
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChatPanel" type="Panel" parent="CanvasLayer/Control" unique_id=1086222864]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 1.0
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_top = -56.0
+offset_bottom = -8.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Control/ChatPanel" unique_id=1861192717]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/Control/ChatPanel/HBoxContainer" unique_id=209976]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Nhan tin voi ERIS..."
+
+[node name="SendButton" type="Button" parent="CanvasLayer/Control/ChatPanel/HBoxContainer" unique_id=576196245]
+layout_mode = 2
+text = "Gửi"
+
+[node name="CloseButton" type="Button" parent="CanvasLayer/Control/ChatPanel/HBoxContainer" unique_id=784276559]
+layout_mode = 2
+text = "X"
+
+[node name="CharacterContextMenu" type="Panel" parent="CanvasLayer/Control" unique_id=1122334455]
+visible = false
+custom_minimum_size = Vector2(170, 188)
+layout_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control/CharacterContextMenu" unique_id=1122334456]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="ChatButton" type="Button" parent="CanvasLayer/Control/CharacterContextMenu/VBoxContainer" unique_id=1122334457]
+layout_mode = 2
+text = "Chat"
+
+[node name="TouchButton" type="Button" parent="CanvasLayer/Control/CharacterContextMenu/VBoxContainer" unique_id=1122334460]
+layout_mode = 2
+text = "Chạm / kéo / thả"
+
+[node name="ForceSpeakButton" type="Button" parent="CanvasLayer/Control/CharacterContextMenu/VBoxContainer" unique_id=1122334459]
+layout_mode = 2
+text = "Nói ngay"
+
+[node name="EmotionButton" type="Button" parent="CanvasLayer/Control/CharacterContextMenu/VBoxContainer" unique_id=1122334461]
+layout_mode = 2
+text = "Khí sắc"
+
+[node name="CloseButton" type="Button" parent="CanvasLayer/Control/CharacterContextMenu/VBoxContainer" unique_id=1122334458]
+layout_mode = 2
+text = "Đóng"
+
+[node name="EmotionPanel" type="Panel" parent="CanvasLayer/Control" unique_id=1122334462]
+visible = false
+custom_minimum_size = Vector2(360, 460)
+layout_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control/EmotionPanel" unique_id=1122334463]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="CanvasLayer/Control/EmotionPanel/VBoxContainer" unique_id=1122334464]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer/Control/EmotionPanel/VBoxContainer/Header" unique_id=1122334465]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Khí sắc"
+
+[node name="CloseButton" type="Button" parent="CanvasLayer/Control/EmotionPanel/VBoxContainer/Header" unique_id=1122334466]
+layout_mode = 2
+text = "X"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/Control/EmotionPanel/VBoxContainer" unique_id=1122334467]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EmotionText" type="RichTextLabel" parent="CanvasLayer/Control/EmotionPanel/VBoxContainer/ScrollContainer" unique_id=1122334468]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Chua co frame cam xuc."
+fit_content = true
+
+[node name="AvatarBody" type="CharacterBody2D" parent="." unique_id=175824923]
+
+[node name="Avatar" type="AnimatedSprite2D" parent="AvatarBody" unique_id=265743738]
+position = Vector2(646, 360)
+sprite_frames = SubResource("SpriteFrames_avatar")
+animation = &"stand"
+
+[node name="BubbleContainer" type="MarginContainer" parent="AvatarBody/Avatar" unique_id=43338983]
+offset_left = -280.0
+offset_top = -300.0
+offset_right = 280.0
+offset_bottom = -70.0
+
+[node name="TextureRect" type="TextureRect" parent="AvatarBody/Avatar/BubbleContainer" unique_id=1386747863]
+layout_mode = 2
+texture = ExtResource("3_ymilm")
+expand_mode = 1
+
+[node name="MessageLabel" type="RichTextLabel" parent="AvatarBody/Avatar/BubbleContainer/TextureRect" unique_id=228289034]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 27.0
+offset_top = 52.0
+offset_right = -27.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.0278574, 1)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AvatarBody" unique_id=1268289346]
+position = Vector2(646, 360)
+shape = SubResource("RectangleShape2D_qwgmb")

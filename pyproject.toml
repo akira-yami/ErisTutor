@@ -25,7 +25,7 @@ telemetry = [
 ]
 
 [tool.setuptools]
-py-modules = ["failure_meta"]
+py-modules = ["eris_secrets", "failure_meta", "secret_versions"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

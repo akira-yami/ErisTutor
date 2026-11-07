@@ -1,11 +1,22 @@
 import json
+import os
 import re
 from llm.json_sanitizer import strip_reasoning_envelope
 import unicodedata
 
 from actions.contracts import VALID_SYSTEM_ACTIONS
 from failure_meta import normalize_failure_meta
-from llm.contracts import VALID_ANIMATIONS
+
+VALID_ANIMATIONS = {
+    "stand", "sit_down", "sit", "sit_up", "read", "stand_walk",
+    "piano", "clone", "divine", "hop", "jump", "sleep", "sad", "food",
+    "affection", "climb", "climb_top", "air_swing_l", "air_swing_r",
+}
+
+
+def _no_fallback_mode_enabled() -> bool:
+    raw = os.getenv("ERIS_NO_FALLBACK_MODE", "")
+    return raw.strip().lower() in {"1", "true", "yes", "on", "y"}
 
 # Model thường mô tả biểu cảm bằng từ ngữ semantic (soft_smile, subtle_apology)
 # trong field ``animation`` dù Godot chỉ hiểu pose vật lý như stand/read. Thay vì
@@ -20,7 +31,6 @@ _SEMANTIC_ANIMATION_STAGE_ALIASES: dict[str, dict[str, str]] = {
     "gentle_pause": {"nonverbal_cue": "soft_breath", "delivery_hint": "low_quiet"},
     "curious": {"nonverbal_cue": "tilt_head", "stage_motion": "tilt_head", "delivery_hint": "curious_soft"},
 }
-from runtime.no_fallback_policy import no_fallback_mode_enabled
 
 # ParserGroundingMixin chỉ chuẩn hóa cấu trúc Decision và metadata sân khấu.
 # Public text thuộc quyền của model chính; parser không còn được phép viết lại
@@ -1497,7 +1507,7 @@ class ParserGroundingMixin:
 
     def _salvage_non_json_response(self, cleaned: str, user_hint: str = ""):
         text = cleaned.strip()
-        if no_fallback_mode_enabled():
+        if _no_fallback_mode_enabled():
             return self._finalize_decision({
                 **self.fallback,
                 "text": "",
