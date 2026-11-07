@@ -11,6 +11,10 @@ numpy>=2.0.0
 # --- core llm subsystem (feat/llm) ---
 requests>=2.28.0
 
+# --- tutor subsystem (feat/tutor-executive) ---
+# FSRS spaced-repetition scheduler for learner retention
+fsrs==6.3.2
+
 # The entries below are OPTIONAL and only needed when a later feature actually
 # uses them. They are listed (commented) so other machines know exactly what to
 # install when enabling that feature, instead of hitting a missing-module error
