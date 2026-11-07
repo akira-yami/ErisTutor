@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Eris — Rich Chat</title>
+  <link rel="stylesheet" href="chat.css?v=tutor-v1" />
+  <link rel="stylesheet" href="vendor/prism.css" />
+  <script src="vendor/prism.js" defer></script>
+  <script src="vendor/prism-clike.js" defer></script>
+  <script src="vendor/prism-markup.js" defer></script>
+  <script src="vendor/prism-css.js" defer></script>
+  <script src="vendor/prism-javascript.js" defer></script>
+  <script src="vendor/prism-typescript.js" defer></script>
+  <script src="vendor/prism-json.js" defer></script>
+  <script src="vendor/prism-python.js" defer></script>
+  <script src="vendor/prism-csharp.js" defer></script>
+  <script src="vendor/prism-c.js" defer></script>
+  <script src="vendor/prism-cpp.js" defer></script>
+  <script src="vendor/prism-java.js" defer></script>
+  <script src="vendor/prism-bash.js" defer></script>
+  <script src="artifacts.js?v=tutor-v1" defer></script>
+  <script src="chat.js?v=tutor-v1" defer></script>
+  <script src="vendor/mathjax.js" defer></script>
+</head>
+<body>
+  <div class="layout" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-mark">✦</div><div><strong>Eris</strong><small>Rich Conversation</small></div></div>
+      <div class="sidebar-head">HỘI THOẠI</div>
+      <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Tìm trong hội thoại…" autocomplete="off" /></label>
+      <nav class="date-list" id="dates" aria-label="Ngày hội thoại"></nav>
+      <div class="sidebar-foot"><span class="dot"></span> Chạy cục bộ trên thiết bị của bạn <span class="muted">v1</span></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="icon mobile-toggle" id="menuBtn" aria-label="Mở menu">☰</button>
+        <div class="header-title"><strong>Một khoảng nhỏ, cùng Eris</strong><span>Chữ đẹp hơn, toán rõ hơn, cùng một trí nhớ và hội thoại</span></div>
+        <a class="workspace-nav canvas-nav" href="canvas.html" title="Mở bản đồ học tập trong trình duyệt">◇ <span>Learning Canvas</span></a>
+        <button class="workspace-nav" id="workspaceBtn" type="button" aria-label="Xem bàn làm việc và artifact" aria-pressed="false" title="Bàn làm việc">✎ <span>Bàn làm việc</span></button>
+        <div class="status"><span class="dot"></span><span id="status">Đang kết nối</span></div>
+        <button class="icon" id="themeBtn" title="Đổi chế độ sáng/tối">◐</button>
+      </header>
+      <div class="scroll-region" id="scroll">
+        <div class="messages" id="messages"><div class="empty">Đang tải hội thoại từ Eris…</div></div>
+      </div>
+      <div class="composer-outer">
+        <form class="composer" id="sendForm">
+          <textarea id="input" rows="1" maxlength="6000" placeholder="Kể Eris nghe, hoặc cùng giải một bài toán…" aria-label="Tin nhắn" spellcheck="true"></textarea>
+          <button class="send" id="sendBtn" type="submit" aria-label="Gửi tin nhắn" disabled>↑</button>
+        </form>
+        <div class="hint">Enter để gửi · Shift + Enter xuống dòng · LaTeX: <code>$x^2$</code> hoặc <code>$$...$$</code></div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
