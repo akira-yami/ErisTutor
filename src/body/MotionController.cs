@@ -279,70 +279,70 @@ public sealed class MotionController
         ApplyStaticAction(pose == "stand_walk" ? "stand" : pose, facing, playSound: false);
     }
 
-    public void ApplyVisualState(AnimatedSprite2D monika, Control bubble, Vector2 bodyPosition, Vector2 screenSize)
+    public void ApplyVisualState(AnimatedSprite2D avatar, Control bubble, Vector2 bodyPosition, Vector2 screenSize)
     {
         if (_climbPhase == ClimbPhase.GoingToWall)
         {
-            if (monika.Animation != "stand_walk")
-                monika.Play("stand_walk");
+            if (avatar.Animation != "stand_walk")
+                avatar.Play("stand_walk");
             float scaleX = _climbUpWallX > bodyPosition.X ? -1f : 1f;
-            ApplyFlip(monika, bubble, scaleX);
+            ApplyFlip(avatar, bubble, scaleX);
             return;
         }
 
         if (_climbPhase == ClimbPhase.Up || _climbPhase == ClimbPhase.Down)
         {
-            if (monika.Animation != "climb")
-                monika.Play("climb");
+            if (avatar.Animation != "climb")
+                avatar.Play("climb");
             float wallX = _climbPhase == ClimbPhase.Up ? _climbUpWallX : _climbDownWallX;
             float scaleX = wallX < screenSize.X / 2f ? 1f : -1f;
-            ApplyFlip(monika, bubble, scaleX);
+            ApplyFlip(avatar, bubble, scaleX);
             return;
         }
 
         if (_climbPhase == ClimbPhase.Top || _climbPhase == ClimbPhase.TopHold)
         {
-            if (monika.Animation != "climb_top")
-                monika.Play("climb_top");
-            ApplyFlip(monika, bubble, TopFacingScale(bodyPosition, screenSize));
+            if (avatar.Animation != "climb_top")
+                avatar.Play("climb_top");
+            ApplyFlip(avatar, bubble, TopFacingScale(bodyPosition, screenSize));
             return;
         }
 
         if (_isFalling)
         {
-            if (monika.Animation != "air" && _currentAction != "air_swing_l" && _currentAction != "air_swing_r")
-                monika.Play("air");
-            else if (monika.Animation != _currentAction && (_currentAction == "air_swing_l" || _currentAction == "air_swing_r"))
-                monika.Play(_currentAction);
+            if (avatar.Animation != "air" && _currentAction != "air_swing_l" && _currentAction != "air_swing_r")
+                avatar.Play("air");
+            else if (avatar.Animation != _currentAction && (_currentAction == "air_swing_l" || _currentAction == "air_swing_r"))
+                avatar.Play(_currentAction);
             if (_currentAction == "air_swing_l")
-                ApplyHorizontalFacing(monika, bubble, -1);
+                ApplyHorizontalFacing(avatar, bubble, -1);
             else if (_currentAction == "air_swing_r")
-                ApplyHorizontalFacing(monika, bubble, 1);
+                ApplyHorizontalFacing(avatar, bubble, 1);
             return;
         }
 
-        if (monika.Animation != _currentAction)
-            monika.Play(_currentAction);
+        if (avatar.Animation != _currentAction)
+            avatar.Play(_currentAction);
 
         if (_isWalking)
         {
-            ApplyHorizontalFacing(monika, bubble, _moveDir >= 0f ? 1 : -1);
+            ApplyHorizontalFacing(avatar, bubble, _moveDir >= 0f ? 1 : -1);
             return;
         }
 
         if (_currentAction == "air_swing_l")
         {
-            ApplyHorizontalFacing(monika, bubble, -1);
+            ApplyHorizontalFacing(avatar, bubble, -1);
             return;
         }
 
         if (_currentAction == "air_swing_r")
         {
-            ApplyHorizontalFacing(monika, bubble, 1);
+            ApplyHorizontalFacing(avatar, bubble, 1);
             return;
         }
 
-        ApplyHorizontalFacing(monika, bubble, _facingDir);
+        ApplyHorizontalFacing(avatar, bubble, _facingDir);
     }
 
     public void NotifyAnimationFinished()
@@ -600,15 +600,15 @@ public sealed class MotionController
         return topFacing == 1 ? -1f : 1f;
     }
 
-    private void ApplyHorizontalFacing(AnimatedSprite2D monika, Control bubble, int facingDir)
+    private void ApplyHorizontalFacing(AnimatedSprite2D avatar, Control bubble, int facingDir)
     {
         _facingDir = facingDir >= 0 ? 1 : -1;
-        ApplyFlip(monika, bubble, _facingDir == 1 ? -1f : 1f);
+        ApplyFlip(avatar, bubble, _facingDir == 1 ? -1f : 1f);
     }
 
-    private void ApplyFlip(AnimatedSprite2D monika, Control bubble, float scaleX)
+    private void ApplyFlip(AnimatedSprite2D avatar, Control bubble, float scaleX)
     {
-        monika.Scale = new Vector2(scaleX, 1f);
+        avatar.Scale = new Vector2(scaleX, 1f);
         bubble.Scale = new Vector2(scaleX, 1f);
         bubble.Position = new Vector2(_bubbleBasePos.X * scaleX, _bubbleBasePos.Y);
     }

@@ -1,8 +1,34 @@
 [gd_scene format=3 uid="uid://0cxwsbtda5e7"]
 
 [ext_resource type="Script" uid="uid://ckcm0fyajxapn" path="res://src/body/UdpListener.cs" id="1_bkceq"]
-[ext_resource type="PackedScene" uid="uid://e1uo7upkrcpq" path="res://asset/Resource/Monika.tscn" id="2_monika"]
+[ext_resource type="Texture2D" path="res://src/body/assets/avatar.svg" id="2_avatar"]
 [ext_resource type="Texture2D" uid="uid://db044mp2ndp0" path="res://asset/Resource/khung.png" id="3_ymilm"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_avatar"]
+animations = [
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"affection", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air_swing_l", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"air_swing_r", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"climb", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"climb_top", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"clone", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": false, "name": &"divine", "speed": 1.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"food", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"hop", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"jump", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"piano", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"read", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sad", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": false, "name": &"sit", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sit_down", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sit_up", "speed": 5.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"sleep", "speed": 2.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"stand", "speed": 0.5},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"stand_walk", "speed": 3.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"idle", "speed": 1.0},
+{"frames": [{"duration": 1.0, "texture": ExtResource("2_avatar")}], "loop": true, "name": &"shime", "speed": 1.0}
+]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwgmb"]
 size = Vector2(128, 132)
@@ -139,25 +165,25 @@ bbcode_enabled = true
 text = "Chua co frame cam xuc."
 fit_content = true
 
-[node name="Monika2" type="CharacterBody2D" parent="." unique_id=175824923]
+[node name="AvatarBody" type="CharacterBody2D" parent="." unique_id=175824923]
 
-[node name="Monika" parent="Monika2" unique_id=265743738 instance=ExtResource("2_monika")]
+[node name="Avatar" type="AnimatedSprite2D" parent="AvatarBody" unique_id=265743738]
 position = Vector2(646, 360)
-animation = &"climb"
-frame_progress = 0.0
+sprite_frames = SubResource("SpriteFrames_avatar")
+animation = &"stand"
 
-[node name="BubbleContainer" type="MarginContainer" parent="Monika2/Monika" unique_id=43338983]
+[node name="BubbleContainer" type="MarginContainer" parent="AvatarBody/Avatar" unique_id=43338983]
 offset_left = -280.0
 offset_top = -300.0
 offset_right = 280.0
 offset_bottom = -70.0
 
-[node name="TextureRect" type="TextureRect" parent="Monika2/Monika/BubbleContainer" unique_id=1386747863]
+[node name="TextureRect" type="TextureRect" parent="AvatarBody/Avatar/BubbleContainer" unique_id=1386747863]
 layout_mode = 2
 texture = ExtResource("3_ymilm")
 expand_mode = 1
 
-[node name="MessageLabel" type="RichTextLabel" parent="Monika2/Monika/BubbleContainer/TextureRect" unique_id=228289034]
+[node name="MessageLabel" type="RichTextLabel" parent="AvatarBody/Avatar/BubbleContainer/TextureRect" unique_id=228289034]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 15
@@ -174,6 +200,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Monika2" unique_id=1268289346]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AvatarBody" unique_id=1268289346]
 position = Vector2(646, 360)
 shape = SubResource("RectangleShape2D_qwgmb")
