@@ -802,10 +802,12 @@ class OpenAICompatibleClient:
                 mode = deepseek_thinking_mode(self.configured_model_name, requested=thinking_mode)
             
             worker_role = str(getattr(self, "worker_role", "") or "").strip().lower()
-            # Executive có thể tắt thinking độc lập với các worker khác.
+            effective_role = (worker_role or str(active_worker_role() or "")).strip().lower()
+            # Executive / Root có thể tắt thinking độc lập với các worker khác.
             # Check NÀY phải sau DS2API mode (line trên) để override được cả
             # trường hợp endpoint là localhost/DS2API (vốn force mode="enabled").
-            if worker_role == "executive" and os.environ.get("ERIS_EXECUTIVE_THINKING_DISABLED", "0") in {"1", "true", "yes"}:
+            # Hỗ trợ cả direct client (worker_role attribute) và production ContextVar (effective_role).
+            if (worker_role == "executive" or effective_role in {"executive", "root"}) and os.environ.get("ERIS_EXECUTIVE_THINKING_DISABLED", "0") in {"1", "true", "yes"}:
                 mode = "disabled"
             # Surface (public writer) có thể tắt thinking để trả lời nhanh hơn.
             # Production truyền role qua ContextVar (active_worker_role), KHÔNG qua
@@ -814,7 +816,6 @@ class OpenAICompatibleClient:
             # fallback về active_worker_role() (production). Default BẬT (thinking
             # tắt cho surface) — env=0 để opt lại thinking. Check này sau DS2API
             # mode để override được localhost-force (mode="enabled").
-            effective_role = (worker_role or str(active_worker_role() or "")).strip().lower()
             if effective_role == "surface" and os.environ.get("ERIS_SURFACE_THINKING_DISABLED", "1") in {"1", "true", "yes"}:
                 mode = "disabled"
             payload["thinking"] = {"type": mode}

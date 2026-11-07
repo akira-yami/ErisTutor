@@ -276,14 +276,12 @@ class RootConversationSession:
                   len(messages), [len(message.get("content", "")) for message in messages], estimate_tokens(messages))
         raw: list[str] = []
         from llm.raw_trace import worker_role_context
-        exec_timeout = float(os.environ.get("ERIS_EXECUTIVE_DS2API_FAILFAST_TIMEOUT_S", "90.0"))
         with worker_role_context("executive"):
             result = router.invoke_structured_worker(
                 client, system=system, payload={}, schema=schema,
                 name="eris_root_conversation_step_v12", max_tokens=1200,
                 reasoning_effort="medium", inference_tier="subconscious_4b",
                 cognitive_lane="root_conversation", priority=70, temperature=0.3,
-                timeout_seconds=exec_timeout,
                 conversation_messages=messages, raw_reply_sink=raw,
             )
         if not isinstance(result, Mapping) or not result or len(raw) != 1:

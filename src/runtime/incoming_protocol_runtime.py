@@ -365,7 +365,7 @@ class IncomingProtocolRuntimeMixin:
 
         request_id = str(msg.get("request_id", "") or "")
         kernel = getattr(self, "memory_kernel", None)
-        living_user = getattr(kernel, "living_user", None) or getattr(getattr(self, "memory_core", None), "living_user", None)
+        living_user = getattr(kernel, "living_user", None)
         try:
             internal_state = self._get_internal_state() if callable(getattr(self, "_get_internal_state", None)) else None
         except Exception:

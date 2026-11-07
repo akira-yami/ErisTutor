@@ -229,6 +229,14 @@ class ModelMemoryRuntimeMixin:
         if getattr(self.memory_state, "internal_state", None) is None:
             self.memory_state.internal_state = PersistentInternalState()
 
+    @property
+    def internal_state(self) -> PersistentInternalState:
+        return self._get_internal_state()
+
+    @internal_state.setter
+    def internal_state(self, state: PersistentInternalState) -> None:
+        self._set_internal_state(state)
+
     def _get_internal_state(self) -> PersistentInternalState:
         state = None
         if isinstance(self.memory_state, dict):

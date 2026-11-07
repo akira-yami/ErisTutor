@@ -77,7 +77,7 @@
     "max_repair_attempts": 2
   },
   "prompt": {
-    "hard_cap_tokens": 64000,
+    "hard_cap_tokens": 5100,
     "dds_enabled": false,
     "strict_grounding": true
   },

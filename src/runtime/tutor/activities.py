@@ -14,6 +14,7 @@ import re
 import secrets
 import time
 from pathlib import Path
+from typing import Any
 
 from runtime.learning_core import KnowledgePoint, LearningPath
 from runtime.learning_core.records import AssessmentAttempt, DomainSpec, digest
@@ -370,7 +371,7 @@ class LearningActivities:
                 "instruction": item["explanation"] if action == "reveal" else hints[index],
             }
         mode = item.get("response_mode", "choice")
-        semantic_detail = None
+        semantic_detail: dict[str, Any] | None = None
         if mode == "choice":
             if answer is None or not answer.isdigit() or not 0 <= int(answer) < len(item["options"]):
                 raise ValueError("invalid_activity_answer")
@@ -379,7 +380,6 @@ class LearningActivities:
             result = "correct" if correct else "incorrect"
         elif mode in {"numeric", "reflection"}:
             value = decode_text_answer(answer or "")
-            semantic_detail = None
             if mode == "numeric":
                 if not re.fullmatch(r"[+-]?[0-9]{1,12}", value):
                     raise ValueError("invalid_numeric_answer")

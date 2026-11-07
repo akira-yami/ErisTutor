@@ -340,19 +340,6 @@ class ConversationContextAssembler:
             host.last_affective_voice_state = dict(affect_payload)
         except Exception:
             pass
-        # Root capabilities registry from host
-        if "__root_capabilities" not in context:
-            try:
-                from .context import RootCapabilityRegistry
-
-                capabilities: dict[str, Any] = {}
-                tutor_cap = getattr(host, "tutor_capability", None)
-                if tutor_cap is not None:
-                    capabilities["tutor"] = tutor_cap
-                context["__root_capabilities"] = RootCapabilityRegistry(capabilities)
-            except Exception:
-                pass
-
         from runtime.diagnostic_logging import safe_log
         safe_log(getattr(host, "logger", None), "info",
                  "[chat-stage] context_ms=%d memory_context_ms=%d",

@@ -17,6 +17,7 @@ from __future__ import annotations
 from runtime.telemetry_text_policy import is_generic_telemetry_line
 from runtime.diagnostic_logging import safe_log
 
+import re
 from typing import Any, Callable, Optional
 
 try:  # pragma: no cover
@@ -33,6 +34,21 @@ _GENERIC_TELEMETRY_PREFIXES = (
     "browser target is visible:",
     "context classification:",
 )
+
+
+def is_generic_telemetry_line(text: str) -> bool:
+    """True nếu một dòng chỉ là telemetry chung chung, KHÔNG phải nội dung màn hình thật."""
+
+    lowered = str(text or "").strip().lower()
+    if not lowered:
+        return True
+    if lowered.startswith(_GENERIC_TELEMETRY_PREFIXES):
+        return True
+    if re.fullmatch(r"\d+ browser tabs are visible", lowered):
+        return True
+    if re.fullmatch(r"\d+ windows are open", lowered):
+        return True
+    return False
 
 
 def build_tutor_daemon_from_runtime(runtime_owner: Any) -> Optional[Any]:

@@ -15,8 +15,6 @@ import os
 import time
 from typing import Any, Mapping
 
-from runtime.conversation.context import RootCapabilityRegistry
-
 from failure_meta import build_failure_meta
 
 from runtime.no_fallback_policy import no_fallback_mode_enabled
