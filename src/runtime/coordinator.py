@@ -91,6 +91,13 @@ class RuntimeCoordinator(
         self.subsystem_health_registry = SubsystemHealthRegistry(
             max_events=self.runtime_policy_settings.health.max_events
         )
+        from runtime.loop_guard import RuntimeLoopGuard
+
+        self.loop_guard = RuntimeLoopGuard(
+            settings=self.runtime_policy_settings.run_loop,
+            health_registry=self.subsystem_health_registry,
+            logger=self.logger,
+        )
 
         # Transport & Dispatcher
         self.transport_boundary = RuntimeTransportBoundary(
