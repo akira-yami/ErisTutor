@@ -18,12 +18,28 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.5",
 ]
+telemetry = [
+  "mss",
+  "Pillow",
+  "psutil",
+]
+
+[tool.setuptools]
+py-modules = ["failure_meta"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 # Only the packages that currently exist in the repo. Expand as later layers land.
-include = ["domain*", "transport*", "core*", "screen*", "runtime*", "native*"]
+include = [
+  "actions*", "core*", "cortex*", "domain*", "evals*", "experiments*", "llm*",
+  "memory*", "native*", "parser_grounding*", "runtime*", "screen*", "telemetry*",
+  "transport*",
+]
 exclude = ["tests*", "assets*"]
+
+[tool.setuptools.package-data]
+evals = ["*.json"]
+"experiments.emergence" = ["scenarios/*.yaml"]
 
 [tool.ruff]
 target-version = "py311"
