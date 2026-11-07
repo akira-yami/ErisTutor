@@ -1,0 +1,11 @@
+{
+  "name": "agent-self-awareness",
+  "description": "Kiểm tra Eris hiện thật sự làm được gì: health, latency, risk, reversibility, executor và dependency workspace trước khi chọn đường thực thi.",
+  "keywords": ["capability", "health", "self model", "năng lực", "làm được gì", "available", "unavailable", "latency", "risk"],
+  "tools": ["inspect_capability_catalog", "inspect_capability_health"],
+  "mode": "consult",
+  "latency": "<3s",
+  "workspace_required": false,
+  "risk_level": "low",
+  "reversible": true
+}
