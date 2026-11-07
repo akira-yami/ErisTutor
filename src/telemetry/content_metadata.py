@@ -375,7 +375,7 @@ class ContentMetadataCollector:
             if not window:
                 return None
             texts: list[str] = []
-            for node, _depth in auto.WalkTree(window, maxDepth=self.accessibility_max_depth):
+            for node, depth in auto.WalkTree(window, maxDepth=self.accessibility_max_depth):
                 if len(texts) >= self.accessibility_max_nodes:
                     break
                 name = _clean_text(getattr(node, "Name", ""), 180)
