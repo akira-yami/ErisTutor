@@ -42,6 +42,9 @@ MODULES = [
     "memory.memory_packet_builder",
     # Step 5a — embedding index (numpy only at import; torch/transformers lazy)
     "memory.embedding_index",
+    # Step 5b — living user and cognition core
+    "memory.living_user",
+    "memory.memory_cognition",
 ]
 
 failed = []

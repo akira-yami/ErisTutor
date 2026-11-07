@@ -17,9 +17,9 @@ from actions.contracts import VALID_SYSTEM_ACTIONS
 
 from cortex.banned_filler import HOLLOW_PRESENCE_LINES, STALE_MICRO_TEMPLATES, quoted_fragment
 from failure_meta import build_failure_meta, normalize_failure_meta
-from runtime.no_fallback_policy import build_no_fallback_payload, no_fallback_mode_enabled
+from .no_fallback_policy import build_no_fallback_payload, no_fallback_mode_enabled
 from runtime.voice_policy import VOICE_POLICY, ANTI_DISCLAIMER_FEWSHOT as _VOICE_POLICY_FEWSHOT
-from runtime.eris_voice_contract import (
+from .voice_contract import (
     CHAT_VOICE_CORE_V39,
     CHAT_STYLE_RULES_V39,
     AUTONOMOUS_VOICE_CORE_V39,
@@ -1908,12 +1908,12 @@ class LlmService:
         try:
             response = _call(messages, stage=initial_stage, override_client=initial_client)
         except requests.HTTPError as exc:
-            def _looks_like_prompt_leak() -> bool:
-                r_json = getattr(exc, "response_json", {}) or {}
+            def _looks_like_prompt_leak(err: Exception = exc) -> bool:
+                r_json = getattr(err, "response_json", {}) or {}
                 # Handle dictionary error responses (like Gemini)
                 err_msg = str(r_json.get("error", {}).get("message", "")).lower()
                 if not err_msg:
-                    err_msg = str(exc).lower()
+                    err_msg = str(err).lower()
                 return "safety" in err_msg or "recitation" in err_msg
 
             if allow_local_fallback and recovery_client is not None and recovery_client is not initial_client and _looks_like_prompt_leak():
@@ -3156,7 +3156,7 @@ class LlmService:
             f"Legacy fallback: {fallback_text or '<none>'}\n"
             f"Runtime seeds: {runtime_seed_text}\n"
             + (
-                f"Curiosity Engine topics (pick ONE to say naturally, don't explain it):\n"
+                "Curiosity Engine topics (pick ONE to say naturally, don't explain it):\n"
                 + "\n".join(f"  - {s}" for s in curiosity_seeds)
                 + "\n"
                 if curiosity_seeds else ""

@@ -47,3 +47,11 @@ def test_numpy_cosine_similarity() -> None:
     assert len(sims) == 2
     assert abs(sims[0] - 1.0) < 1e-5
     assert abs(sims[1] - (-1.0)) < 1e-5
+
+
+def test_memory_cognition_core_init(tmp_path) -> None:
+    from memory.memory_cognition import MemoryCognitionCore
+    core = MemoryCognitionCore(base_dir=str(tmp_path))
+    assert core is not None
+    assert core.base_dir == str(tmp_path)
+

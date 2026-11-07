@@ -10,7 +10,7 @@ phần đầu prompt giống hệt nhau giữa các request.
 
 import hashlib
 
-from runtime.eris_voice_contract import CHAT_VOICE_CORE_V39
+from .voice_contract import CHAT_VOICE_CORE_V39
 
 
 CACHEABLE_CHAT_PREFIX_V2 = f"""
