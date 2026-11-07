@@ -84,6 +84,11 @@ class DefaultActionObserver:
         user32 = ctypes.windll.user32
         kernel32 = ctypes.windll.kernel32
         cf_unicode_text = 13
+        user32.GetClipboardData.argtypes = [ctypes.c_uint]
+        user32.GetClipboardData.restype = ctypes.c_void_p
+        kernel32.GlobalLock.argtypes = [ctypes.c_void_p]
+        kernel32.GlobalLock.restype = ctypes.c_void_p
+        kernel32.GlobalUnlock.argtypes = [ctypes.c_void_p]
         if not user32.OpenClipboard(None):
             return ""
         try:

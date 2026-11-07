@@ -44,6 +44,16 @@ _OBSERVATIONAL_CAPABILITY_IDS = (
 
 
 _CAPABILITY_DATA: dict[str, CapabilityDefinition] = {
+    "click_mouse": CapabilityDefinition(
+        id="click_mouse", effect="control", public_name_vi="click chuột trái",
+        description_vi="Click một điểm thuộc cửa sổ đang foreground sau khi Sandbox cấp quyền.",
+        risk_level="high",
+    ),
+    "type_text": CapabilityDefinition(
+        id="type_text", effect="control", public_name_vi="gõ văn bản",
+        description_vi="Gõ Unicode vào cửa sổ đang foreground sau khi Sandbox cấp quyền.",
+        risk_level="high",
+    ),
     "canvas": CapabilityDefinition(
         id="canvas", effect="control", public_name_vi="Learning Canvas Java DI",
         description_vi="Root capability canvas mở nhóm DI, đọc nội dung và đề xuất focus trong Godot native; dùng guide canvas, không gọi qua action executor.",
@@ -371,6 +381,15 @@ def _boolean(description: str = "") -> dict[str, Any]:
 _EMPTY_INPUT = _object_schema()
 
 _CAPABILITY_INPUT_CONTRACTS: dict[str, tuple[dict[str, Any], str]] = {
+    "click_mouse": (_object_schema({
+        "hwnd": _integer("Handle cửa sổ đang foreground", minimum=1),
+        "x": _integer("Tọa độ X trên màn hình"),
+        "y": _integer("Tọa độ Y trên màn hình"),
+    }, ("hwnd", "x", "y")), "json"),
+    "type_text": (_object_schema({
+        "hwnd": _integer("Handle cửa sổ đang foreground", minimum=1),
+        "text": _string("Văn bản Unicode, tối đa 2000 ký tự"),
+    }, ("hwnd", "text")), "json"),
     "canvas": (_object_schema({
         "operation": _string("Root Canvas operation", enum=("library", "open_group", "snapshot", "focus", "accept_focus")),
         "base_revision": _integer("Revision từ snapshot", minimum=0),

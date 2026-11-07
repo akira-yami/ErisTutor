@@ -99,6 +99,17 @@ def refresh_runtime_capabilities(
 
     for capability_id in VALID_SYSTEM_ACTION_LIST:
         enabled_key = _SETTING_KEYS.get(capability_id, "")
+        if capability_id in {"click_mouse", "type_text"} and not (
+            caps_settings.get("desktop_input_enabled") is True
+            and os.name == "nt"
+            and getattr(executor, "sandbox_world", None) is not None
+            and callable(getattr(executor, "sandbox_capability_provider", None))
+            and getattr(executor, "subject_service", None) is not None
+        ):
+            statuses[capability_id] = CapabilityRuntimeStatus(
+                capability_id, False, "desktop_input_requires_opt_in_and_sandbox", "runtime"
+            )
+            continue
         if enabled_key and caps_settings.get(enabled_key) is False:
             statuses[capability_id] = CapabilityRuntimeStatus(
                 capability_id, False, "disabled_by_runtime_settings", "settings"

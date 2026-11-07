@@ -162,10 +162,10 @@ class ActionExecutor:
                 error_kind="SubjectCoreUnavailable",
             )
 
-        from cortex.subject.contracts import WorldObservation
-        from runtime.world.contracts import SandboxCommand, SandboxCommandKind
-
         try:
+            from cortex.subject.contracts import WorldObservation
+            from runtime.world.contracts import SandboxCommand, SandboxCommandKind
+
             if self.subject_service is None:
                 raise RuntimeError("SubjectServiceUnavailable")
             observation_id = f"capability-observation:{uuid.uuid4()}"
@@ -297,10 +297,35 @@ class ActionExecutor:
         except Exception:
             pass
         self._log("info", "[action] %s(%s) -> %s | status=%s | observer=%s",
-                  action_name, action_input or "<empty>", result.message,
+                  action_name, "<redacted>" if action_name == "type_text" else action_input or "<empty>", result.message,
                   getattr(result.status, "value", result.status), result.observer_reason or "none")
         return result
 
+
+    def _execute_desktop_input(self, capability_id: str, action_input: str) -> ActionExecutionResult:
+        from native import desktop_input
+
+        try:
+            arguments = json.loads(action_input)
+            valid, reason = validate_capability_arguments(capability_id, arguments)
+            if not valid:
+                raise ValueError(reason)
+            if capability_id == "click_mouse":
+                desktop_input.click_mouse(**arguments)
+            else:
+                desktop_input.type_text(**arguments)
+        except (ValueError, TypeError, OSError) as exc:
+            return ActionExecutionResult(
+                capability_id, success=False, message="Thao tác desktop bị từ chối hoặc chưa hoàn tất.",
+                error_kind=type(exc).__name__,
+            )
+        return ActionExecutionResult(capability_id, success=True, message="Đã gửi thao tác desktop.")
+
+    def _click_mouse(self, action_input: str) -> ActionExecutionResult:
+        return self._execute_desktop_input("click_mouse", action_input)
+
+    def _type_text(self, action_input: str) -> ActionExecutionResult:
+        return self._execute_desktop_input("type_text", action_input)
 
     def _execute_cognitive(self, capability_id: str, action_input: str) -> ActionExecutionResult:
         runtime = self.cognitive_runtime
