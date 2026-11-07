@@ -1,0 +1,4 @@
+scenario_id: cross_context_transfer
+transfer_ratio_min: 0.30
+transfer_ratio_max: 0.80
+paraphrase_robustness_min: 0.80

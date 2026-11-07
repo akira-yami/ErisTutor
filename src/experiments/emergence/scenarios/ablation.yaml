@@ -1,0 +1,3 @@
+scenario_id: causal_ablation
+target_tendency_drop_min: 0.30
+unrelated_behavior_change_max: 0.10

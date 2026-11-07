@@ -1,0 +1,11 @@
+{
+  "name": "safe-recovery",
+  "description": "Quan sát checkpoint atomic của task và chọn điểm phục hồi an toàn khi hướng thực thi sai hoặc scope phình.",
+  "keywords": ["rollback", "checkpoint", "restore", "recovery", "undo", "khôi phục", "quay lại"],
+  "tools": ["list_task_checkpoints", "project_git_diff", "get_project_status"],
+  "mode": "consult",
+  "latency": "<3s",
+  "workspace_required": true,
+  "risk_level": "low",
+  "reversible": true
+}

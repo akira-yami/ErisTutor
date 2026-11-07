@@ -1,0 +1,3 @@
+scenario_id: resistance_to_one_turn_personality_shift
+one_turn_max_sd: 0.25
+ten_episode_min_sd: 0.50

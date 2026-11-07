@@ -1,0 +1,11 @@
+{
+  "name": "coding-verification",
+  "description": "Xác minh thay đổi code bằng status/diff/test/build có evidence trước khi kết luận task hoàn tất.",
+  "keywords": ["verify", "verification", "test", "build", "diff", "status", "pass", "regression", "xác minh"],
+  "tools": ["get_project_status", "project_git_diff", "project_run_tests", "project_run_command", "project_read_file"],
+  "mode": "long",
+  "latency": "seconds to minutes",
+  "workspace_required": true,
+  "risk_level": "medium",
+  "reversible": true
+}
