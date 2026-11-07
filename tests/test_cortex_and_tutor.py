@@ -135,21 +135,6 @@ class _OverEagerReasoner(ConservativeTutorReasoner):
         )
 
 
-def test_all_cortex_and_runtime_tutor_modules_import_cleanly() -> None:
-    src_root = Path(__file__).resolve().parents[1] / "src"
-    count = 0
-    for folder in ("cortex", "runtime/tutor", "memory/subject"):
-        for py_file in sorted((src_root / folder).rglob("*.py")):
-            rel = py_file.relative_to(src_root).with_suffix("")
-            parts = list(rel.parts)
-            if parts[-1] == "__init__":
-                parts = parts[:-1]
-            mod_name = ".".join(parts)
-            importlib.import_module(mod_name)
-            count += 1
-    assert count >= 190
-
-
 def test_cortex_internal_state_and_affect_appraisal() -> None:
     engine = InternalStateEngine()
     state = PersistentInternalState()

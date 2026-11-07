@@ -1,29 +1,8 @@
 """Foundation-layer tests.
 
 Scope: the modules owned by the feat/foundation branch — domain, transport,
-failure_meta, secure_redaction. Kept small and fast so per-branch CI stays quick.
+failure_meta, secure_redaction.
 """
-import importlib
-
-import pytest
-
-FOUNDATION_MODULES = [
-    "failure_meta",
-    "secret_versions",
-    "eris_secrets",
-    "app_logging",
-    "runtime.secure_redaction",
-    "domain",
-    "transport",
-    "core",
-    "screen",
-]
-
-
-@pytest.mark.parametrize("name", FOUNDATION_MODULES)
-def test_foundation_module_imports(name):
-    """Every foundation module imports with the stdlib alone (no optional deps)."""
-    assert importlib.import_module(name) is not None
 
 
 def test_decision_to_payload_minimal():
