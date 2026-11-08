@@ -258,7 +258,7 @@ class RootConversationSession:
         cap = hard_cap_for_provider(provider)
         uri = str(getattr(client, "base_url", "") or "").lower()
         model = str(getattr(client, "model_name", "") or "").lower()
-        if "deepseek" in model and any(x in uri for x in ("localhost", "127.0.0.1")):
+        if "deepseek" in model or "deepseek" in uri or provider == "deepseek":
             try:
                 requested = int(os.environ.get("ERIS_ROOT_SESSION_PROMPT_CAP_TOKENS", "90000"))
                 if requested > 0:

@@ -12,7 +12,9 @@ numpy>=2.0.0
 requests>=2.28.0
 
 # --- audio / tts subsystem ---
-miniaudio>=1.71           # decode MP3/WAV and fallback audio device
+miniaudio>=1.71
+edge-tts>=7.0.0
+sounddevice>=0.5.0           # decode MP3/WAV and fallback audio device
 
 # --- tutor subsystem (feat/tutor-executive) ---
 # FSRS spaced-repetition scheduler for learner retention

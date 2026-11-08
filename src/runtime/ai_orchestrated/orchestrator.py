@@ -1230,10 +1230,13 @@ class AIAutonomousOrchestrator:
     def run_social_signal(self, metadata: Mapping[str, Any] | None = None) -> Any:
         return self._run_v12_signal("social_signal", metadata=metadata, sleep_after=False)
 
-    def run_force_speak(self) -> None:
+    def run_force_speak(self, text: str = "") -> None:
+        metadata = {"reason": "explicit_presence_request", "explicit_user_pull": True}
+        if text:
+            metadata["prompt_hint"] = str(text)
         self._run_v12_signal(
             "autonomous_signal",
-            metadata={"reason": "explicit_presence_request", "explicit_user_pull": True},
+            metadata=metadata,
             sleep_after=False,
         )
 

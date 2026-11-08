@@ -74,8 +74,17 @@ def _enabled() -> bool:
     return runtime_bool("tts", "enabled", default=True)
 
 def _tts_provider() -> str:
-    """ElevenLabs is the sole remote speech provider."""
-    return "elevenlabs"
+    from runtime.runtime_settings_store import runtime_text
+
+    env_provider = os.environ.get("ERIS_TTS_PROVIDER", "").strip().lower()
+    if env_provider:
+        return "edge-tts" if env_provider in ("edge", "edge-tts") else env_provider
+    store_provider = runtime_text("tts", "provider", default="").strip().lower()
+    if store_provider:
+        return "edge-tts" if store_provider in ("edge", "edge-tts") else store_provider
+    if _elevenlabs_auth_configured_fast():
+        return "elevenlabs"
+    return "edge-tts"
 
 
 
@@ -85,7 +94,11 @@ def _tts_provider() -> str:
 def _voice(language_hint: str = "") -> str:
     from runtime.runtime_settings_store import runtime_text
 
-    if _tts_provider() == "elevenlabs":
+    provider = _tts_provider()
+    if provider in {"edge", "edge-tts"}:
+        candidates = _edge_voice_candidates(language_hint)
+        return candidates[0] if candidates else "vi-VN-HoaiMyNeural"
+    if provider == "elevenlabs":
         language = _normalize_language_hint(language_hint or _language_hint())
         if language in {"vi", "ja"}:
             selected = runtime_text("tts", f"elevenlabs_voice_id_{language}", default="").strip()
@@ -100,7 +113,8 @@ def _voice(language_hint: str = "") -> str:
 
 
 def _model() -> str:
-    if _tts_provider() == "elevenlabs":
+    provider = _tts_provider()
+    if provider == "elevenlabs":
         from runtime.runtime_settings_store import runtime_text
 
         return (
@@ -108,7 +122,7 @@ def _model() -> str:
             or runtime_text("tts", "elevenlabs_model", default="eleven_v3").strip()
             or "eleven_v3"
         )
-    return "eleven_v3"
+    return "default"
 
 def _normalize_language_hint(value: str) -> str:
     """Chuẩn hoá value từ .env/UI thành mã ngôn ngữ nội bộ ổn định."""
@@ -1534,7 +1548,19 @@ def _synthesize_active_provider_wav(
     voice_director_segment: Mapping[str, object] | None = None,
     cancel_event=None, authority_check=None,
 ) -> bytes:
-    """Synthesize with ElevenLabs, then the existing local fallback if available."""
+    """Synthesize with active provider (Edge TTS or ElevenLabs), with fallback."""
+    provider = _tts_provider()
+    if provider in {"edge", "edge-tts"}:
+        try:
+            wav_bytes, _ = _synthesize_edge_tts_wav(text, language_hint=language_hint)
+            if wav_bytes:
+                return wav_bytes
+        except Exception as edge_exc:
+            logger.warning("[TTS/Edge] provider error: %s", _short_error(edge_exc))
+            local = _try_local_tts_fallback(edge_exc, fallback_text=text, language_hint=language_hint)
+            if local:
+                return local
+            raise
     try:
         return _synthesize_elevenlabs_wav(
             text, voice, model, prosody_plan=prosody_plan, language_hint=language_hint,
@@ -2017,7 +2043,8 @@ class _TtsWorker:
         return _normalize_language_hint(req.language_hint or configured or "vi")
 
     def _request_voice(self, req: _SpeakRequest) -> str:
-        if _tts_provider() == "elevenlabs":
+        provider = _tts_provider()
+        if provider in {"elevenlabs", "edge", "edge-tts"}:
             return _voice(self._request_language(req))
         requested = str(req.voice_family or "").strip()
         if not requested or requested.lower() in {"eris_primary", "primary", "default"}:
@@ -2465,12 +2492,16 @@ class TtsEngine:
                 logger.warning("[TTS] requests chưa cài. Chạy: pip install requests")
                 return
             if not _elevenlabs_auth_configured_fast():
-                logger.warning(
-                    "[TTS] Missing ElevenLabs auth: account pool/Firebase refresh token "
-                    "or ELEVENLABS_API_KEY/ERIS_ELEVENLABS_API_KEY is required."
-                )
-                return
-            if not _voice():
+                if _local_tts_fallback_enabled():
+                    logger.info("[TTS] ElevenLabs auth absent; falling back to local TTS engine (Edge TTS).")
+                    provider = "edge-tts"
+                else:
+                    logger.warning(
+                        "[TTS] Missing ElevenLabs auth: account pool/Firebase refresh token "
+                        "or ELEVENLABS_API_KEY/ERIS_ELEVENLABS_API_KEY is required."
+                    )
+                    return
+            elif not _voice():
                 logger.warning(
                     "[TTS] Thiếu ERIS_ELEVENLABS_VOICE_ID hoặc tts.elevenlabs_voice_id."
                 )

@@ -93,3 +93,37 @@ def test_openai_compatible_client_init() -> None:
 
 
 
+
+
+def test_deepseek_token_budget_and_root_session_fits() -> None:
+    from llm.token_budget import hard_cap_for_provider, root_session_prompt_cap
+    from runtime.conversation.root_session import RootConversationSession
+    from runtime.inference_broker import inference_context
+    from dataclasses import dataclass
+
+    # DeepSeek should have generous prompt budget, not restricted by Groq 5100
+    deepseek_cap = hard_cap_for_provider("deepseek")
+    assert deepseek_cap >= 64000
+
+    # root_session_prompt_cap should recognize api.deepseek.com
+    with inference_context(lane="root_conversation", metadata={"cognitive_lane": "root_conversation"}):
+        cap = root_session_prompt_cap(
+            base_url="https://api.deepseek.com",
+            model="deepseek-v4-flash",
+            fallback=5100,
+        )
+        assert cap >= 90000
+
+    # root_session._fits must admit full Self (~11,000 tokens)
+    @dataclass
+    class DummyClient:
+        base_url: str = "https://api.deepseek.com"
+        model_name: str = "deepseek-v4-flash"
+
+    session = RootConversationSession()
+    # ~11,000 tokens of Self and system prompt
+    messages = [
+        {"role": "system", "content": "system context " * 500},
+        {"role": "user", "content": "full self json " * 2500},
+    ]
+    assert session._fits(DummyClient(), messages) is True

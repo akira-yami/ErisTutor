@@ -137,7 +137,15 @@ def hard_cap_for_provider(provider: str) -> int:
 
     if os.environ.get("ERIS_LLM_PROMPT_HARD_CAP_TOKENS") is not None:
         override = _safe_int_env("ERIS_LLM_PROMPT_HARD_CAP_TOKENS", 0)
-        return override if override > 0 else _NO_HARD_CAP_TOKENS
+        if override > 0:
+            # 5100 là trần legacy riêng của Groq free-tier (6000 TPM * 0.85).
+            # Không áp giá trị mặc định của Groq lên provider có budget lớn như DeepSeek, OpenAI, Gemini hay Local.
+            if override == 5100 and prov != "groq":
+                pass
+            else:
+                return override
+        else:
+            return _NO_HARD_CAP_TOKENS
 
     runtime_cap = None
     try:
@@ -149,7 +157,13 @@ def hard_cap_for_provider(provider: str) -> int:
         runtime_cap = None
 
     if runtime_cap is not None:
-        return runtime_cap if runtime_cap > 0 else _NO_HARD_CAP_TOKENS
+        if runtime_cap > 0:
+            if runtime_cap == 5100 and prov != "groq":
+                pass
+            else:
+                return runtime_cap
+        else:
+            return _NO_HARD_CAP_TOKENS
 
     # Nothing explicitly configured: use a conservative provider-aware cap.
     return max(512, int(budget_for_provider(prov) * _DEFAULT_HEADROOM))
@@ -447,8 +461,7 @@ def root_session_prompt_cap(*, base_url: str | None, model: str | None, fallback
     """
     uri = str(base_url or "").lower()
     name = str(model or "").lower()
-    if ("deepseek" not in name or "api.deepseek.com" in uri or
-            not any(x in uri for x in ("localhost", "127.0.0.1"))):
+    if "deepseek" not in name and "deepseek" not in uri:
         return fallback
     if os.environ.get("ERIS_ROOT_SESSION_BOOTSTRAP", "1").strip().lower() in {"0", "false", "no", "off"}:
         return fallback

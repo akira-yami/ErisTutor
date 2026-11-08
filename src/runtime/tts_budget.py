@@ -25,6 +25,8 @@ def _normalize_provider(provider: str) -> str:
     raw = str(provider or "").strip().lower()
     if raw in {"eleven", "11labs", "eleven_labs"}:
         return "elevenlabs"
+    if raw in {"edge", "edge-tts", "edgetts"}:
+        return "edge-tts"
     if raw in {"google", "google_tts", "gemini_tts"}:
         return "gemini"
     return raw
@@ -68,7 +70,7 @@ class TtsRequestBudget:
         Provider lạ dùng limit Gemini bảo thủ thay vì đoán mò rồi gửi request khổng lồ.
         """
         normalized = _normalize_provider(provider)
-        if normalized == "elevenlabs":
+        if normalized in {"elevenlabs", "edge-tts"}:
             return max(120, int(self.elevenlabs_max_transcript_chars))
         return max(48, int(self.max_transcript_chars))
 

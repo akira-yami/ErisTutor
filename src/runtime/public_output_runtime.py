@@ -1051,7 +1051,7 @@ class PublicOutputRuntimeMixin:
                     clock.mark_audio_finished(turn_id=str(stage_frame.turn_id or ""))
                 except Exception:
                     pass
-            audio_required = sync_text and _should_speak
+            audio_required = sync_text and _should_speak and _tts_ok
             if audio_required:
                 discard_deferred_text()
                 public_lifecycle.transition(

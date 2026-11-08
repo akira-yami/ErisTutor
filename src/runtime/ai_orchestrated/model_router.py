@@ -1488,7 +1488,11 @@ class AIRuntimeModelRouter:
 
     @property
     def observer_client(self) -> Any | None:
-        return getattr(self.llm_service, "social_parser_client", None)
+        return (
+            getattr(self.llm_service, "social_parser_client", None)
+            or getattr(self.llm_service, "client", None)
+            or self.deep_client
+        )
 
     @property
     def deep_client(self) -> Any | None:
