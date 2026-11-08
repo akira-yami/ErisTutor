@@ -36,7 +36,7 @@ class SemanticSimilarityResult:
 
 
 def _backend_mode() -> str:
-    value = str(os.environ.get("ERIS_SEMANTIC_BACKEND", "auto") or "auto").strip().lower()
+    value = str(os.environ.get("ERIS_SEMANTIC_BACKEND", "fallback") or "fallback").strip().lower()
     aliases = {
         "off": "fallback",
         "disabled": "fallback",

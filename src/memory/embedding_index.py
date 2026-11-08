@@ -450,7 +450,7 @@ class EmbeddingIndex:
 def build_embedding_index(*, model_name: str | None = None, enabled: bool = True) -> EmbeddingIndex | None:
     """Build index nếu dependency có sẵn; model vẫn lazy-load."""
 
-    env_enabled = os.getenv("ERIS_EMBEDDING_ENABLED", "1").strip().lower()
+    env_enabled = os.getenv("ERIS_EMBEDDING_ENABLED", "0").strip().lower()
     if env_enabled in {"0", "false", "no", "off"} or not enabled:
         return None
     try:
@@ -473,7 +473,7 @@ def get_shared_embedding_index() -> EmbeddingIndex | None:
     if _SHARED_BUILT:
         return _SHARED_INDEX
     _SHARED_BUILT = True
-    env_enabled = os.getenv("ERIS_EMBEDDING_ENABLED", "1").strip().lower()
+    env_enabled = os.getenv("ERIS_EMBEDDING_ENABLED", "0").strip().lower()
     if env_enabled in {"0", "false", "no", "off"}:
         return None
     try:
