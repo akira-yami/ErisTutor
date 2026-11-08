@@ -4,19 +4,18 @@
   <img src="https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge&logo=statuspal" alt="Status" />
   <img src="https://img.shields.io/badge/Architecture-v2.0_Production-blueviolet?style=for-the-badge" alt="Architecture" />
   <img src="https://img.shields.io/badge/Tests-317%2F317_Passed-brightgreen?style=for-the-badge&logo=pytest" alt="Tests" />
-  <img src="https://img.shields.io/badge/AWS_Cloud-Fargate_Serverless-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS Fargate" />
-  <img src="https://img.shields.io/badge/AI_Gateway-DeepSeek_Broker_Active-brightgreen?style=for-the-badge&logo=fastapi" alt="AI Gateway" />
+  <img src="https://img.shields.io/badge/AI_Engine-DeepSeek_Deliberation-brightgreen?style=for-the-badge&logo=fastapi" alt="AI Engine" />
   <img src="https://img.shields.io/badge/Platform-Windows_10%2F11_x64-0078D6?style=for-the-badge&logo=windows" alt="Platform" />
 </p>
 
-> 🌟 **ErisTutor** là lớp nhận thức học tập của **Eris AI** — một sinh thể số đồng hành trên desktop Windows, sở hữu thân thể Live2D 60 FPS (Godot/C#) và một bộ não nhận thức cao cấp viết bằng Python 3.12, tích hợp **AWS Cloud AI Gateway** (DeepSeek Key Broker & Telemetry Observability).
+> 🌟 **ErisTutor** là lớp nhận thức học tập của **Eris AI** — một sinh thể số đồng hành trên desktop Windows, sở hữu thân thể Live2D 60 FPS (Godot/C#) và một bộ não nhận thức cao cấp viết bằng Python 3.12, tích hợp DeepSeek Deliberation & Telemetry Observability.
 
 ---
 
 ## 📖 Mục Lục
 
 1. [Tổng Quan Cốt Lõi](#-tổng-quan-cốt-lõi)
-2. [Kiến Trúc Hybrid 4 Phân Hệ & AWS Gateway](#-kiến-trúc-hybrid-4-phân-hệ--aws-gateway)
+2. [Kiến Trúc 4 Phân Hệ Cốt Lõi](#-kiến-trúc-4-phân-hệ-cốt-lõi)
 3. [Ranh Giới Quyền Sở Hữu & Các Bất Biến (Invariants)](#-ranh-giới-quyền-sở-hữu--các-bất-biến-invariants)
 4. [Kiến Trúc Đa Tầng & Khế Ước Ngôn Ngữ (Polyglot & Linguistics)](#-kiến-trúc-đa-tầng--khế-ước-ngôn-ngữ-polyglot--linguistics)
 5. [Cấu Trúc Thư Mục](#-cấu-trúc-thư-mục)
@@ -37,7 +36,7 @@ ErisTutor **không phải** là một chatbot hỏi-đáp bài tập đơn thu�
 
 ---
 
-## 🏛 Kiến Trúc Hybrid 4 Phân Hệ & AWS Gateway
+## 🏛 Kiến Trúc 4 Phân Hệ Cốt Lõi
 
 ```mermaid
 graph TD
@@ -67,17 +66,10 @@ graph TD
         LearningStore[("(SQLite LearningStore)<br/>Nguồn sự thật xác định: Evidence, Mastery, Review")]
     end
 
-    subgraph CloudGateway ["5. AWS Cloud AI Gateway (Serverless)"]
-        Fargate["AWS Fargate Serverless Cluster"]
-        KeyBroker["DeepSeek Key Broker & Rate Limiter"]
-        TelemetryObs["Telemetry Observability & Metrics"]
-    end
-
     BodyLayer <--> MindLayer
     MindLayer <--> MemoryLayer
     MindLayer <--> TutorLayer
     TutorLayer --> LearningStore
-    MindLayer <--> CloudGateway
 ```
 
 ---

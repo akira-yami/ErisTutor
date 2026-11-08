@@ -653,14 +653,25 @@ public partial class UdpListener : Node2D
 			_shutdownReason = reason;
 	}
 
+	private void TerminateApplication(string reason)
+	{
+		MarkShutdownReason(reason);
+		CloseCharacterContextMenu();
+		ShutdownLive2DMode();
+		StopRichChatPortal();
+		StopVisionProcess();
+		try { _udp?.Close(); } catch { }
+		try { _chatSend?.Close(); } catch { }
+		try { RunLogger.Shutdown(); } catch { }
+		GetTree()?.Quit();
+		System.Environment.Exit(0);
+	}
+
 	public override void _Notification(int what)
 	{
 		if (what == NotificationWMCloseRequest)
 		{
-			MarkShutdownReason("window close request");
-			CloseCharacterContextMenu();
-			StopVisionProcess();
-			GetTree().Quit();
+			TerminateApplication("window close request");
 		}
 	}
 
@@ -1583,12 +1594,8 @@ public partial class UdpListener : Node2D
 
 	private void OnContextExitPressed()
 	{
-		MarkShutdownReason("context menu exit");
-		// Thoát hẳn ERIS: đóng menu, dừng tiến trình con (vision...) rồi tắt app.
-		CloseCharacterContextMenu();
 		GD.Print("[Exit] Người dùng yêu cầu thoát ERIS qua context menu.");
-		StopVisionProcess();
-		GetTree().Quit();
+		TerminateApplication("context menu exit");
 	}
 
 	private void ToggleEmotionPanel()
