@@ -123,10 +123,7 @@ _DEFAULT_SETTINGS: dict[str, Any] = {
         "max_repair_attempts": 2,
     },
     "prompt": {
-        # PDF pages 4 and 15-16: 5100 = 85% of the primary Groq 6000 TPM
-        # budget.  Zero remains available as an explicit unlimited override, but
-        # it is no longer the shipped default that silently disables protection.
-        "hard_cap_tokens": 5100,
+        "hard_cap_tokens": 64000,
         "dds_enabled": True,
         "strict_grounding": True,
     },

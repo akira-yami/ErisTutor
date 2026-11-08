@@ -35,7 +35,7 @@
     "director_second_pass": "off",
     "low_quality_fail_open": true,
     "auto_fallback": false,
-    "completion_chat_tokens": 1280,
+    "completion_chat_tokens": 4096,
     "chat_timeout_seconds": 24,
     "max_concurrency": 4
   },
@@ -77,7 +77,7 @@
     "max_repair_attempts": 2
   },
   "prompt": {
-    "hard_cap_tokens": 5100,
+    "hard_cap_tokens": 64000,
     "dds_enabled": false,
     "strict_grounding": true
   },

@@ -19,7 +19,7 @@ class ProviderErrorKind(StrEnum):
 def classify_provider_error(exc: Exception | str, *, status_code: int | None = None) -> ProviderErrorKind:
     text = _error_text(exc).lower()
     code = status_code if status_code is not None else _status_from_exception(exc)
-    if code == 429 or "resource_exhausted" in text or "quota" in text and "exceeded" in text:
+    if code in (402, 429) or any(marker in text for marker in ("resource_exhausted", "insufficient_balance", "insufficient balance")) or ("quota" in text and "exceeded" in text):
         return ProviderErrorKind.RATE_LIMIT
     if any(marker in text for marker in ("api key not valid", "api key was reported as leaked", "reported as leaked", "api_key_invalid", "invalid credential", "api key expired", "unauthorized")):
         return ProviderErrorKind.KEY_REVOKED

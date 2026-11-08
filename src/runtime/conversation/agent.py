@@ -328,7 +328,7 @@ class RuntimeModelRootAgent:
                         payload=payload,
                         schema=schema,
                         name="eris_root_conversation_step_v12",
-                        max_tokens=1200,
+                        max_tokens=4096,
                         reasoning_effort="medium",
                         inference_tier="subconscious_4b",
                         cognitive_lane="root_conversation",
