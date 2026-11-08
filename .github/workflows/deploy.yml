@@ -5,15 +5,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      target_env:
-        description: "Target Cloud Environment"
-        required: true
-        default: "aws-production"
-        type: choice
-        options:
-          - "aws-production"
-          - "aws-staging"
 
 permissions:
   contents: read
@@ -21,7 +12,7 @@ permissions:
 
 jobs:
   deploy-aws:
-    name: Deploy AI Gateway & Telemetry to AWS
+    name: Build & Verify Eris Cloud Rich Chat Container
     runs-on: ubuntu-latest
     environment:
       name: aws-production
@@ -30,33 +21,27 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Cloud Environment
-        run: |
-          echo "Connecting to AWS Region: ap-southeast-1 (Singapore)..."
-          echo "Target Cluster: eris-cloud-fargate"
-          echo "Environment: ${{ github.event.inputs.target_env || 'aws-production' }}"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Verify Secure Redaction Invariants
+      - name: Build Cloud Rich Chat Container
         run: |
-          echo "Checking privacy redaction rules..."
-          echo "Strict PII redaction policy: ACTIVE"
+          echo "Building lightweight Eris Rich Chat image..."
+          docker build -t eris-richchat-cloud:latest .
 
-      - name: Build & Package Lightweight Gateway Container
+      - name: Test Container Health & State API
         run: |
-          echo "Packaging Eris AI Gateway (DeepSeek Key Broker & Telemetry Hub)..."
-          sleep 2
-          echo "Docker image built & tagged: eris-gateway:v2.0-aws"
-
-      - name: Deploy to AWS ECS / Fargate
-        run: |
-          echo "Pushing container definition to AWS ECR..."
-          sleep 2
-          echo "Registering task definition in AWS ECS (Fargate)..."
+          echo "Starting container for smoke test..."
+          docker run -d --name test-eris -p 8080:8080 -e PORT=8080 eris-richchat-cloud:latest
           sleep 3
-          echo "=================================================="
-          echo "STATUS: 🟢 DEPLOYMENT SUCCEEDED"
-          echo "SERVICE: Eris AI Gateway & Telemetry Broker"
-          echo "INFRASTRUCTURE: AWS Fargate Serverless"
-          echo "HEALTH CHECK: HTTP 200 OK"
-          echo "=================================================="
+          curl -f http://127.0.0.1:8080/api/state || exit 1
+          echo "Health check passed: HTTP 200 OK"
+          docker stop test-eris
 
+      - name: Summary
+        run: |
+          echo "=================================================="
+          echo "STATUS: 🟢 CLOUD CONTAINER READY FOR AWS"
+          echo "SERVICE: Eris Rich Chat Studio & Inner Thought AI"
+          echo "DOCKER IMAGE: eris-richchat-cloud:latest"
+          echo "=================================================="
