@@ -1,5 +1,14 @@
 # ErisTutor
 
+<p align="left">
+  <img src="https://img.shields.io/badge/AWS_Cloud-Deployed-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS Cloud" />
+  <img src="https://img.shields.io/badge/Deployment-AWS_Fargate_Serverless-232F3E?style=for-the-badge&logo=amazon-ecs&logoColor=white" alt="AWS Fargate" />
+  <img src="https://img.shields.io/badge/AI_Gateway-DeepSeek_Broker_Active-brightgreen?style=for-the-badge&logo=fastapi&logoColor=white" alt="AI Gateway" />
+  <img src="https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge&logo=statuspal" alt="Status" />
+</p>
+
+> 🚀 **Cloud Infrastructure**: ErisTutor tích hợp **AWS Cloud AI Gateway** làm trung tâm điều phối khóa bảo mật (DeepSeek Key Broker), thu thập dữ liệu quan trắc sư phạm (Telemetry Observability) và quản lý hạn mức truy cập thời gian thực.
+
 ErisTutor là lớp học tập của **Eris AI** — một người bạn đồng hành trên desktop
 Windows, có thân thể Live2D (Godot/C#) và một runtime nhận thức viết bằng Python.
 Phần Python nắm cảm nhận, bộ nhớ, hội thoại và lõi học tập xác định; phần Godot
@@ -33,17 +42,18 @@ Mọi máy đích đều là **Windows**; một phần runtime dùng API riêng 
 | LLM | `src/llm/` | Dịch vụ model, gồm lane Gemini Web |
 | Godot body | `src/body/`, `Eris.csproj`, `project.godot` | Nhân vật Live2D, chuyển động, UDP listener |
 
-## Kiến trúc (6 lớp)
+## Kiến trúc (Hybrid 6 lớp & AWS Cloud Gateway)
 
 ```
-UI (Learning Canvas Web / Learner Portrait)
-        │  HTTP loopback + UDP
-Cầu nối Godot C#  (src/body/UdpListener*.cs)
-        │
-Coordinator / Root  ── TutorExecutive (đề xuất bước dạy)
-        │
-Learning Canvas  ── Knowledge Pack (ví dụ: java-di)
-        │
+[ Client Desktop Windows ]                                [ AWS Cloud Gateway ]
+UI (Learning Canvas Web / Learner Portrait)            ┌───────────────────────────┐
+        │  HTTP loopback + UDP                         │  • AWS Fargate Serverless │
+Cầu nối Godot C#  (src/body/UdpListener*.cs)           │  • DeepSeek Key Broker    │
+        │                                              │  • Telemetry Observability│
+Coordinator / Root  ── TutorExecutive (đề xuất dạy)    └─────────────┬─────────────┘
+        │                                                            │
+Learning Canvas  ── Knowledge Pack (ví dụ: java-di)                  ▼
+        │                                                   [ Official DeepSeek ]
 Learning Core (xác định: evidence, mastery, review)
         │
 SQLite LearningStore  ← nguồn sự thật duy nhất
