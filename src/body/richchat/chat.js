@@ -293,7 +293,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       currentDay==='all' && !currentSearch;
     if(needsActivity && !activity){activity=document.createElement('div');
       activity.className='live-activity';activity.setAttribute('role','status');
-      activity.innerHTML='<span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><div><strong>Eris đang suy nghĩ…</strong><small>Tiến trình thật được hiển thị trong bảng hoạt động.</small></div>';root.appendChild(activity);}
+      activity.innerHTML='<span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Eris đang chuẩn bị trả lời…</span>';root.appendChild(activity);}
     else if(!needsActivity && activity)activity.remove();
   }
   const acknowledged=new Set(), ackInFlight=new Set(), retries=new Map();
@@ -385,7 +385,17 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     if(!workspaceMode&&!current.length&&!unbound.length){
       const welcome=document.createElement('div');welcome.className='empty';welcome.dataset.renderKey='welcome:'+currentDay+':'+currentSearch;
       if(currentSearch||currentDay!=='all')welcome.textContent='Không tìm thấy tin nhắn phù hợp. Hãy đổi bộ lọc để xem lại hội thoại.';
-      else welcome.innerHTML='<div class="welcome"><div class="welcome-mark">✦</div><div class="eyebrow">CÙNG ERIS, MỌI THỨ ĐỀU CÓ THỂ BẮT ĐẦU NHỎ</div><h2>Hôm nay mình làm gì cùng nhau?</h2><p>Một ý tưởng, một bài học, hay chỉ vài câu chuyện. Eris luôn ở đây.</p><div class="welcome-choices"><button type="button" data-welcome-prompt="Dạy tôi Spring Boot từ những khái niệm đầu tiên.">◇ Học một điều mới</button><button type="button" data-welcome-prompt="Eris, cùng tôi phân tích một ý tưởng nhé: ">✧ Bàn về một ý tưởng</button><button type="button" data-welcome-prompt="Giúp tôi lập kế hoạch cho: ">▤ Lập kế hoạch</button><button type="button" data-welcome-prompt="Eris, hôm nay bạn đang nghĩ gì?">✦ Trò chuyện với Eris</button></div></div>';
+      else welcome.innerHTML=`<div class="welcome">
+        <p class="welcome-label">Hội thoại mới</p>
+        <h2>Trò chuyện với Eris</h2>
+        <p>Viết một tin nhắn hoặc chọn một chủ đề để bắt đầu.</p>
+        <div class="welcome-choices">
+          <button type="button" data-welcome-prompt="Dạy tôi Spring Boot từ những khái niệm đầu tiên.">Học một điều mới <span aria-hidden="true">↗</span></button>
+          <button type="button" data-welcome-prompt="Eris, cùng tôi phân tích một ý tưởng nhé: ">Bàn về một ý tưởng <span aria-hidden="true">↗</span></button>
+          <button type="button" data-welcome-prompt="Giúp tôi lập kế hoạch cho: ">Lập kế hoạch <span aria-hidden="true">↗</span></button>
+          <button type="button" data-welcome-prompt="Eris, hôm nay bạn đang nghĩ gì?">Hỏi thăm Eris <span aria-hidden="true">↗</span></button>
+        </div>
+      </div>`;
       if(root.firstElementChild?.dataset.renderKey!==welcome.dataset.renderKey)root.replaceChildren(welcome);
       updateSpeechDecorations();return;
     }
@@ -403,7 +413,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     };
     if(workspaceMode){
       const section=document.createElement('section');section.className='artifact-gallery';
-      const heading=document.createElement('h3');heading.textContent='Bàn làm việc tương tác';
+      const heading=document.createElement('h3');heading.textContent='Bàn làm việc';
       const note=document.createElement('p');note.textContent='Các artifact do Eris tạo. Bạn có thể nhờ Eris chỉnh sửa mà không thay đổi lời thoại gốc.';
       section.append(heading,note);
       if(artifacts.length) addArtifacts(section,artifacts);
@@ -520,7 +530,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       }
       if(card.dataset.studioActionsBound)continue;
       card.dataset.studioActionsBound='1';
-      const ask=document.createElement('button');ask.type='button';ask.className='artifact-edit';ask.textContent='✦ Nhờ Eris sửa';
+      const ask=document.createElement('button');ask.type='button';ask.className='artifact-edit';ask.textContent='Nhờ Eris sửa';
       card.querySelector('header')?.append(ask);
       ask.addEventListener('click',()=>{
         setWorkspaceMode(false);
@@ -612,7 +622,6 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     setWorkspaceMode(!workspaceMode);
     renderMessages();scroll.scrollTop=0;
   });
-  document.getElementById('themeBtn').addEventListener('click',()=>document.body.classList.toggle('dark'));
   document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
   poll();setInterval(()=>{if(!document.hidden&&!window.ErisStudio?.isStreaming?.())poll();},1100);
   window.addEventListener('load',()=>{ if(window.MathJax?.startup?.promise) MathJax.startup.promise.then(()=>{syncMath();renderMessages();}).catch(()=>{}); });

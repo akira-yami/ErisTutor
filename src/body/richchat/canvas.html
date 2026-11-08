@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer" />
   <title>Eris · Learning Canvas</title>
-  <link rel="stylesheet" href="canvas.css" />
   <link rel="stylesheet" href="vendor/prism.css" />
+  <link rel="stylesheet" href="workspace.css?v=3" />
+  <link rel="stylesheet" href="canvas.css?v=3" />
   <script src="vendor/prism.js" defer></script>
   <script src="vendor/prism-clike.js" defer></script>
   <script src="vendor/prism-java.js" defer></script>
@@ -18,49 +19,61 @@
   <script src="vendor/prism-csharp.js" defer></script>
   <script src="vendor/prism-json.js" defer></script>
   <script src="vendor/prism-bash.js" defer></script>
-  <script src="canvas.js" defer></script>
+  <script src="canvas.js?v=2" defer></script>
 </head>
 <body>
   <div class="shell">
-    <aside class="rail">
-      <a class="brand" href="./"><span class="brand-icon">✦</span><span><strong>Eris</strong><small>Learning space</small></span></a>
-      <p class="eyebrow">KHÔNG GIAN HỌC TẬP</p>
-      <h1>Learning<br/><em>Canvas.</em></h1>
-      <p class="intro">Một vài nhánh trước mắt, kiến thức mở ra theo sự tò mò của bạn.</p>
-      <div class="rail-card"><span class="label">CHỦ ĐỀ HIỆN TẠI</span><strong id="pathTitle">Dependency Injection</strong><span id="assessment">Theo dõi từ bài làm thực tế</span></div>
-      <div class="legend" id="learningLegend" aria-label="Chú thích tiến độ"><span><i class="state available"></i> Có thể học</span><span><i class="state learning"></i> Đang học</span><span><i class="state practicing"></i> Đang luyện</span><span><i class="state mastered"></i> Đã vững</span></div>
-      <div class="rail-bottom"><a href="./">← Quay lại Rich Chat</a><p>Chỉ kết nối với ERIS trên thiết bị này.</p></div>
-    </aside>
     <main class="main">
       <header class="toolbar">
-        <div><span class="eyebrow" id="workspaceType">ERIS TUTOR / JAVA</span><h2>Bản đồ kiến thức</h2></div>
-        <div class="tools"><span class="pin" id="pin">Theo Eris</span><button id="refresh" class="button secondary" type="button" title="Tải lại Canvas">↻ Làm mới</button><a class="button secondary chat-link" href="./">Hội thoại ↗</a></div>
+        <a class="wordmark" href="./" aria-label="Eris · Hội thoại" title="Về hội thoại">E</a>
+        <h1>Learning Canvas</h1>
+        <div class="tools">
+          <button id="refresh" class="button secondary toolbar-button" type="button" title="Làm mới" aria-label="Làm mới"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2 5.3"/></svg><span>Làm mới</span></button>
+          <a class="button secondary toolbar-button" href="./" title="Về hội thoại" aria-label="Về hội thoại"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8 8 0 0 1-3.4-.75L4 20l1.25-4.6A8 8 0 1 1 20 11.5Z"/></svg><span>Hội thoại</span></a>
+        </div>
       </header>
-      <section class="graph-controls" aria-label="Không gian học mở">
-      <div class="topic-switch">
-        <label for="topicSelect" class="label">THƯ VIỆN CHỦ ĐỀ</label>
-        <select id="topicSelect" aria-label="Chuyển chủ đề kiến thức"><option value="java-di">Java · Dependency Injection</option></select>
-        <form id="newTopicForm" class="topic-form">
-          <input id="newTopicTitle" type="text" maxlength="120" placeholder="Mở chủ đề mới..." aria-label="Tên chủ đề mới" required />
-          <button type="submit" class="button" id="newTopicButton">+ Tạo bản đồ</button>
-        </form>
+      <div class="notebook">
+        <aside class="rail" aria-label="Thư viện chủ đề">
+          <div class="topic-switch">
+            <label for="topicSelect" class="label">Chủ đề</label>
+            <select id="topicSelect"><option value="java-di">Java · Dependency Injection</option></select>
+          </div>
+          <details class="rail-disclosure" id="library">
+            <summary>Quản lý chủ đề</summary>
+            <form id="newTopicForm" class="topic-form">
+              <label for="newTopicTitle" class="label">Chủ đề mới</label>
+              <input id="newTopicTitle" type="text" maxlength="120" placeholder="Tên chủ đề" required />
+              <button type="submit" class="button" id="newTopicButton">+ Tạo bản đồ</button>
+            </form>
+            <div class="learning-dashboard">
+              <span class="label">Học tiếp</span>
+              <div class="recent-strip" id="recentSubjects"><span class="history-empty">Chưa có môn học gần đây.</span></div>
+              <details class="learning-history"><summary>Lịch sử học</summary>
+                <div class="history-columns"><div><strong>Hoạt động gần đây</strong><div id="learningHistory">Chưa có hoạt động.</div></div>
+                <div><strong>Chuẩn bị bản đồ</strong><div id="learningJobs">Chưa có tác vụ.</div></div></div>
+              </details>
+            </div>
+          </details>
+        </aside>
+        <div class="study-area">
+          <section class="study-heading" aria-labelledby="pathTitle">
+            <div><span class="eyebrow" id="workspaceType">Lộ trình học</span><h2 id="pathTitle">Dependency Injection · Java</h2><p id="assessment">Tiến độ dựa trên bài làm</p></div>
+            <span class="pin" id="pin">Theo Eris</span>
+          </section>
+          <div class="fsrs-review-strip" id="fsrsReviewQueue" hidden></div>
+          <section class="speaking" id="speaking" aria-live="polite" hidden><span class="pulse"></span><span id="speakingText"></span><button id="speakingJump" class="text-button" type="button">Đến nội dung →</button></section>
+          <div class="mobile-modes" role="group" aria-label="Chọn chế độ xem"><button type="button" id="mapTab" class="active" aria-pressed="true" aria-controls="mapColumn">Bản đồ</button><button type="button" id="detailTab" aria-pressed="false" aria-controls="detailViewport">Bài học</button></div>
+          <section class="workspace" id="workspace">
+            <section class="map-column" id="mapColumn" aria-labelledby="mapTitle">
+              <div class="column-title"><h3 id="mapTitle">Bản đồ kiến thức</h3><small id="nodeCount">—</small></div>
+              <div id="mapViewport" class="map-viewport"><svg class="connections" id="links" aria-hidden="true"></svg><div id="map" class="map-layers"><div class="placeholder">Đang tải bản đồ…</div></div></div>
+              <div class="legend" id="learningLegend" aria-label="Chú thích tiến độ"><span><i class="state available"></i> Có thể học</span><span><i class="state learning"></i> Đang học</span><span><i class="state practicing"></i> Đang luyện</span><span><i class="state mastered"></i> Đã vững</span></div>
+            </section>
+            <article class="detail-column" id="detailViewport" aria-labelledby="detailTitle"><div class="column-title"><h3 id="detailTitle">Bài học</h3><small id="focusState">—</small></div><div id="detail" class="detail"><div class="placeholder">Chọn một mục trên bản đồ để bắt đầu.</div></div></article>
+          </section>
+        </div>
       </div>
-      <div class="learning-dashboard" aria-label="Lịch sử và tiếp tục học">
-        <div class="fsrs-review-strip" id="fsrsReviewQueue" hidden></div>
-        <div class="recent-strip" id="recentSubjects"><span class="history-empty">Chưa có môn học gần đây.</span></div>
-        <details class="learning-history"><summary>◷ Lịch sử học & tác vụ Gemini</summary>
-          <div class="history-columns"><div><strong>Hoạt động gần đây</strong><div id="learningHistory">Chưa có hoạt động.</div></div>
-          <div><strong>Chuẩn bị bản đồ</strong><div id="learningJobs">Chưa có tác vụ.</div></div></div>
-        </details>
-      </div>
-      </section>
-      <section class="speaking" id="speaking" aria-live="polite" hidden><span class="pulse"></span><span id="speakingText"></span><button id="speakingJump" class="text-button" type="button">Đến nội dung →</button></section>
-      <div class="mobile-modes" role="tablist" aria-label="Chọn không gian hiển thị"><button type="button" id="mapTab" class="active" aria-selected="true">Bản đồ</button><button type="button" id="detailTab" aria-selected="false">Nội dung</button></div>
-      <section class="workspace" id="workspace">
-        <div class="map-column"><div class="column-title"><span>VÙNG ĐANG KHÁM PHÁ</span><small id="nodeCount">—</small></div><div id="mapViewport" class="map-viewport"><svg class="connections" id="links" aria-hidden="true"></svg><div id="map" class="map-layers"><div class="placeholder">Đang nạp bản đồ...</div></div></div></div>
-        <article class="detail-column" id="detailViewport"><div class="column-title"><span>HỌC & LUYỆN TẬP</span><small id="focusState">—</small></div><div id="detail" class="detail"><div class="placeholder">Chọn một kiến thức trên bản đồ để bắt đầu.</div></div></article>
-      </section>
-      <footer class="footer" aria-live="polite"><span class="dot"></span><span id="status">Đang kết nối với Eris...</span><span id="lastSync">Local · 127.0.0.1</span></footer>
+      <footer class="footer" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="status">Đang kết nối với Eris…</span><span id="lastSync">Kết nối cục bộ</span></footer>
     </main>
   </div>
 </body>

@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light;
+  --font: "Segoe UI", system-ui, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+  --mono: "Cascadia Code", Consolas, monospace;
+  --bg: #fbf4f7;
+  --side: #f3e5eb;
+  --surface: #fffbfd;
+  --text: #2f222a;
+  --muted: #6f5664;
+  --border: #e7d3dd;
+  --accent: #963d66;
+  --on-accent: #fffbfd;
+  --accent-hover: #7d2d53;
+  --tint: #f7dce8;
+  --ochre: #8c522d;
+  --ochre-bg: #f6ecdc;
+  --danger: #a43b37;
+  --danger-bg: #f9e9e6;
+  --success: #336448;
+  --success-bg: #e5f1e9;
+  --code: #261d25;
+  --scrim: #24141f9c;
+  --shadow: 0 6px 22px #4724390d;
+}
+
+body.dark {
+  color-scheme: dark;
+  --bg: #231820;
+  --side: #2b1d27;
+  --surface: #32232e;
+  --text: #f8ecf2;
+  --muted: #d4bbc9;
+  --border: #553b4b;
+  --accent: #f0a5c7;
+  --on-accent: #361c2c;
+  --accent-hover: #f8c0db;
+  --tint: #4e2a3e;
+  --ochre: #e2b082;
+  --ochre-bg: #3a3024;
+  --danger: #f4a49c;
+  --danger-bg: #422e2a;
+  --success: #a2d6b4;
+  --success-bg: #263c30;
+  --shadow: 0 6px 22px #0003;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+button, input, select, textarea { color: inherit; font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { color: var(--text); background: var(--tint); }
+
+.ui-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+.wordmark {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 700 21px/1 var(--serif);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

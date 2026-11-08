@@ -101,7 +101,7 @@ public partial class UdpListener
         Assembly assembly = typeof(UdpListener).Assembly;
         var resources = assembly.GetManifestResourceNames();
         string[] files = {
-            "index.html", "chat.css", "chat.js", "studio.css", "studio.js", "artifacts.js", "canvas.html", "canvas.css", "canvas.js", "vendor/mathjax.js", "vendor/prism.css",
+            "index.html", "workspace.css", "chat.css", "chat.js", "studio.css", "studio.js", "artifacts.js", "canvas.html", "canvas.css", "canvas.js", "vendor/mathjax.js", "vendor/prism.css",
             "vendor/prism.js", "vendor/prism-clike.js", "vendor/prism-python.js",
             "vendor/prism-javascript.js", "vendor/prism-typescript.js", "vendor/prism-csharp.js",
             "vendor/prism-c.js", "vendor/prism-cpp.js", "vendor/prism-java.js", "vendor/prism-css.js",

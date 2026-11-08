@@ -25,7 +25,7 @@ test('user-visible editor does not promise an unimplemented artifact save', () =
 test('rich chat assets are bundled for the built Windows app', () => {
   const project = fs.readFileSync(path.join(root, '..', '..', '..', 'Eris.csproj'), 'utf8');
   assert.match(project, /EmbeddedResource Include="src\/body\/richchat\/\*\*\/\*"/);
-  for (const name of ['index.html', 'chat.css', 'chat.js', 'artifacts.js']) {
+  for (const name of ['index.html', 'workspace.css', 'chat.css', 'chat.js', 'artifacts.js', 'canvas.html', 'canvas.css']) {
     assert.ok(portal.includes(`"${name}"`), `Missing embedded asset: ${name}`);
   }
 });

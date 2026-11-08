@@ -164,8 +164,15 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
   $('inspectorBtn')?.addEventListener('click',()=>setView(document.body.classList.contains('inspector-closed')));
   $('statusDetails')?.addEventListener('click',()=>setView(true));
   $('inspectorClose')?.addEventListener('click',()=>setView(false));
-  $('sidebarCollapse')?.addEventListener('click',()=>{const on=document.body.classList.toggle('sidebar-collapsed');safeWrite('eris.studio.sidebar',on?'1':'0');});
-  if(safeRead('eris.studio.sidebar','0')==='1')document.body.classList.add('sidebar-collapsed');
+  function setSidebarCollapsed(collapsed){
+    document.body.classList.toggle('sidebar-collapsed',collapsed);
+    const label=collapsed?'Mở rộng thanh lịch sử':'Thu gọn thanh lịch sử';
+    $('sidebarCollapse').title=label;
+    $('sidebarCollapse').setAttribute('aria-label',label);
+    safeWrite('eris.studio.sidebar',collapsed?'1':'0');
+  }
+  $('sidebarCollapse').addEventListener('click',()=>setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed')));
+  setSidebarCollapsed(safeRead('eris.studio.sidebar','0')==='1');
   $('newTopicBtn')?.addEventListener('click',()=>{if(input.value.trim()&&!confirm('Thay nội dung nháp bằng chủ đề mới?'))return;
     focusInput('Chủ đề mới: ');$('sidebar')?.classList.remove('open');
     notify('Đây là chủ đề mới trong transcript hiện tại, không phải phiên chat tách biệt.');});
@@ -240,7 +247,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     const topics=transcript.filter(m=>m.role==='user'&&/^Chủ đề mới:\s*\S/i.test(m.text||'')).slice(-10).reverse();
     if(!topics.length){const p=document.createElement('p');p.className='activity-empty';p.textContent='Các chủ đề mới sẽ xuất hiện tại đây.';box.append(p);return;}
     for(const m of topics){const button=document.createElement('button');button.className='saved-button';button.type='button';
-      button.textContent='◇ '+m.text.replace(/^Chủ đề mới:\s*/i,'').slice(0,42);button.addEventListener('click',()=>{
+      button.textContent=m.text.replace(/^Chủ đề mới:\s*/i,'').slice(0,42);button.addEventListener('click',()=>{
         // Trở về tất cả các ngày trước khi điều hướng; không đổi transcript Eris.
         $('search').value='';$('search').dispatchEvent(new Event('input'));
         const first=$('dates')?.querySelector('.date-button');first?.click();
@@ -251,7 +258,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
   }
   function savedNav(){const box=$('savedList');if(!box)return;box.replaceChildren();let count=0;
     for(const m of transcript){const key=ErisStudioUtils.fingerprint(m);if(!saved.has(key))continue;count++;
-      const button=document.createElement('button');button.type='button';button.className='saved-button';button.textContent='✧ '+String(m.text).replace(/\s+/g,' ').slice(0,51);
+      const button=document.createElement('button');button.type='button';button.className='saved-button';button.textContent=String(m.text).replace(/\s+/g,' ').slice(0,51);
       button.title='Tới tin nhắn đã đánh dấu';button.onclick=()=>{
         const element=Array.from(root.querySelectorAll('.entry')).find(row=>row.dataset.msgKey===key);
         if(element)element.scrollIntoView({behavior:'smooth',block:'center'});
@@ -260,7 +267,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
       };box.append(button);
     }
     $('savedCount').textContent=String(count);
-    if(count===0){const p=document.createElement('p');p.className='activity-empty';p.textContent='Đánh dấu ✧ bên cạnh tin nhắn để lưu lối tắt.';box.append(p);}
+    if(count===0){const p=document.createElement('p');p.className='activity-empty';p.textContent='Chưa có tin đã lưu.';box.append(p);}
   }
   root.addEventListener('click',event=>{
     const welcome=event.target.closest('[data-welcome-prompt]');
@@ -271,7 +278,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     const action=btn.dataset.studioAction;
     if(action==='bookmark'){
       saved.has(key)?saved.delete(key):saved.add(key);safeWrite('eris.studio.bookmarks.v1',JSON.stringify(Array.from(saved).slice(-180)));
-      btn.classList.toggle('marked',saved.has(key));btn.textContent=saved.has(key)?'★ Đã lưu':'✧ Lưu';savedNav();
+      btn.classList.toggle('marked',saved.has(key));btn.textContent=saved.has(key)?'Đã lưu':'Lưu';savedNav();
     }else if(action==='quote'){
       const excerpt=msg.text.replace(/\s+/g,' ').slice(0,310);
       focusInput((input.value?input.value+'\n\n':'')+`> ${excerpt}\n\n`);
@@ -349,8 +356,14 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
   },true);
   document.addEventListener('keydown',event=>{
     if((event.ctrlKey||event.metaKey)&&event.key===','){event.preventDefault();openSettings();}
-    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();$('search').focus();$('sidebar').classList.add('open');}
-    if(event.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){event.preventDefault();$('search').focus();$('sidebar').classList.add('open');}
+    const searchShortcut=(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k';
+    const slashShortcut=event.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement?.tagName);
+    if(searchShortcut||slashShortcut){
+      event.preventDefault();
+      setSidebarCollapsed(false);
+      $('sidebar').classList.add('open');
+      $('search').focus();
+    }
     if(event.key==='Escape'){if(recording)recording.stop();if(settingsDialog?.open){closeSettings();return;}setView(false);$('sidebar').classList.remove('open');}
   });
   function activityUpdate(state){
@@ -371,7 +384,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     const emotion=String(runtime.emotion||'');$('emotionTag').hidden=!emotion;if(emotion)$('emotionTag').textContent=emotion.slice(0,35);
     const key=[stage,label,runtime.activity||''].join('|');
     if(label && history[0]?.key!==key){history.unshift({key,label,stage,time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})});history.splice(12);renderHistory();}
-    const count=artifacts.length;$('artifactCount').textContent=count?`${count} artifact đã xuất hiện trong transcript.`:'Chưa có kết quả công cụ trong transcript.';
+    const count=artifacts.length;$('artifactCount').textContent=count?`${count} kết quả trong hội thoại.`:'Chưa có tài liệu trong hội thoại.';
     updateSettingsModal(state);
   }
   function renderHistory(){const box=$('activityTimeline');box.replaceChildren();for(const item of history){
@@ -388,7 +401,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     if(prefs.autoScroll&&transcript.length>prevCount)scrollDown();
     for(const row of root.querySelectorAll('.entry')){
       const btn=row.querySelector('[data-studio-action="bookmark"]');if(!btn)continue;
-      const marked=saved.has(row.dataset.msgKey);btn.classList.toggle('marked',marked);btn.textContent=marked?'★ Đã lưu':'✧ Lưu';
+      const marked=saved.has(row.dataset.msgKey);btn.classList.toggle('marked',marked);btn.textContent=marked?'Đã lưu':'Lưu';
     }
   });
   // EventSource phát toàn bộ snapshot thật (KHÔNG có stream token nếu runtime chưa phát token).

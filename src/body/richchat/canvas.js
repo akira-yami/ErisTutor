@@ -3,6 +3,16 @@
 // decisions belong to runtime.learning_canvas in the Python backend.
 (() => {
   const byId = id => document.getElementById(id);
+  const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+  function syncTheme() {
+    let theme = 'auto';
+    try {theme = localStorage.getItem('eris.studio.theme') || 'auto';} catch (_) {}
+    document.body.classList.toggle('dark', theme === 'dark' || (theme === 'auto' && systemTheme.matches));
+  }
+  syncTheme();
+  systemTheme.addEventListener('change', syncTheme);
+  window.addEventListener('storage', syncTheme);
+  byId('library').open = matchMedia('(min-width: 861px)').matches;
   const state = {
     snapshot: null, selected: '', mode: 'map', pending: null, desiredNode: '',
     details: new Map(), activities: new Map(), drafts: new Map(), answers: new Map(),
@@ -301,8 +311,9 @@
     // Overlay is positioned in the same scroll content coordinates as the rows.
     const view = viewport.getBoundingClientRect();
     const rects = new Map([...map.querySelectorAll('[data-node]')].map(button => [button.dataset.node,button.getBoundingClientRect()]));
-    const width = Math.max(map.scrollWidth + 40, viewport.clientWidth);
-    const height = Math.max(map.scrollHeight + 50,viewport.clientHeight);
+    if (!viewport.clientWidth) return;
+    const width = Math.max(map.offsetWidth + 2 * map.offsetLeft, viewport.clientWidth);
+    const height = Math.max(map.offsetHeight + 2 * map.offsetTop, viewport.clientHeight);
     svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
     svg.style.width = width + 'px'; svg.style.height = height + 'px';
     const position = (rect, bottom) => ({x:rect.left - view.left + viewport.scrollLeft + rect.width/2,
@@ -316,7 +327,6 @@
         const line = document.createElementNS(ns,'path');
         const mid = (a.y + b.y) / 2;
         line.setAttribute('d',`M ${a.x} ${a.y} C ${a.x} ${mid} ${b.x} ${mid} ${b.x} ${b.y}`);
-        line.setAttribute('fill','none');line.setAttribute('stroke','#d8afca');line.setAttribute('stroke-width','1.7');
         svg.append(line);
       }
     }
@@ -670,7 +680,7 @@
       if (due.length > 0) {
         fsrs.hidden = false;
         fsrs.replaceChildren();
-        fsrs.append(el('span','review-tag',`⏰ Ôn tập (${mode}): ${due.length} đến hạn`));
+        fsrs.append(el('span','review-tag',`Ôn tập (${mode}) · ${due.length} đến hạn`));
         for (const item of due.slice(0, 6)) {
           const title = nodeById(item.kp_id)?.title || item.kp_id.split(':').pop() || item.kp_id;
           const pill = el('button','review-pill',title);
@@ -708,7 +718,7 @@
   function render() {
     const snap=state.snapshot;
     byId('pathTitle').textContent = graphMode() ? graph().title : (snap?.title || 'Dependency Injection · Java');
-    byId('workspaceType').textContent = graphMode() ? 'ERIS / TRI THỨC MỞ' : 'ERIS TUTOR / JAVA';
+    byId('workspaceType').textContent = graphMode() ? 'Bản đồ chủ đề' : 'Lộ trình học';
     byId('learningLegend').classList.toggle('hidden-by-mode',graphMode());
     const groupSelect = byId('topicSelect');
     const items = workspace()?.groups || [{group_id:'java-di',title:'Java · Dependency Injection'}];
@@ -719,13 +729,13 @@
     }
     groupSelect.value=workspace()?.selected_group_id || snap?.group_id || 'java-di';
     byId('pin').textContent = graphMode() ? 'Chế độ khám phá' : (snap?.focus?.pinned ? 'Đã ghim' : 'Theo Eris');
-    byId('assessment').textContent = graphMode() ? 'Mở từng nhánh · chưa chấm mastery' : 'Theo dõi từ bài làm thực tế';
+    byId('assessment').textContent = graphMode() ? 'Khám phá từng nhánh theo thứ tự bạn chọn' : 'Tiến độ dựa trên bài làm';
     const mobile=state.mode==='detail';
     byId('workspace').classList.toggle('detail-mode', mobile);
     byId('mapTab').classList.toggle('active',!mobile);
     byId('detailTab').classList.toggle('active',mobile);
-    byId('mapTab').setAttribute('aria-selected',String(!mobile));
-    byId('detailTab').setAttribute('aria-selected',String(mobile));
+    byId('mapTab').setAttribute('aria-pressed',String(!mobile));
+    byId('detailTab').setAttribute('aria-pressed',String(mobile));
     renderMap();renderDetail();renderSpeaking();renderContinuity();renderButtons();
   }
   byId('refresh').addEventListener('click',()=>send('open'));
