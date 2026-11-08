@@ -148,10 +148,10 @@
   },
   "initiative": {
     "enabled": true,
-    "hourly_budget": 2,
-    "global_hourly_budget": 40,
-    "minimum_interval_seconds": 60,
-    "minimum_user_silence_seconds": 12,
+    "hourly_budget": 20,
+    "global_hourly_budget": 120,
+    "minimum_interval_seconds": 25,
+    "minimum_user_silence_seconds": 10,
     "importance_margin": 0.08,
     "semantic_duplicate_threshold": 0.66,
     "activity_update_cooldown_seconds": 120
@@ -159,10 +159,10 @@
   "commentary": {
     "enabled": true,
     "user_requested_autonomous_surface": true,
-    "desired_interval_seconds": 35,
-    "maximum_quiet_seconds": 70,
+    "desired_interval_seconds": 25,
+    "maximum_quiet_seconds": 50,
     "startup_delay_seconds": 8,
-    "minimum_user_silence_seconds": 10
+    "minimum_user_silence_seconds": 8
   },
   "tutor": {
     "enabled": false,

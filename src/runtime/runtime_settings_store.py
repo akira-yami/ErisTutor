@@ -203,9 +203,9 @@ _DEFAULT_SETTINGS: dict[str, Any] = {
     "initiative": {
         "enabled": True,
         # Global cap chỉ là phanh cuối. Cooldown thật nằm theo motive class.
-        "hourly_budget": 2,  # legacy UI value; Initiative v3 không dùng làm global cap
-        "global_hourly_budget": 40,
-        "minimum_interval_seconds": 60,
+        "hourly_budget": 20,  # legacy UI value; Initiative v3 không dùng làm global cap
+        "global_hourly_budget": 120,
+        "minimum_interval_seconds": 25,
         "importance_margin": 0.08,
         "semantic_duplicate_threshold": 0.66,
         "activity_update_cooldown_seconds": 120,
