@@ -83,17 +83,21 @@ class GraphWorkspace:
         raw = self.store.get_meta(META_KEY, None)
         if raw is None:
             return {"schema": "eris.learning.graph.p3", "revision": 0,
-                    "selected_group_id": self.legacy_group_id, "groups": []}
+                    "selected_group_id": "", "groups": [], "legacy_hidden": True}
         if (not isinstance(raw, dict) or raw.get("schema") != "eris.learning.graph.p3"
                 or type(raw.get("revision")) is not int or raw["revision"] < 0
                 or not isinstance(raw.get("groups"), list) or len(raw["groups"]) > MAX_GROUPS):
             raise ValueError("invalid_saved_graph_workspace")
+        if "legacy_hidden" not in raw:
+            raw["legacy_hidden"] = True
         return raw
 
     def snapshot(self) -> dict:
         with self._lock:
             state = self._load()
             selected = state["selected_group_id"]
+            if selected == self.legacy_group_id:
+                selected = state["groups"][0]["group_id"] if state["groups"] else ""
             graph = next((group for group in state["groups"] if group["group_id"] == selected), None)
             if graph is not None:
                 # Không truyền gợi ý ẩn tới web: chỉ gửi số lượng nhánh đã chuẩn bị.
@@ -102,7 +106,7 @@ class GraphWorkspace:
                                             next(g for g in state["groups"] if g["group_id"] == selected).get("prepared", {}).items()
                                             if value}
             groups = []
-            if not state.get("legacy_hidden", False):
+            if not state.get("legacy_hidden", True):
                 groups.append({"group_id": self.legacy_group_id, "title": "Java · Dependency Injection", "kind": "lesson"})
             groups.extend([{"group_id": item["group_id"], "title": item["title"],
                             "kind": "exploration", "node_count": len(item["nodes"])} for item in state["groups"]])
@@ -204,7 +208,7 @@ class GraphWorkspace:
                 state["selected_group_id"] = (
                     state["groups"][0]["group_id"]
                     if state["groups"]
-                    else (self.legacy_group_id if not state.get("legacy_hidden") else "")
+                    else (self.legacy_group_id if not state.get("legacy_hidden", True) else "")
                 )
 
             self._write(state, revision)

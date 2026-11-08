@@ -44,9 +44,9 @@
   }
   function workspace() {return state.snapshot?.graph_workspace;}
   function graph() {return workspace()?.graph || null;}
-  function graphMode() {return !!graph() && workspace()?.selected_group_id !== state.snapshot?.group_id;}
+  function graphMode() {return !!graph();}
   function activeNodes() {
-    if (!graphMode()) return state.snapshot?.nodes || [];
+    if (!graph()) return [];
     // P3.5: chỉ vẽ đường đã đi và tối đa 4 lựa chọn ngay trước mắt.
     // Các tầng khác tồn tại trên backend, nhưng không phủ kín màn hình.
     const nodes = graph().nodes || [];
@@ -154,10 +154,10 @@
           state.playback = null;
         }
         observePlayback(snapshot.playback);
-        if (graphMode()) {
+        if (graph()) {
           state.selected = graph()?.selected_node_id || state.selected;
-        } else if (!state.pending || state.pending.action !== 'navigate') {
-          state.selected = snapshot.focus.node_id || state.selected;
+        } else {
+          state.selected = '';
         }
         if (previous?.focus.node_id !== snapshot.focus.node_id && !state.pending)
           state.mode = 'detail';
@@ -252,14 +252,11 @@
     if (navDebounce) clearTimeout(navDebounce);
     navDebounce = setTimeout(() => {
       navDebounce = null;
-      if (graphMode()) {
+      if (graph()) {
         if (id !== graph()?.selected_node_id)
           send('graph_select',{group_id:graph().group_id,node_id:id});
         return;
       }
-      const focus = state.snapshot?.focus?.node_id;
-      if (id !== focus) send('navigate', {node_id:id});
-      else if (!state.details.has(id)) send('open', {node_id:id});
     }, 120);
   }
   function renderMap() {
@@ -267,7 +264,7 @@
     map.replaceChildren();
     const nodes = activeNodes();
     byId('nodeCount').textContent = nodes.length ? `${nodes.length} kiến thức` : '—';
-    if (!nodes.length) {map.append(el('div','placeholder','Chưa có bản đồ. Nhấn Làm mới để tải lại.')); return;}
+    if (!nodes.length) {map.append(el('div','placeholder','Chưa có bản đồ. Nhấn "+ Tạo bản đồ" ở góc trái để bắt đầu chủ đề mới.')); return;}
     const levels = [...new Set(nodes.map(n => n.level || 0))].sort((a,b) => a-b);
     for (const level of levels) {
       const group = el('section','map-layer');
@@ -561,8 +558,8 @@
     if (oldEditor && currentActivity()) state.drafts.set(currentActivity().activity_id,oldEditor.value);
     container.replaceChildren();
     const node = nodeById(state.selected);
-    byId('focusState').textContent = node ? (graphMode() ? 'Nhánh khám phá' : labels[node.state] || 'Có thể học') : '—';
-    if (!node) {addText(container,'div','placeholder','Chọn một nút trên bản đồ để đọc nội dung và luyện tập.');return;}
+    byId('focusState').textContent = node ? 'Nhánh khám phá' : '—';
+    if (!node) {addText(container,'div','placeholder','Chưa có nội dung. Chọn một mục trên bản đồ hoặc tạo chủ đề mới để bắt đầu.');return;}
     const head = el('div','detail-head');container.append(head);
     addText(head,'span','eyebrow','KIẾN THỨC / '+(node.level + 1));
     addText(head,'h3','',node.title);
@@ -717,19 +714,24 @@
   }
   function render() {
     const snap=state.snapshot;
-    byId('pathTitle').textContent = graphMode() ? graph().title : (snap?.title || 'Dependency Injection · Java');
-    byId('workspaceType').textContent = graphMode() ? 'Bản đồ chủ đề' : 'Lộ trình học';
-    byId('learningLegend').classList.toggle('hidden-by-mode',graphMode());
+    const currentGraph = graph();
+    byId('pathTitle').textContent = currentGraph ? currentGraph.title : 'Chưa chọn chủ đề';
+    byId('workspaceType').textContent = currentGraph ? 'Bản đồ chủ đề' : 'Không gian học';
+    byId('learningLegend').classList.toggle('hidden-by-mode', !!currentGraph);
     const groupSelect = byId('topicSelect');
-    const items = workspace()?.groups || [{group_id:'java-di',title:'Java · Dependency Injection'}];
+    const items = workspace()?.groups || [];
     const signature = items.map(item => item.group_id+'|'+item.title).join(';');
     if (groupSelect.dataset.signature !== signature) {
-      groupSelect.replaceChildren(...items.map(item=>{const opt=el('option','',item.title);opt.value=item.group_id;return opt;}));
+      if (!items.length) {
+        groupSelect.replaceChildren(el('option','','Chưa có chủ đề'));
+      } else {
+        groupSelect.replaceChildren(...items.map(item=>{const opt=el('option','',item.title);opt.value=item.group_id;return opt;}));
+      }
       groupSelect.dataset.signature=signature;
     }
-    groupSelect.value=workspace()?.selected_group_id || snap?.group_id || 'java-di';
-    byId('pin').textContent = graphMode() ? 'Chế độ khám phá' : (snap?.focus?.pinned ? 'Đã ghim' : 'Theo Eris');
-    byId('assessment').textContent = graphMode() ? 'Khám phá từng nhánh theo thứ tự bạn chọn' : 'Tiến độ dựa trên bài làm';
+    groupSelect.value = workspace()?.selected_group_id || (items.length ? items[0].group_id : '');
+    byId('pin').textContent = currentGraph ? 'Chế độ khám phá' : 'Theo Eris';
+    byId('assessment').textContent = currentGraph ? 'Khám phá từng nhánh theo thứ tự bạn chọn' : 'Chọn hoặc tạo chủ đề để bắt đầu';
     const mobile=state.mode==='detail';
     byId('workspace').classList.toggle('detail-mode', mobile);
     byId('mapTab').classList.toggle('active',!mobile);
@@ -762,7 +764,7 @@
     if (document.hidden || state.pending || !state.snapshot || state.offline ||
         now-state.lastActivityAt>90000 || now-state.lastHeartbeatAt<30000) return;
     const group_id=workspace()?.selected_group_id;
-    const node_id=graphMode()?graph()?.selected_node_id:state.snapshot?.focus?.node_id;
+    const node_id=graph()?graph()?.selected_node_id:'';
     if (!group_id || !node_id) return;
     state.lastHeartbeatAt=now;
     send('study_heartbeat',{group_id,node_id});
