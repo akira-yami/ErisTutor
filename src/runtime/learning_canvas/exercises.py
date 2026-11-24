@@ -14,7 +14,14 @@ from runtime.workspace.python_docker import DockerPythonExerciseWorkspace
 class CanvasExercises:
     def __init__(self, learning, store, pack, *, workspace=None, python_workspace=None, on_completed=None):
         self.learning, self.store, self.pack = learning, store, pack
-        self.workspace = workspace or DockerJavaWorkspace(store._path.parent / "canvas-java")
+        if workspace is not None:
+            self.workspace = workspace
+        else:
+            local_java = DockerJavaWorkspace(store._path.parent / "canvas-java")
+            from runtime.java_backend_client import JavaBackendConfig, RemoteJavaJudgeWorkspace
+
+            cfg = JavaBackendConfig.from_env()
+            self.workspace = RemoteJavaJudgeWorkspace(local_java) if cfg.judge_enabled else local_java
         self.python_workspace = python_workspace or DockerPythonExerciseWorkspace(store._path.parent / "canvas-python")
         self.on_completed = on_completed
         self._lock = threading.RLock()

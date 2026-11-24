@@ -32,6 +32,11 @@ def build_tutor_runtime(
     """Tạo đúng một learning truth + tutor executive cho process hiện tại."""
     learning = LearningService(store=store or LearningStore(), logger=logger,
                                retention_mode=os.getenv("ERIS_LEARNING_RETENTION_MODE", "shadow"))
+    from runtime.java_backend_client import JavaBackendClient, JavaBackendConfig, JavaLearningMirrorProxy
+
+    java_cfg = JavaBackendConfig.from_env()
+    if java_cfg.enabled and java_cfg.learning_mode == "mirror":
+        learning = JavaLearningMirrorProxy(learning, client=JavaBackendClient(java_cfg), logger=logger)
     reasoner = None
     if callable(getattr(model_router, "invoke_structured_worker", None)):
         reasoner = RuntimeTutorReasoner(model_router, learner_client=learner_client, logger=logger)

@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:eristutor_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+management:
+  health:
+    redis:
+      enabled: false
+
+eristutor:
+  richchat:
+    dir: ../src/body/richchat
+  packs:
+    dir: ../src/runtime/learning_canvas/packs
+  rate-limit:
+    backend: memory
+    requests-per-minute: 1000

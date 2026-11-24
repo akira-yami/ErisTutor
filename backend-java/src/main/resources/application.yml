@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: eristutor-backend
+  profiles:
+    default: dev
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      deepseek:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 2
+      gemini:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 2
+  retry:
+    instances:
+      deepseek:
+        maxAttempts: 2
+        waitDuration: 300ms
+      gemini:
+        maxAttempts: 2
+        waitDuration: 300ms
+
+eristutor:
+  jwt:
+    secret: ${ERIS_JWT_SECRET:eris-tutor-dev-secret-key-please-override-in-prod-2026-64bytes}
+    access-ttl-seconds: 3600
+    refresh-ttl-seconds: 604800
+  desktop:
+    api-key: ${ERIS_JAVA_DESKTOP_KEY:eris-desktop-local-key}
+  richchat:
+    dir: ${ERIS_RICHCHAT_DIR:../src/body/richchat}
+  packs:
+    dir: ${ERIS_PACKS_DIR:../src/runtime/learning_canvas/packs}
+  judge:
+    docker-image: ${ERIS_JAVA_DOCKER_IMAGE:eclipse-temurin:21.0.8_9-jdk-jammy}
+    max-concurrent: ${ERIS_JAVA_JUDGE_CONCURRENCY:2}
+    timeout-seconds: ${ERIS_JAVA_JUDGE_TIMEOUT_S:15}
+    workspace-dir: ${ERIS_JAVA_JUDGE_WORKSPACE:}
+  ai:
+    deepseek:
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY:}
+      model: ${DEEPSEEK_MODEL:deepseek-chat}
+      timeout-seconds: 40
+    gemini:
+      base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:gemini-2.5-flash}
+      timeout-seconds: 40
+  rate-limit:
+    backend: ${ERIS_RATE_LIMIT_BACKEND:memory}
+    requests-per-minute: ${ERIS_RATE_LIMIT_RPM:30}

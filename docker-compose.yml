@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: eristutor
+      POSTGRES_USER: eristutor
+      POSTGRES_PASSWORD: eristutor
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eristutor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  java-backend:
+    build:
+      context: ./backend-java
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/eristutor
+      DB_USERNAME: eristutor
+      DB_PASSWORD: eristutor
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ERIS_RICHCHAT_DIR: /app/richchat
+      ERIS_PACKS_DIR: /app/packs
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    volumes:
+      - ./src/body/richchat:/app/richchat:ro
+      - ./src/runtime/learning_canvas/packs:/app/packs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  pgdata:
