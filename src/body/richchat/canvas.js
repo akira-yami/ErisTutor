@@ -69,7 +69,12 @@
     return state.snapshot?.learning_continuity?.nodes?.[groupId+'/'+nodeId] || null;
   }
   function currentActivity() {return state.activities.get(state.selected);}
-  function setStatus(value) {state.status = value; byId('status').textContent = value;}
+  function setStatus(value) {
+    state.status = value;
+    const status = byId('status');
+    status.textContent = value;
+    status.classList.toggle('connection-error', state.offline);
+  }
   function errMessage(reason) {
     const known = {
       stale_canvas_revision:'Bản đồ đã được Eris cập nhật. Hãy chọn lại kiến thức.',
@@ -204,9 +209,11 @@
       let response;
       try {response = await fetch('api/canvas/state', {cache:'no-store', signal:ctrl.signal});}
       finally {clearTimeout(timeout);}
-      if (!response.ok) throw new Error('HTTP ' + response.status);
+      if (!response.ok) throw new Error(String(response.status));
       const data = await response.json();
+      const reconnected = state.offline;
       state.offline = false;
+      if (reconnected) setStatus('Đã kết nối lại với Eris');
       ingest(data);
       if (state.pending && Date.now() - state.pending.started > 9500) {
         state.pending = null;
@@ -224,9 +231,16 @@
         state.lastExercisePoll = Date.now();
         send('exercise_status', {activity_id:activity.activity_id, nonce:activity.nonce});
       }
-    } catch (_) {
+    } catch (error) {
       state.offline = true;
-      setStatus('Mất kết nối ERIS. Mở ứng dụng và thử lại.');
+      const message = error.message === '401' || error.message === '403'
+        ? 'Kết nối hiện tại chưa có quyền đọc dữ liệu học tập.'
+        : 'Mất kết nối với Eris. Mở ứng dụng và thử lại.';
+      setStatus(message);
+      if (!state.snapshot) {
+        byId('map').querySelector('.placeholder').textContent = message;
+        byId('detail').querySelector('.placeholder').textContent = 'Bài học sẽ hiển thị khi Learning Canvas kết nối được với Eris.';
+      }
     } finally {state.busy = false;}
   }
   function renderButtons() {

@@ -272,11 +272,16 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       if(label)label.textContent=workspaceMode?'Hội thoại':'Bàn làm việc';
     }
   };
-  const connectionDot=document.querySelector('.status .dot');
   function showConnection(connected, message) {
-    statusEl.textContent=message;
-    statusEl.parentElement?.classList.toggle('disconnected',!connected);
-    if(connectionDot) connectionDot.setAttribute('aria-label',connected?'Đã kết nối':'Mất kết nối');
+    statusEl.textContent=connected?message:'Ngoại tuyến';
+    const button=statusEl.parentElement;
+    button.classList.toggle('disconnected',!connected);
+    button.title=message;
+    button.setAttribute('aria-label','Mở trạng thái Eris. '+message);
+    if(!connected){
+      document.getElementById('contextText').textContent=message;
+      document.getElementById('presenceLabel').textContent=message;
+    }
   }
   function updateSpeechDecorations() {
     for(const row of root.querySelectorAll('.entry.assistant[data-turn-id]')) {
@@ -312,7 +317,9 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       const row=document.createElement('div');row.className='date-row';
       const btn=document.createElement('button');btn.className='date-button'+(date===currentDay?' active':'');
       btn.innerHTML=`<span>${html(label)}</span><small>${count} tin nhắn</small>`;
-      btn.addEventListener('click',()=>{currentDay=date;renderDates();renderMessages();document.getElementById('sidebar').classList.remove('open')});row.append(btn);
+      btn.type='button';
+      btn.setAttribute('aria-pressed',String(date===currentDay));
+      btn.addEventListener('click',()=>{currentDay=date;renderDates();renderMessages()});row.append(btn);
       if(date!=='all'){
         const del=document.createElement('button');del.type='button';del.className='date-delete';
         del.dataset.deleteDay=date;del.setAttribute('aria-label','Xóa hội thoại '+label);
@@ -385,10 +392,10 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     if(!workspaceMode&&!current.length&&!unbound.length){
       const welcome=document.createElement('div');welcome.className='empty';welcome.dataset.renderKey='welcome:'+currentDay+':'+currentSearch;
       if(currentSearch||currentDay!=='all')welcome.textContent='Không tìm thấy tin nhắn phù hợp. Hãy đổi bộ lọc để xem lại hội thoại.';
-      else welcome.innerHTML=`<div class="welcome">
-        <p class="welcome-label">Hội thoại mới</p>
+      else welcome.innerHTML=`<div class="welcome" data-enter>
+        <div class="welcome-emblem" aria-hidden="true"><span class="wordmark">E</span></div>
         <h2>Trò chuyện với Eris</h2>
-        <p>Viết một tin nhắn hoặc chọn một chủ đề để bắt đầu.</p>
+        <p>Gửi tin nhắn hoặc chọn một gợi ý để bắt đầu.</p>
         <div class="welcome-choices">
           <button type="button" data-welcome-prompt="Dạy tôi Spring Boot từ những khái niệm đầu tiên.">Học một điều mới <span aria-hidden="true">↗</span></button>
           <button type="button" data-welcome-prompt="Eris, cùng tôi phân tích một ý tưởng nhé: ">Bàn về một ý tưởng <span aria-hidden="true">↗</span></button>
@@ -413,11 +420,11 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     };
     if(workspaceMode){
       const section=document.createElement('section');section.className='artifact-gallery';
-      const heading=document.createElement('h3');heading.textContent='Bàn làm việc';
-      const note=document.createElement('p');note.textContent='Các artifact do Eris tạo. Bạn có thể nhờ Eris chỉnh sửa mà không thay đổi lời thoại gốc.';
+      const heading=document.createElement('h2');heading.textContent='Bàn làm việc';
+      const note=document.createElement('p');note.textContent='Xem tài liệu Eris đã tạo và gửi yêu cầu chỉnh sửa từ hội thoại.';
       section.append(heading,note);
       if(artifacts.length) addArtifacts(section,artifacts);
-      else {const none=document.createElement('p');none.textContent='Chưa có artifact trong các lượt chat gần đây.';section.append(none);}
+      else {const none=document.createElement('p');none.textContent='Chưa có tài liệu trong hội thoại gần đây.';section.append(none);}
       section.dataset.renderKey='workspace:'+artifacts.map(a=>a.artifact.artifact_id+':'+a.artifact.revision).join('|');
       frag.appendChild(section);
     }
@@ -452,7 +459,7 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
       frag.appendChild(item);
     }
     if(!workspaceMode && unbound.length){const gallery=document.createElement('section');gallery.className='artifact-gallery';
-      const heading=document.createElement('h3');heading.textContent='Bàn làm việc · kết quả công cụ';
+      const heading=document.createElement('h2');heading.textContent='Bàn làm việc · kết quả công cụ';
       const note=document.createElement('p');note.textContent='Các kết quả chưa có ID lượt chat, được giữ riêng để tránh gắn nhầm vào lời thoại.';
       gallery.append(heading,note);addArtifacts(gallery,unbound);gallery.dataset.renderKey='unbound:'+unbound.map(a=>a.artifact.artifact_id+':'+a.artifact.revision).join('|');frag.appendChild(gallery);}
     // Reconcile theo khóa ổn định: tin nhắn không đổi giữ nguyên DOM/MathJax,
@@ -622,7 +629,6 @@ if(typeof document!=='undefined') document.addEventListener('DOMContentLoaded',(
     setWorkspaceMode(!workspaceMode);
     renderMessages();scroll.scrollTop=0;
   });
-  document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
   poll();setInterval(()=>{if(!document.hidden&&!window.ErisStudio?.isStreaming?.())poll();},1100);
   window.addEventListener('load',()=>{ if(window.MathJax?.startup?.promise) MathJax.startup.promise.then(()=>{syncMath();renderMessages();}).catch(()=>{}); });
 });

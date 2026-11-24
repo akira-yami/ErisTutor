@@ -1,13 +1,16 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-type="software">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer" />
+  <meta name="description" content="Xem bản đồ kiến thức, học và ôn tập cùng Eris." />
+  <meta name="page-type" content="software" />
+  <meta name="site-kind" content="software" />
   <title>Eris · Learning Canvas</title>
   <link rel="stylesheet" href="vendor/prism.css" />
-  <link rel="stylesheet" href="workspace.css?v=3" />
-  <link rel="stylesheet" href="canvas.css?v=3" />
+  <link rel="stylesheet" href="workspace.css?v=4" />
+  <link rel="stylesheet" href="canvas.css?v=4" />
   <script src="vendor/prism.js" defer></script>
   <script src="vendor/prism-clike.js" defer></script>
   <script src="vendor/prism-java.js" defer></script>
@@ -19,17 +22,19 @@
   <script src="vendor/prism-csharp.js" defer></script>
   <script src="vendor/prism-json.js" defer></script>
   <script src="vendor/prism-bash.js" defer></script>
-  <script src="canvas.js?v=2" defer></script>
+  <script src="canvas.js?v=3" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#studyArea">Đến bài học</a>
   <div class="shell">
     <main class="main">
       <header class="toolbar">
-        <a class="wordmark" href="./" aria-label="Eris · Hội thoại" title="Về hội thoại">E</a>
+        <a class="wordmark action-link" href="./" aria-label="Eris · Hội thoại" title="Về hội thoại">E</a>
         <h1>Learning Canvas</h1>
         <div class="tools">
           <button id="refresh" class="button secondary toolbar-button" type="button" title="Làm mới" aria-label="Làm mới"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M20 12a8 8 0 1 0-2 5.3"/></svg><span>Làm mới</span></button>
-          <a class="button secondary toolbar-button" href="./" title="Về hội thoại" aria-label="Về hội thoại"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8 8 0 0 1-3.4-.75L4 20l1.25-4.6A8 8 0 1 1 20 11.5Z"/></svg><span>Hội thoại</span></a>
+          <a class="button secondary toolbar-button action-link" href="portrait/index.html" title="Chân dung học tập" aria-label="Chân dung học tập"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg><span>Chân dung</span></a>
+          <a class="button secondary toolbar-button action-link" href="./" title="Về hội thoại" aria-label="Về hội thoại"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-8 8 8 8 0 0 1-3.4-.75L4 20l1.25-4.6A8 8 0 1 1 20 11.5Z"/></svg><span>Hội thoại</span></a>
         </div>
       </header>
       <div class="notebook">
@@ -55,8 +60,8 @@
             </div>
           </details>
         </aside>
-        <div class="study-area">
-          <section class="study-heading" aria-labelledby="pathTitle">
+        <div class="study-area" id="studyArea" tabindex="-1">
+          <section class="study-heading" aria-labelledby="pathTitle" data-enter>
             <div><span class="eyebrow" id="workspaceType">Không gian học</span><h2 id="pathTitle">Chưa chọn chủ đề</h2><p id="assessment">Chọn hoặc tạo chủ đề để bắt đầu</p></div>
             <span class="pin" id="pin">Theo Eris</span>
           </section>

@@ -2,11 +2,20 @@
 // ERIS Learner Portrait: display-only. No scoring, no curriculum mutation, no Gemini requests from the browser.
 (() => {
   const $ = id => document.getElementById(id);
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+  function applyTheme() {
+    let theme = 'auto';
+    try { theme = localStorage.getItem('eris.studio.theme') || 'auto'; } catch {}
+    document.body.classList.toggle('dark', theme === 'dark' || (theme === 'auto' && systemTheme.matches));
+  }
+  applyTheme();
+  systemTheme.addEventListener('change', applyTheme);
+  window.addEventListener('storage', applyTheme);
   const el = (tag, cls = '', text = '') => { const v = document.createElement(tag); if (cls) v.className = cls; if (text) v.textContent = text; return v; };
   const NS = 'http://www.w3.org/2000/svg';
   const svgEl = (tag, attrs = {}) => { const n = document.createElementNS(NS, tag); for (const [k,v] of Object.entries(attrs)) n.setAttribute(k,String(v)); return n; };
   const STATUS = { review_due: 'Đến hạn ôn', needs_repair: 'Nên giải thích lại', possible_repeated_gap: 'Có dấu hiệu lỗi lặp', needs_independent_probe: 'Cần thử tự làm', unassessed: 'Chưa đánh giá', evidence_available: 'Đã có bằng chứng' };
-  const viewNames = { portrait: 'CHÂN DUNG', knowledge:'KIẾN THỨC', evidence:'BẰNG CHỨNG', growth:'PHÁT TRIỂN' };
+  const viewNames = { portrait: 'Chân dung', knowledge:'Kiến thức', evidence:'Bằng chứng', growth:'Phát triển' };
   let data = null, current = 'portrait', lastPayload = '', generationPollAt = 0, nodePicked = '';
   const setConnection = (online, label) => { $('connectionDot').classList.toggle('online', online); $('connectionText').textContent = label; };
   const setView = view => {
@@ -91,21 +100,20 @@
     const {positions,width,height}=layoutNodes(nodes);
     const graph=svgEl('svg',{width,height,viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':'Bản đồ kiến thức theo các quan hệ tiên quyết'});
     const defs=svgEl('defs'); const marker=svgEl('marker',{id:'edgeArrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});
-    marker.append(svgEl('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'#d9cad9'})); defs.append(marker);graph.append(defs);
+    marker.append(svgEl('path',{class:'graph-arrow',d:'M 0 0 L 10 5 L 0 10 z'})); defs.append(marker);graph.append(defs);
     for (const node of nodes) {
       const end=positions.get(node.id);
       for(const parent of node.prerequisites || []) {
         const start=positions.get(parent); if(!start) continue;
         const x1=start.x+180,y1=start.y+27,x2=end.x,y2=end.y+27;
-        graph.append(svgEl('path',{d:`M ${x1} ${y1} C ${x1+30} ${y1}, ${x2-30} ${y2}, ${x2} ${y2}`,fill:'none',stroke:'#d9cad9','stroke-width':1.6,'marker-end':'url(#edgeArrow)'}));
+        graph.append(svgEl('path',{class:'graph-edge',d:`M ${x1} ${y1} C ${x1+30} ${y1}, ${x2-30} ${y2}, ${x2} ${y2}`,fill:'none','stroke-width':1.6,'marker-end':'url(#edgeArrow)'}));
       }
     }
     for (const node of nodes) {
       const {x,y}=positions.get(node.id),kind=tone(node);
-      const group=svgEl('g',{class:'graph-node',tabindex:0,role:'button','aria-label':node.title,transform:`translate(${x},${y})`});
-      const fill=kind==='green'?'#eaf4ee':kind==='amber'?'#fcf3e7':'#f7f3f8',stroke=kind==='green'?'#9bbca9':kind==='amber'?'#dfc7a3':'#dfd5e3';
-      group.append(svgEl('rect',{class:'node-shape',x:0,y:0,rx:12,width:180,height:56,fill,stroke,'stroke-width':1.3}));
-      group.append(svgEl('circle',{cx:14,cy:28,r:4,fill:kind==='green'?'#79a28a':kind==='amber'?'#d0a773':'#b1aabc'}));
+      const group=svgEl('g',{class:'graph-node '+kind,tabindex:0,role:'button','aria-label':node.title,transform:`translate(${x},${y})`});
+      group.append(svgEl('rect',{class:'node-shape',x:0,y:0,rx:10,width:180,height:56,'stroke-width':1.3}));
+      group.append(svgEl('circle',{class:'node-dot',cx:14,cy:28,r:4}));
       const parts=Array.from(node.title || 'Kiến thức');
       const line=parts.length>24?parts.slice(0,23).join('')+'…':node.title;
       const title=svgEl('text',{x:25,y:25,class:'graph-label'}); title.textContent=line; group.append(title);
@@ -158,7 +166,8 @@
   }
   async function poll() {
     try {
-      const res=await fetch('../api/portrait/state',{cache:'no-store'});if(!res.ok)throw Error('offline');
+      const res=await fetch('../api/portrait/state',{cache:'no-store'});
+      if(!res.ok)throw Error(String(res.status));
       const state=await res.json();setConnection(true,'Đã kết nối');
       if(state.status==='error'){const err=$('error');err.textContent=state.message||'Có lỗi đọc hồ sơ.';err.hidden=false;$('loading').hidden=true;return;}
       if(state.data?.schema==='eris.learner_portrait.v1'){
@@ -168,7 +177,16 @@
           generationPollAt=Date.now();await ask('refresh');
         }
       }
-    } catch(e){setConnection(false,'Mất kết nối với Eris');$('syncState').textContent='Ngoại tuyến';}
+    } catch(e){
+      const denied=e.message==='401'||e.message==='403';
+      setConnection(false,denied?'Chưa có quyền truy cập':'Mất kết nối với Eris');
+      $('syncState').textContent=denied?'Chưa có quyền truy cập':'Ngoại tuyến';
+      if(!data){
+        $('loading').hidden=true;
+        $('error').hidden=false;
+        $('error').textContent=denied?'Kết nối hiện tại chưa có quyền đọc dữ liệu chân dung học tập.':'Chưa lấy được hồ sơ học tập từ Eris.';
+      }
+    }
   }
   document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>setView(btn.dataset.view)));
   $('exploreAll').addEventListener('click',()=>setView('knowledge'));

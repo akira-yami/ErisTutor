@@ -160,21 +160,58 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
   const notify=text=>{const el=document.createElement('div');el.className='toast';el.textContent=text;document.body.appendChild(el);setTimeout(()=>el.remove(),2500);};
   function focusInput(value=null){if(value!==null)input.value=value;input.dispatchEvent(new Event('input'));input.focus();}
   function setView(open){document.body.classList.toggle('inspector-closed',!open);$('inspectorBtn')?.setAttribute('aria-pressed',String(open));safeWrite('eris.studio.inspector',open?'1':'0');}
-  setView(safeRead('eris.studio.inspector',innerWidth>=1450?'1':'0')==='1');
-  $('inspectorBtn')?.addEventListener('click',()=>setView(document.body.classList.contains('inspector-closed')));
-  $('statusDetails')?.addEventListener('click',()=>setView(true));
-  $('inspectorClose')?.addEventListener('click',()=>setView(false));
+  setView(safeRead('eris.studio.inspector',innerWidth>=1280?'1':'0')==='1');
+  function openInspector() {
+    setView(true);
+    if(innerWidth<=1150)$('inspectorClose').focus({preventScroll:true});
+  }
+  function closeInspector() {
+    const restoreFocus=$('inspector').contains(document.activeElement);
+    setView(false);
+    if(restoreFocus)$('inspectorBtn').focus({preventScroll:true});
+  }
+  $('inspectorBtn')?.addEventListener('click',()=>{
+    if(document.body.classList.contains('inspector-closed'))openInspector();
+    else closeInspector();
+  });
+  $('statusDetails')?.addEventListener('click',openInspector);
+  $('inspectorClose')?.addEventListener('click',closeInspector);
+  $('inspectorBackdrop')?.addEventListener('click',()=>{
+    closeInspector();
+    $('inspectorBtn').focus({preventScroll:true});
+  });
   function setSidebarCollapsed(collapsed){
     document.body.classList.toggle('sidebar-collapsed',collapsed);
     const label=collapsed?'Mở rộng thanh lịch sử':'Thu gọn thanh lịch sử';
     $('sidebarCollapse').title=label;
     $('sidebarCollapse').setAttribute('aria-label',label);
+    $('sidebarCollapse').setAttribute('aria-expanded',String(!collapsed));
     safeWrite('eris.studio.sidebar',collapsed?'1':'0');
   }
   $('sidebarCollapse').addEventListener('click',()=>setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed')));
   setSidebarCollapsed(safeRead('eris.studio.sidebar','0')==='1');
+  const mobileSidebar=window.matchMedia('(max-width: 700px)');
+  const sidebar=$('sidebar'), menuButton=$('menuBtn'), sidebarBackdrop=$('sidebarBackdrop');
+  function setMobileSidebar(open, focusTarget=open?$('sidebarClose'):null){
+    if(!open && !sidebar.classList.contains('open'))return;
+    sidebar.classList.toggle('open',open);
+    sidebarBackdrop.hidden=!open;
+    if(open)focusTarget?.focus({preventScroll:true});
+    $('conversation').inert=open;
+    $('inspector').inert=open;
+    menuButton.setAttribute('aria-expanded',String(open));
+    if(!open && mobileSidebar.matches)focusTarget?.focus({preventScroll:true});
+  }
+  menuButton.addEventListener('click',()=>setMobileSidebar(true));
+  for(const button of [$('sidebarClose'),sidebarBackdrop]){
+    button.addEventListener('click',()=>setMobileSidebar(false,menuButton));
+  }
+  $('dates').addEventListener('click',event=>{
+    if(event.target.closest('.date-button'))setMobileSidebar(false,menuButton);
+  });
+  mobileSidebar.addEventListener('change',()=>setMobileSidebar(false));
   $('newTopicBtn')?.addEventListener('click',()=>{if(input.value.trim()&&!confirm('Thay nội dung nháp bằng chủ đề mới?'))return;
-    focusInput('Chủ đề mới: ');$('sidebar')?.classList.remove('open');
+    setMobileSidebar(false);focusInput('Chủ đề mới: ');
     notify('Đây là chủ đề mới trong transcript hiện tại, không phải phiên chat tách biệt.');});
   $('openWorkspace')?.addEventListener('click',()=>{if($('workspaceBtn')?.getAttribute('aria-pressed')!=='true')$('workspaceBtn')?.click();if(innerWidth<1150)setView(false);});
   const scrollDown=()=>{scroll.scrollTo({top:scroll.scrollHeight,behavior:'smooth'});};
@@ -252,7 +289,6 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
         $('search').value='';$('search').dispatchEvent(new Event('input'));
         const first=$('dates')?.querySelector('.date-button');first?.click();
         setTimeout(()=>Array.from(root.querySelectorAll('.entry')).find(e=>e.dataset.msgKey===ErisStudioUtils.fingerprint(m))?.scrollIntoView({behavior:'smooth',block:'center'}),10);
-        $('sidebar')?.classList.remove('open');
       });box.append(button);
     }
   }
@@ -263,7 +299,7 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
         const element=Array.from(root.querySelectorAll('.entry')).find(row=>row.dataset.msgKey===key);
         if(element)element.scrollIntoView({behavior:'smooth',block:'center'});
         else {const search=$('search');search.value=m.text.slice(0,65);search.dispatchEvent(new Event('input'));setTimeout(()=>root.querySelector('.entry')?.scrollIntoView({behavior:'smooth',block:'center'}),30);}
-        $('sidebar')?.classList.remove('open');
+        setMobileSidebar(false,menuButton);
       };box.append(button);
     }
     $('savedCount').textContent=String(count);
@@ -361,10 +397,19 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     if(searchShortcut||slashShortcut){
       event.preventDefault();
       setSidebarCollapsed(false);
-      $('sidebar').classList.add('open');
-      $('search').focus();
+      if(mobileSidebar.matches)setMobileSidebar(true,$('search'));
+      else $('search').focus();
     }
-    if(event.key==='Escape'){if(recording)recording.stop();if(settingsDialog?.open){closeSettings();return;}setView(false);$('sidebar').classList.remove('open');}
+    if(event.key==='Escape'){
+      if(recording)recording.stop();
+      if(settingsDialog?.open){closeSettings();return;}
+      if(sidebar.classList.contains('open') && !deleteDialog.open){
+        event.preventDefault();
+        setMobileSidebar(false,menuButton);
+        return;
+      }
+      closeInspector();
+    }
   });
   function activityUpdate(state){
     const runtime=state?.presence||{},speech=state?.speech||{};
@@ -378,10 +423,12 @@ if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',()
     }
     activeBefore=currentlyActive;if(currentlyActive)hadRuntimeActivity=true;
     $('presenceLabel').textContent=label;
-    $('stageTag').textContent=stageNames[stage]||stageNames[phase]||'Hoạt động';
+    const stageLabel=stageNames[stage]||stageNames[phase]||'Hoạt động';
+    $('stageTag').textContent=stageLabel;
+    $('stageTag').hidden=stageLabel===label;
     $('presenceOrb').className='presence-orb'+(phase==='thinking'?' thinking':phase==='speaking'?' speaking':'');
     $('contextText').textContent=label;
-    const emotion=String(runtime.emotion||'');$('emotionTag').hidden=!emotion;if(emotion)$('emotionTag').textContent=emotion.slice(0,35);
+    const emotion=String(runtime.emotion||'');$('emotionTag').hidden=!emotion||emotion==='normal';if(emotion)$('emotionTag').textContent=emotion.slice(0,35);
     const key=[stage,label,runtime.activity||''].join('|');
     if(label && history[0]?.key!==key){history.unshift({key,label,stage,time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})});history.splice(12);renderHistory();}
     const count=artifacts.length;$('artifactCount').textContent=count?`${count} kết quả trong hội thoại.`:'Chưa có tài liệu trong hội thoại.';

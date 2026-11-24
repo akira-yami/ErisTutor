@@ -5,13 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eris Account & Resource Hub</title>
-    <!-- Google Fonts: Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=2">
 </head>
 
 <body>
@@ -19,17 +13,14 @@
         <!-- Sidebar Navigation -->
         <aside class="hub-sidebar">
             <div class="brand">
-                <div class="brand-avatar">
-                    <span class="avatar-glow"></span>
-                    <span class="brand-glyph">✦</span>
-                </div>
+                <div class="brand-avatar" aria-hidden="true">E</div>
                 <div class="brand-info">
-                    <h2>ERIS HUB</h2>
-                    <span class="brand-subtitle">Account & Resource Manager</span>
+                    <h2>Eris Hub</h2>
+                    <span class="brand-subtitle">Tài khoản và tài nguyên</span>
                 </div>
             </div>
 
-            <nav class="nav-links">
+            <nav class="nav-links" aria-label="Quản lý tài nguyên">
                 <button class="nav-tab active" data-tab="overview" id="nav-overview">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"></rect>
@@ -296,7 +287,7 @@
                         <span class="stat-unit" id="ds-test-job-counter">0 / 0</span>
                     </div>
                     <div class="progress-bar-wrap" style="height: 6px;">
-                        <div class="progress-bar-fill" id="ds-test-job-fill" style="width: 0%; background: var(--brand-gradient);"></div>
+                        <div class="progress-bar-fill" id="ds-test-job-fill" style="width: 0%; background: var(--brand-primary);"></div>
                     </div>
                 </div>
 

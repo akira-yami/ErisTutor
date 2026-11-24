@@ -12,7 +12,8 @@
 .content a{color:var(--accent)}
 .content ul,.content ol{margin:12px 0 20px;padding-left:26px}
 .content li{margin:5px 0}
-.content blockquote{border-left:3px solid var(--accent);margin:15px 0;padding:6px 15px;color:var(--muted);background:var(--side);border-radius:0 10px 10px 0}
+.content blockquote{margin:14px 0;padding:12px 16px;border-left:2px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;background:var(--raised);color:var(--muted)}
+.content blockquote:first-child{margin-top:2px}
 .content hr{height:1px;border:0;background:var(--border);margin:24px 0}
 .content :not(pre)>code{background:var(--side);border:1px solid var(--border);padding:2px 5px;border-radius:6px;font:13px/1.5 Consolas,monospace}
 .math-block{display:block;background:var(--side);border:1px solid var(--border);border-radius:8px;padding:15px 12px;margin:15px 0;overflow-x:auto;text-align:center;min-height:58px}
@@ -20,7 +21,7 @@
 .math-inline{display:inline-block;max-width:100%;vertical-align:middle}
 .math-error{color:var(--accent);font-family:Consolas,monospace}
 .code-card{margin:16px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--code)}
-.code-head{display:flex;justify-content:space-between;align-items:center;color:#e0cdd9;font-size:11px;padding:9px 13px;background:#382a35}
+.code-head{display:flex;justify-content:space-between;align-items:center;color:#e3e5df;font-size:11px;padding:9px 13px;background:var(--code-head)}
 .code-head button{border:0;color:#c2c4cd;background:transparent;font-size:11px}
 .code-head button:hover{color:#fff}
 .code-card pre[class*="language-"]{padding:18px 17px;margin:0!important;border-radius:0;font-size:13px;max-height:550px;overflow:auto;white-space:pre;tab-size:4;background:var(--code)!important}
@@ -51,9 +52,10 @@
 .artifact-body .math-block{margin:7px 0}
 .artifact-image{margin:10px 0}
 .artifact-image img{display:block;max-width:100%;max-height:470px;object-fit:contain;border-radius:8px}
-.artifact-gallery{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:21px 24px;margin-top:6px}
-.artifact-gallery>h3{margin:0;font-size:15px}
-.artifact-gallery>p{font-size:12px;color:var(--muted);margin:8px 0 16px}
+.artifact-gallery{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-panel);padding:clamp(17px,3vw,28px);margin-top:6px}
+.artifact-gallery>h2{margin:0;font:500 26px/1.2 var(--serif)}
+.artifact-gallery>p{font-size:13px;line-height:1.55;color:var(--muted);margin:9px 0 16px}
+.artifact-gallery>p:last-child{margin-bottom:0}
 .artifact-failure{font-size:12px;color:var(--accent);padding:9px 12px;border-left:3px solid var(--accent)}
 /* P4: browser-side editable workspace. Original artifact snapshots remain immutable. */
 .artifact-edit{margin-left:8px;font-size:11px;color:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
